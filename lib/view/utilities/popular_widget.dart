@@ -1,3 +1,4 @@
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matager/lang/applocate.dart';
@@ -131,5 +132,24 @@ Widget noConnection(BuildContext context, double width, double height) {
         "No Connection with INTERNET",
       ),
     ),
+  );
+}
+
+Widget drawDots({ValueNotifier pos, int length}) {
+  return ValueListenableBuilder(
+    valueListenable: pos,
+    builder: (context, value, _) {
+      return DotsIndicator(
+          dotsCount: length,
+          position: value.ceilToDouble(),
+          decorator: DotsDecorator(
+            color: CustomColors.gray,
+            activeColor: CustomColors.primary,
+            size: const Size.square(9.0),
+            activeSize: const Size(18.0, 9.0),
+            activeShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0)),
+          ));
+    },
   );
 }

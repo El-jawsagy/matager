@@ -16,13 +16,14 @@ class Authentication {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      if (data['data'].length > 50) {
+      if (data['data']['token'].length > 50) {
         setToken(data['data']['token']);
         setEmail(email);
         setName(data['data']['name']);
+        setPhoto(data['data']['image']);
       }
 
-      return data['data'];
+      return data['data']['token'];
     }
   }
 
@@ -72,4 +73,10 @@ setName(String name) async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
   print("name is change");
   await preferences.setString("name", name);
+}
+
+setPhoto(String image) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  print("photo is change");
+  await preferences.setString("photo", image);
 }

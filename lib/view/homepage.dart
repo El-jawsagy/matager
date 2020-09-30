@@ -15,11 +15,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  HomePageApi homePage;
+  MarketAndCategoryApi homePage;
 
   @override
   void initState() {
-    homePage = HomePageApi();
+    homePage = MarketAndCategoryApi();
     super.initState();
   }
 
@@ -28,14 +28,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: CustomColors.whiteBG,
       appBar: AppBar(
+        title: Text(
+          AppLocale.of(context).getTranslated("app_name"),
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          textWidthBasis: TextWidthBasis.parent,
+          textAlign: TextAlign.right,
+        ),
+        centerTitle: true,
         elevation: 0,
         actions: <Widget>[
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.search,
-            ),
-          ),
           IconButton(
             onPressed: () {},
             icon: Icon(
@@ -47,24 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
       drawer: NavDrawer(),
       body: ListView(
         children: <Widget>[
-          Row(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.only(left: 16.0, right: 16, bottom: 16),
-                child: Text(
-                  AppLocale.of(context).getTranslated("app_name"),
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                  textWidthBasis: TextWidthBasis.parent,
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
           FutureBuilder(
               future: homePage.getAllCategory(),
               builder: (BuildContext context, AsyncSnapshot snapshot) {
-                print(snapshot.data);
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:
                     return emptyPage(context);

@@ -87,25 +87,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         children: <Widget>[
                           _drawLogo(),
                           SizedBox(
-                              height: MediaQuery.of(context).size.height * .02),
+                              height: MediaQuery.of(context).size.height * .012),
                           _drawFirstName(signUpProperties.editTextSize),
                           SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * .012),
+                              height: MediaQuery.of(context).size.height * .012),
                           _drawLastName(signUpProperties.editTextSize),
                           SizedBox(
-                              height:
-                                  MediaQuery.of(context).size.height * .012),
+                              height: MediaQuery.of(context).size.height * .012),
                           _drawEmail(signUpProperties.editTextSize),
                           SizedBox(
-                              height: MediaQuery.of(context).size.height * .02),
+                              height: MediaQuery.of(context).size.height * .012),
                           _drawPasswordEditText(signUpProperties.editTextSize),
                           SizedBox(
-                              height: MediaQuery.of(context).size.height * .02),
+                              height: MediaQuery.of(context).size.height * .012),
                           _drawConfPasswordEditText(
                               signUpProperties.editTextSize),
                           SizedBox(
-                              height: MediaQuery.of(context).size.height * .1),
+                              height: MediaQuery.of(context).size.height * .08),
                           _drawSignUpButton(signUpProperties.signUPTextSize),
                           SizedBox(
                               height: MediaQuery.of(context).size.height * .01),
@@ -132,7 +130,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         top: MediaQuery.of(context).size.height * 0.05,
       ),
       width: MediaQuery.of(context).size.width * 0.8,
-      height: MediaQuery.of(context).size.height * 0.28,
+      height: MediaQuery.of(context).size.height * 0.25,
       child: Image.asset(
         "assets/images/boxImage.png",
         fit: BoxFit.contain,
@@ -363,7 +361,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
         validator: (onValue) {
           if (onValue.isEmpty) {
-            return "please repeat  you Password";
+            return AppLocale.of(context).getTranslated("wrong");
           } else if (onValue.isNotEmpty) {
             if (onValue == _passwordEditingText.text) {
               return null;
@@ -379,32 +377,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget _drawSignUpButton(double textSize) {
     return InkWell(
       onTap: () async {
-        authentication
-            .signUp(
-                _firstNameEditingText.text,
-                _lastNameEditingText.text,
-                _phoneEditingText.text,
-                _emailEditingText.text,
-                _emailEditingText.text)
-            .then((value) {
-          switch (value) {
-            case "email wrong":
-              showDialogWidget("make sure of email ", context);
-              break;
+        if (_signUpKey.currentState.validate()) {
+          authentication
+              .signUp(
+                  _firstNameEditingText.text,
+                  _lastNameEditingText.text,
+                  _phoneEditingText.text,
+                  _emailEditingText.text,
+                  _emailEditingText.text)
+              .then((value) {
+            switch (value) {
+              case "email wrong":
+                showDialogWidget("make sure of email ", context);
+                break;
 
-            case "password wrong":
-              showDialogWidget("make sure of password ", context);
-              break;
+              case "password wrong":
+                showDialogWidget("make sure of password ", context);
+                break;
 
-            default:
-              if (value.length > 100) {
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()));
-              } else
-                showDialogWidget("we have an error", context);
-              break;
-          }
-        });
+              default:
+                if (value.length > 100) {
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()));
+                } else
+                  showDialogWidget("we have an error", context);
+                break;
+            }
+          });
+        }
       },
       child: Container(
         width: MediaQuery.of(context).size.width * .65,

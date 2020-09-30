@@ -1,0 +1,91 @@
+import 'package:flutter/material.dart';
+import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/Authentication/login.dart';
+import 'package:matager/view/utilities/drawer.dart';
+import 'package:matager/view/utilities/prefrences.dart';
+import 'package:matager/view/utilities/theme.dart';
+
+class AddressScreen extends StatefulWidget {
+  @override
+  _AddressScreenState createState() => _AddressScreenState();
+}
+
+class _AddressScreenState extends State<AddressScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        title: Text(
+          AppLocale.of(context).getTranslated("drawer_address"),
+          style: TextStyle(
+            color: CustomColors.whiteBG,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+          overflow: TextOverflow.visible,
+          textAlign: TextAlign.center,
+        ),
+        centerTitle: true,
+      ),
+      drawer: NavDrawer(),
+      body: FutureBuilder(
+        future: Preference.getToken(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Center(
+              child: Container(
+                child: Text(
+                  AppLocale.of(context).getTranslated("drawer_address"),
+                ),
+              ),
+            );
+          }
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 30),
+                  child: Text(
+                    AppLocale.of(context).getTranslated("apology"),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Container(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(left: 16, right: 16, top: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        RaisedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginScreen()));
+                          },
+                          child: Text(
+                            AppLocale.of(context).getTranslated("log"),
+                            style: TextStyle(
+                              color: CustomColors.whiteBG,
+                            ),
+                          ),
+                          color: CustomColors.primary,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

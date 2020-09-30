@@ -2,6 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/Authentication/login.dart';
+import 'package:matager/view/homepage.dart';
+import 'package:matager/view/user/address.dart';
+import 'package:matager/view/user/cart.dart';
+import 'package:matager/view/user/favorite.dart';
+import 'package:matager/view/user/order.dart';
 import 'package:matager/view/utilities/prefrences.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,13 +18,14 @@ class NavDrawer extends StatefulWidget {
 }
 
 class _NavDrawerState extends State<NavDrawer> {
-  var token, name, email;
+  var token, name, email, photo;
 
   getToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString("token");
     name = prefs.getString("name");
     email = prefs.getString("email");
+    photo = prefs.getString("photo");
   }
 
   @override
@@ -29,249 +36,313 @@ class _NavDrawerState extends State<NavDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    print("the token is :$token");
     return Drawer(
-      child: Stack(
-        children: <Widget>[
-          Opacity(
-            opacity: 0.3,
-            child: CustomPaint(
-              painter: TopBackground3(),
-              child: Container(),
-            ),
-          ),
-          Opacity(
-            opacity: 0.6,
-            child: CustomPaint(
-              painter: TopBackground2(),
-              child: Container(),
-            ),
-          ),
-          CustomPaint(
-            painter: TopBackground1(),
-            child: Container(),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  token == null
-                      ? Container(
-                          height: MediaQuery.of(context).size.height * 0.25,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 16, right: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                RaisedButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    AppLocale.of(context).getTranslated("log"),
-                                  ),
-                                  color: CustomColors.whiteBG,
-                                )
-                              ],
-                            ),
-                          ),
-                        )
-                      : Container(
-                          height: MediaQuery.of(context).size.height * 0.25,
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 16, top: 58, right: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                          image: ExactAssetImage(
-                                              'assets/images/image_2.jpg'),
-                                          fit: BoxFit.cover),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(width: 0.4)),
-                                ),
-                                Column(
+      child: FutureBuilder(
+          future: Preference.getToken(),
+          builder: (context, snapshot) {
+            return Stack(
+              children: <Widget>[
+                Opacity(
+                  opacity: 0.3,
+                  child: CustomPaint(
+                    painter: TopBackground3(),
+                    child: Container(),
+                  ),
+                ),
+                Opacity(
+                  opacity: 0.6,
+                  child: CustomPaint(
+                    painter: TopBackground2(),
+                    child: Container(),
+                  ),
+                ),
+                CustomPaint(
+                  painter: TopBackground1(),
+                  child: Container(),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                      child: (snapshot.hasData)
+                          ? Container(
+                              height: MediaQuery.of(context).size.height * 0.22,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 16, top: 58, right: 16),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    Padding(
-                                      padding: const EdgeInsets.all(5),
-                                      child: Text(
-                                        name,
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                            color: Colors.white),
+                                    Container(
+                                      width: 60,
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(width: 0.4)),
+                                      child: ClipOval(
+                                        child: (photo == null || photo == '')
+                                            ? Image.asset(
+                                                'assets/images/image_2.jpg',
+                                              )
+                                            : Image(
+                                                loadingBuilder: (context,
+                                                    image,
+                                                    ImageChunkEvent
+                                                        loadingProgress) {
+                                                  if (loadingProgress == null) {
+                                                    return image;
+                                                  }
+                                                  return Center(
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  );
+                                                },
+                                                image: NetworkImage(photo,
+                                                    scale: 1.0),
+                                                fit: BoxFit.cover,
+                                              ),
                                       ),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(5),
-                                      child: Text(
-                                        email,
-                                        style: TextStyle(
-                                            fontSize: 12, color: Colors.white),
-                                      ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: const EdgeInsets.all(5),
+                                          child: Text(
+                                            name,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                color: Colors.white),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(5),
+                                          child: Text(
+                                            email,
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.white),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
+                              ),
+                            )
+                          : Container(
+                              height: MediaQuery.of(context).size.height * 0.22,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 16, right: 16),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    RaisedButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    LoginScreen()));
+                                      },
+                                      child: Text(
+                                        AppLocale.of(context)
+                                            .getTranslated("log"),
+                                      ),
+                                      color: CustomColors.whiteBG,
+                                    )
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 14, right: 14, top: 10, bottom: 20),
-                    child: Container(
-                      width: double.infinity,
-                      height: 1,
-                      color: Colors.grey[300],
                     ),
-                  ),
-                  menuDrawer(
-                      Icons.home,
-                      AppLocale.of(context).getTranslated('drawer_home'),
-                      Icons.arrow_forward_ios),
-                  menuDrawer(
-                      Icons.favorite,
-                      AppLocale.of(context).getTranslated('drawer_fav'),
-                      Icons.arrow_forward_ios),
-                  menuDrawer(
-                      Icons.shopping_cart,
-                      AppLocale.of(context).getTranslated('drawer_cart'),
-                      Icons.arrow_forward_ios),
-                  menuDrawer(
-                      Icons.shopping_bag,
-                      AppLocale.of(context).getTranslated('drawer_order'),
-                      Icons.arrow_forward_ios),
-                  menuDrawer(
-                      Icons.location_on,
-                      AppLocale.of(context).getTranslated('drawer_address'),
-                      Icons.arrow_forward_ios),
-                  menuDrawer(
-                      Icons.share,
-                      AppLocale.of(context).getTranslated('drawer_share'),
-                      Icons.arrow_forward_ios),
-                  menuDrawer(
-                      Icons.error_outline,
-                      AppLocale.of(context).getTranslated('drawer_about'),
-                      Icons.arrow_forward_ios),
-                  token == null
-                      ? Container()
-                      : menuDrawer(
-                          Icons.exit_to_app,
-                          AppLocale.of(context)
-                              .getTranslated('drawer_sign_out'),
-                          Icons.arrow_forward_ios),
-                  ListTile(
-                    contentPadding: EdgeInsets.only(right: 10),
-                    dense: true,
-                    onTap: () {},
-                    leading: Padding(
-                      padding: const EdgeInsets.only(left: 14),
-                      child: Icon(
-                        Icons.language,
-                        color: CustomColors.primary,
-                        size: 22,
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 14, right: 14, top: 10, bottom: 10),
+                      child: Container(
+                        width: double.infinity,
+                        height: 1,
+                        color: Colors.grey[300],
                       ),
                     ),
-                    title: Text(
-                      AppLocale.of(context).getTranslated('lang_display'),
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: InkWell(
-                        onTap: () async {
-                          String lang = await Preference.getLanguage();
-                          if (lang == 'ar') {
-                            setState(() {
-                              setLang('en');
-                              Phoenix.rebirth(context);
-                            });
-                          } else {
-                            setState(() {
-                              setLang('ar');
-                              Phoenix.rebirth(context);
-                            });
-                          }
-                        },
-                        child: Center(
-                          child: Text(
+                    menuDrawer(
+                        Icons.home,
+                        AppLocale.of(context).getTranslated('drawer_home'),
+                        Icons.arrow_forward_ios, () {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => HomeScreen()));
+                    }),
+                    menuDrawer(
+                        Icons.favorite,
+                        AppLocale.of(context).getTranslated('drawer_fav'),
+                        Icons.arrow_forward_ios, () {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => FavoriteScreen()));
+                    }),
+                    menuDrawer(
+                        Icons.shopping_cart,
+                        AppLocale.of(context).getTranslated('drawer_cart'),
+                        Icons.arrow_forward_ios, () {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CartScreen()));
+                    }),
+                    menuDrawer(
+                        Icons.shopping_bag,
+                        AppLocale.of(context).getTranslated('drawer_order'),
+                        Icons.arrow_forward_ios, () {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => OrderScreen()));
+                    }),
+                    menuDrawer(
+                        Icons.location_on,
+                        AppLocale.of(context).getTranslated('drawer_address'),
+                        Icons.arrow_forward_ios, () {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AddressScreen()));
+                    }),
+                    menuDrawer(
+                        Icons.error_outline,
+                        AppLocale.of(context).getTranslated('drawer_about'),
+                        Icons.arrow_forward_ios, () {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => HomeScreen()));
+                    }),
+                    (!snapshot.hasData)
+                        ? Container()
+                        : menuDrawer(
+                            Icons.exit_to_app,
+                            AppLocale.of(context)
+                                .getTranslated('drawer_sign_out'),
+                            Icons.arrow_forward_ios, () async {
+                            SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
+                            prefs.clear();
+                            setState(() {});
+                          }),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                      child: ListTile(
+                          contentPadding: EdgeInsets.only(right: 10, left: 10),
+                          dense: true,
+                          onTap: () async {
+                            String lang = await Preference.getLanguage();
+                            if (lang == 'ar') {
+                              setState(() {
+                                setLang('en');
+                                Phoenix.rebirth(context);
+                              });
+                            } else {
+                              setState(() {
+                                setLang('ar');
+                                Phoenix.rebirth(context);
+                              });
+                            }
+                          },
+                          leading: Padding(
+                            padding: const EdgeInsets.only(left: 14),
+                            child: Icon(
+                              Icons.language,
+                              color: CustomColors.primary,
+                              size: 22,
+                            ),
+                          ),
+                          title: Text(
+                            AppLocale.of(context).getTranslated('lang_display'),
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          trailing: Text(
                             AppLocale.of(context).getTranslated('lang'),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                        )),
-                  ),
-                ],
-              ),
-              Column(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(right: 14, left: 14),
-                    child: Container(
-                      width: double.infinity,
-                      height: 1,
-                      color: Colors.grey[300],
+                          )),
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      menuDrawerBottom(
-                        Icons.feedback,
-                        AppLocale.of(context).getTranslated("drawer_feed"),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 30,
-                        color: Colors.grey[300],
-                      ),
-                      menuDrawerBottom(
-                        Icons.help,
-                        AppLocale.of(context).getTranslated("drawer_help"),
-                      ),
-                    ],
-                  ),
-                ],
-              )
-            ],
-          ),
-        ],
-      ),
+                    Column(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(right: 14, left: 14),
+                          child: Container(
+                            width: double.infinity,
+                            height: 1,
+                            color: Colors.grey[300],
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: <Widget>[
+                            menuDrawerBottom(
+                              Icons.feedback,
+                              AppLocale.of(context)
+                                  .getTranslated("drawer_feed"),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Container(
+                              width: 1,
+                              height: 30,
+                              color: Colors.grey[300],
+                            ),
+                            menuDrawerBottom(
+                              Icons.help,
+                              AppLocale.of(context)
+                                  .getTranslated("drawer_help"),
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ],
+            );
+          }),
     );
   }
 
-  Widget menuDrawer(leading, title, trailing) {
-    return ListTile(
-      contentPadding: EdgeInsets.only(right: 10),
-      dense: true,
-      onTap: () {},
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 14),
-        child: Icon(
-          leading,
-          color: CustomColors.primary,
-          size: 22,
+  Widget menuDrawer(leading, title, trailing, function) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: ListTile(
+        contentPadding: EdgeInsets.only(right: 10),
+        dense: true,
+        onTap: function,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 14),
+          child: Icon(
+            leading,
+            color: CustomColors.primary,
+            size: 22,
+          ),
         ),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(fontSize: 16),
-      ),
-      trailing: Icon(
-        trailing,
-        size: 18,
-        color: CustomColors.primary,
+        title: Text(
+          title,
+          style: TextStyle(fontSize: 16),
+        ),
+        trailing: Icon(
+          trailing,
+          size: 18,
+          color: CustomColors.primary,
+        ),
       ),
     );
   }

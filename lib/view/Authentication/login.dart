@@ -44,88 +44,82 @@ class _LoginScreenState extends State<LoginScreen> {
     LoginScreenProperties loginScreenProperties =
         LoginScreenProperties(detectedScreen);
     //WillPopScope make you can control with back button in android
-    return WillPopScope(
-      onWillPop: () {
-        // @pop is function to make us navigation from screen to home android screen system
-        return pop();
-      },
-      child: Stack(
-        children: <Widget>[
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: ExactAssetImage("assets/images/banner_two.jpg"),
-                  fit: BoxFit.cover),
-            ),
+    return Stack(
+      children: <Widget>[
+        Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+                image: ExactAssetImage("assets/images/banner_two.jpg"),
+                fit: BoxFit.cover),
           ),
-          Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Stack(
-                children: <Widget>[
-                  SingleChildScrollView(
-                    physics: NeverScrollableScrollPhysics(),
-                    child: Form(
-                      key: _formKey,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Container(
-                          height: MediaQuery.of(context).size.height,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              _drawLogo(),
-                              SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * .04),
-                              _drawEditText(
-                                Icons.email,
-                                AppLocale.of(context).getTranslated("email"),
-                                AppLocale.of(context).getTranslated("wrong"),
-                                loginScreenProperties.editTextSize,
+        ),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: Stack(
+              children: <Widget>[
+                SingleChildScrollView(
+                  physics: NeverScrollableScrollPhysics(),
+                  child: Form(
+                    key: _formKey,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Container(
+                        height: MediaQuery.of(context).size.height,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            _drawLogo(),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * .04),
+                            _drawEditText(
+                              Icons.email,
+                              AppLocale.of(context).getTranslated("email"),
+                              AppLocale.of(context).getTranslated("wrong"),
+                              loginScreenProperties.editTextSize,
+                            ),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * .04),
+                            _drawPasswordEditText(
+                              loginScreenProperties.editTextSize,
+                            ),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * .005),
+                            _drawForgetPass(
+                                loginScreenProperties.forgetTextSize),
+                            SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * .08),
+                            _drawLoginButton(
+                                loginScreenProperties.loginTextSize),
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * .1,
+                            ),
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 2),
+                                child: _drawSignUp(
+                                    loginScreenProperties.signUpText),
                               ),
-                              SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * .04),
-                              _drawPasswordEditText(
-                                loginScreenProperties.editTextSize,
-                              ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      .005),
-                              _drawForgetPass(
-                                  loginScreenProperties.forgetTextSize),
-                              SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * .08),
-                              _drawLoginButton(
-                                  loginScreenProperties.loginTextSize),
-                              SizedBox(
-                                height: MediaQuery.of(context).size.height * .1,
-                              ),
-                              Align(
-                                alignment: Alignment.bottomCenter,
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 2),
-                                  child: _drawSignUp(
-                                      loginScreenProperties.signUpText),
-                                ),
-                              )
-                            ],
-                          ),
+                            )
+                          ],
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -259,27 +253,29 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _drawLoginButton(double textButtonSize) {
     return InkWell(
       onTap: () async {
-        authentication
-            .login(_emailTextController.text, _passwordTextController.text)
-            .then((value) {
-          switch (value) {
-            case "email wrong":
-              showDialogWidget("make sure of email ", context);
-              break;
+        if (_formKey.currentState.validate()) {
+          authentication
+              .login(_emailTextController.text, _passwordTextController.text)
+              .then((value) {
+            switch (value) {
+              case "email wrong":
+                showDialogWidget("make sure of email ", context);
+                break;
 
-            case "password wrong":
-              showDialogWidget("make sure of password ", context);
-              break;
+              case "password wrong":
+                showDialogWidget("make sure of password ", context);
+                break;
 
-            default:
-              if (value.length > 100) {
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()));
-              } else
-                showDialogWidget("we have an error", context);
-              break;
-          }
-        });
+              default:
+                if (value.length > 100) {
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()));
+                } else
+                  showDialogWidget("we have an error", context);
+                break;
+            }
+          });
+        }
       },
       child: Container(
         width: MediaQuery.of(context).size.width * .65,

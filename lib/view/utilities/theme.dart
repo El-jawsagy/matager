@@ -5,11 +5,12 @@ class CustomColors {
 
   static Color lightPrimary = Color(0xff7B68EE);
   static Color dark = Colors.black;
+  static Color darkOne = Colors.black12;
+
   static Color blueOne = Colors.red.shade600;
   static Color blueThree = Colors.red[300];
   static Color darkBlue = Color(0xff17223b);
   static Color darkRed = Colors.red.shade700;
-  static Color darkOne = Color(0xff273859);
   static Color gray = Colors.grey;
   static Color grayOne = Colors.grey[200];
   static Color grayTow = Colors.grey[300];

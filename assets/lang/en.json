@@ -36,6 +36,12 @@
   "delivery_time": "Delivery within :",
   "delivery_cost": "Delivery cost :",
   "delivery_cost_unit": "EGP",
+  "offer": "Last Offers",
+  "Category": "All Category",
+  "offer_dis": "Sorry, there are no offers at the moment",
+  "category_dis": "Sorry, there are no classifications at the moment",
+  "product_dis": "Sorry, there are no Products at the moment",
+  "apology": "We are sorry, but the current page cannot be viewed without logging in",
   "lang_display": "LANGUAGE",
   "lang": "العربية",
   "end": ""

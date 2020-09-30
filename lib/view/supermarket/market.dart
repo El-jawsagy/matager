@@ -7,7 +7,7 @@ import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
 
-import 'display_super_market.dart';
+import 'display_supermarket.dart';
 
 class CheckLocation extends StatefulWidget {
   int id;
@@ -146,11 +146,11 @@ class Markets extends StatefulWidget {
 }
 
 class _MarketsState extends State<Markets> {
-  HomePageApi homePage;
+  MarketAndCategoryApi homePage;
 
   @override
   void initState() {
-    homePage = HomePageApi();
+    homePage = MarketAndCategoryApi();
     super.initState();
   }
 
@@ -187,7 +187,6 @@ class _MarketsState extends State<Markets> {
           future: homePage.getSingleCategory(
               widget.id, widget.latitude, widget.longitude),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
-            print(snapshot.data);
             switch (snapshot.connectionState) {
               case ConnectionState.none:
                 return emptyPage(context);
@@ -206,10 +205,38 @@ class _MarketsState extends State<Markets> {
                       padding: EdgeInsets.symmetric(horizontal: 8),
                       itemBuilder: (context, pos) {
                         Map map = snapshot.data[pos];
-
-                        return _drawCardOfStore(
-                          map,
-                        );
+                        return snapshot.data.length >= 1
+                            ? _drawCardOfStore(
+                                map,
+                              )
+                            : Container(
+                                width: MediaQuery.of(context).size.width,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.3,
+                                child: Center(
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        child: Image.asset(
+                                          "assets/images/box.jpg",
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.25,
+                                        ),
+                                      ),
+                                      Text(
+                                        AppLocale.of(context)
+                                            .getTranslated("category_dis"),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20),
+                                      ),
+                                    ],
+                                  ),
+                                ));
                       },
                     ),
                   );
@@ -229,9 +256,12 @@ class _MarketsState extends State<Markets> {
       height: MediaQuery.of(context).size.height * 0.2,
       child: InkWell(
         onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => DisplayMarket(),
-          ));
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  DisplayMarket(widget.id, data["name"], data["id"]),
+            ),
+          );
         },
         child: Stack(
           children: <Widget>[
