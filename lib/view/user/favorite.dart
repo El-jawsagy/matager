@@ -7,8 +7,12 @@ import 'package:matager/view/utilities/prefrences.dart';
 import 'package:matager/view/utilities/theme.dart';
 
 class FavoriteScreen extends StatefulWidget {
+  double latitude, longitude;
+  FavoriteScreen(this.latitude, this.longitude);
+
   @override
   _FavoriteScreenState createState() => _FavoriteScreenState();
+
 }
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
@@ -29,7 +33,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         ),
         centerTitle: true,
       ),
-      drawer: NavDrawer(),
+      drawer: NavDrawer(widget.latitude,widget.longitude),
       body: FutureBuilder(
         future: Preference.getToken(),
         builder: (context, snapshot) {
@@ -68,7 +72,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => LoginScreen()));
+                                    builder: (context) => LoginScreen(widget.latitude,widget.longitude)));
                           },
                           child: Text(
                             AppLocale.of(context).getTranslated("log"),

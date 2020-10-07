@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/homepage.dart';
+import 'package:matager/view/onboarding.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -88,6 +89,6 @@ class _MyAppState extends State<MyApp> {
           return supportedLocales.first;
         },
         debugShowCheckedModeBanner: false,
-        home: HomeScreen());
+        home: OnBoardingScreen());
   }
 }

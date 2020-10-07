@@ -12,6 +12,10 @@ import 'package:matager/view/utilities/theme.dart';
 import '../homepage.dart';
 
 class LoginScreen extends StatefulWidget {
+  double latitude, longitude;
+
+  LoginScreen(this.latitude, this.longitude);
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -268,8 +272,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
               default:
                 if (value.length > 100) {
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => HomeScreen()));
+                  // Navigator.pushReplacement(context,
+                  //     MaterialPageRoute(builder: (context) => HomeScreen()));
                 } else
                   showDialogWidget("we have an error", context);
                 break;
@@ -329,7 +333,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: InkWell(
             onTap: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SignUpScreen()));
+                  MaterialPageRoute(builder: (context) => SignUpScreen(widget.latitude,widget.longitude)));
             },
             child: Text(
               AppLocale.of(context).getTranslated("sign"),

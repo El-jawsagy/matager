@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/supermarket/product/display_super_market_prodect.dart';
+import 'package:matager/view/utilities/theme.dart';
 
 class TabScreenoFCategory extends StatefulWidget {
   List map;
   int marketId;
+  String marketName;
+  double latitude, longitude;
 
-  TabScreenoFCategory(this.map, this.marketId);
+  TabScreenoFCategory(
+      this.map, this.marketId, this.marketName, this.latitude, this.longitude);
 
   @override
   _TabScreenoFCategoryState createState() => _TabScreenoFCategoryState();
@@ -58,7 +62,7 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
           map[index],
         );
       }),
-      childAspectRatio: .7,
+      childAspectRatio: .75,
     );
   }
 
@@ -83,6 +87,9 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
                 AppLocale.of(context).getTranslated("lang") == 'English'
                     ? data["name"]
                     : data["name_en"],
+                widget.marketName,
+                widget.latitude,
+                widget.longitude,
               ),
             ));
           },
@@ -113,32 +120,24 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(7)),
-                          child: Center(
-                              child: Text(
-                            AppLocale.of(context).getTranslated("lang") ==
-                                    'English'
-                                ? data["name"]
-                                : data["name_en"],
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          )),
-                        ),
-                      ],
-                    ),
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    margin: const EdgeInsets.only(top: 16.0),
+                    decoration: BoxDecoration(
+                        color: CustomColors.primary,
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(7),
+                            bottomRight: Radius.circular(7))),
+                    child: Center(
+                        child: Text(
+                      AppLocale.of(context).getTranslated("lang") == 'English'
+                          ? data["name"]
+                          : data["name_en"],
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: CustomColors.whiteBG),
+                    )),
                   ),
                 ],
               )

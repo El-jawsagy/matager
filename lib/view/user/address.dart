@@ -6,6 +6,10 @@ import 'package:matager/view/utilities/prefrences.dart';
 import 'package:matager/view/utilities/theme.dart';
 
 class AddressScreen extends StatefulWidget {
+  double latitude, longitude;
+
+  AddressScreen(this.latitude, this.longitude);
+
   @override
   _AddressScreenState createState() => _AddressScreenState();
 }
@@ -28,7 +32,7 @@ class _AddressScreenState extends State<AddressScreen> {
         ),
         centerTitle: true,
       ),
-      drawer: NavDrawer(),
+      drawer: NavDrawer(widget.latitude,widget.longitude),
       body: FutureBuilder(
         future: Preference.getToken(),
         builder: (context, snapshot) {
@@ -67,7 +71,7 @@ class _AddressScreenState extends State<AddressScreen> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => LoginScreen()));
+                                    builder: (context) => LoginScreen(widget.latitude, widget.longitude)));
                           },
                           child: Text(
                             AppLocale.of(context).getTranslated("log"),

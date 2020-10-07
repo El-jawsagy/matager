@@ -6,6 +6,10 @@ import 'package:matager/view/utilities/prefrences.dart';
 import 'package:matager/view/utilities/theme.dart';
 
 class OrderScreen extends StatefulWidget {
+  double latitude, longitude;
+
+  OrderScreen(this.latitude, this.longitude);
+
   @override
   _OrderScreenState createState() => _OrderScreenState();
 }
@@ -28,7 +32,7 @@ class _OrderScreenState extends State<OrderScreen> {
         ),
         centerTitle: true,
       ),
-      drawer: NavDrawer(),
+      drawer: NavDrawer(widget.latitude, widget.longitude),
       body: FutureBuilder(
         future: Preference.getToken(),
         builder: (context, snapshot) {
@@ -56,7 +60,7 @@ class _OrderScreenState extends State<OrderScreen> {
                 Container(
                   child: Padding(
                     padding:
-                    const EdgeInsets.only(left: 16, right: 16, top: 16),
+                        const EdgeInsets.only(left: 16, right: 16, top: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -67,7 +71,7 @@ class _OrderScreenState extends State<OrderScreen> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => LoginScreen()));
+                                    builder: (context) => LoginScreen(widget.latitude,widget.longitude)));
                           },
                           child: Text(
                             AppLocale.of(context).getTranslated("log"),

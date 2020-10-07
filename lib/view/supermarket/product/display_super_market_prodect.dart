@@ -1,19 +1,23 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matager/controller/home_api.dart';
 import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/Authentication/login.dart';
+import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'display_market_product_item_details.dart';
 
 class DisplayMarketProduct extends StatefulWidget {
   int storeId, categoryId;
   String categoryName;
+  String marketName;
+  double latitude, longitude;
 
-  DisplayMarketProduct(this.storeId, this.categoryId, this.categoryName);
+  DisplayMarketProduct(this.storeId, this.categoryId, this.categoryName,
+      this.marketName, this.latitude, this.longitude);
 
   @override
   _DisplayMarketProductState createState() => _DisplayMarketProductState();
@@ -71,13 +75,14 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
 
   Widget _screen(List<dynamic> data) {
     return Scaffold(
+      drawer: NavDrawer(widget.latitude, widget.longitude),
       appBar: AppBar(
         elevation: 0,
         title: Text(
           widget.categoryName,
           style: TextStyle(
               color: CustomColors.whiteBG,
-              fontSize: 26,
+              fontSize: 18,
               fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -135,7 +140,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                               List.generate(snapshot.data.length, (index) {
                             return _drawCardOfStore(snapshot.data[index]);
                           }),
-                          childAspectRatio: .6,
+                          childAspectRatio: .55,
                         )
                       : Container(
                           width: MediaQuery.of(context).size.width,
@@ -187,109 +192,153 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => DisplayMarketItemDetails(data)));
+              builder: (context) => DisplayMarketItemDetails(
+                  data, widget.marketName, widget.latitude, widget.longitude)));
         },
         child: Stack(
           children: <Widget>[
             Card(
               elevation: 3,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
+                borderRadius: BorderRadius.circular(7.0),
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(15.0),
-                    child: (data["image"] == null)
-                        ? Image.asset(
-                            "assets/images/boxImage.png",
-                          )
-                        : Image(
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height * .2,
-                            loadingBuilder: (context, image,
-                                ImageChunkEvent loadingProgress) {
-                              if (loadingProgress == null) {
-                                return image;
-                              }
-                              return Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            },
-                            image: NetworkImage(data["image"], scale: 1.0),
-                            fit: BoxFit.cover,
-                          ),
-                  ),
-                  Text(
-                    AppLocale.of(context).getTranslated("lang") == 'English'
-                        ? data["name_ar"]
-                        : data["name_en"],
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: true,
-                  ),
-                  Text.rich(
-                    data['offer']
-                        ? TextSpan(
-                            children: <TextSpan>[
-                              TextSpan(
-                                text:
-                                    " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                                style: new TextStyle(
-                                  color: CustomColors.gray,
-                                  decoration: TextDecoration.lineThrough,
-                                ),
+                  Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(7),
+                            topRight: Radius.circular(7)),
+                        child: (data["image"] == null)
+                            ? Image.asset(
+                                "assets/images/boxImage.png",
+                              )
+                            : Image(
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height * .2,
+                                loadingBuilder: (context, image,
+                                    ImageChunkEvent loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return image;
+                                  }
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                                image: NetworkImage(data["image"], scale: 1.0),
+                                fit: BoxFit.contain,
                               ),
-                              TextSpan(
-                                text: " ",
-                                style: TextStyle(
-                                  color: CustomColors.red,
-                                ),
+                      ),
+                      Text(
+                        AppLocale.of(context).getTranslated("lang") == 'English'
+                            ? data["name_ar"]
+                            : data["name_en"],
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        maxLines: 3,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        softWrap: true,
+                      ),
+                      Text.rich(
+                        data['offer']
+                            ? TextSpan(
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text:
+                                        " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                    style: new TextStyle(
+                                      color: CustomColors.red,
+                                      decoration: TextDecoration.lineThrough,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: " ",
+                                    style: TextStyle(
+                                      color: CustomColors.red,
+                                    ),
+                                  ),
+                                  new TextSpan(
+                                    text:
+                                        " ${data["offer_price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                    style: new TextStyle(
+                                      color: CustomColors.primary,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : TextSpan(
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text:
+                                        " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                    style: new TextStyle(
+                                      color: CustomColors.red,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              new TextSpan(
-                                text:
-                                    " ${data["offer_price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                                style: new TextStyle(
-                                  color: CustomColors.red,
-                                ),
-                              ),
-                            ],
-                          )
-                        : TextSpan(
-                            children: <TextSpan>[
-                              TextSpan(
-                                text:
-                                    " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                                style: new TextStyle(
-                                  color: CustomColors.red,
-                                ),
-                              ),
-                            ],
-                          ),
+                      ),
+                    ],
                   ),
                   _drawAddToCartButton(),
                 ],
               ),
             ),
-            Container(
-              width: 50,
-              height: 25,
-              margin: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                  color: Colors.white70,
-                  borderRadius: BorderRadius.circular(7)),
-              child: Center(
-                  child: Text(
-                " ${Random().nextInt(100)} %",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              )),
-            ),
+            data['offer']
+                ? Opacity(
+                    opacity: 0.75,
+                    child: Container(
+                      width: 50,
+                      height: 25,
+                      margin: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                          color: CustomColors.primary,
+                          borderRadius: BorderRadius.circular(7)),
+                      child: Center(
+                          child: Text(
+                        " ${data["discount"]} %",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.white),
+                      )),
+                    ),
+                  )
+                : Container(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  width: 50,
+                  height: 25,
+                  margin: EdgeInsets.all(12),
+                  child: Center(
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.favorite_border,
+                        color: Colors.black,
+                      ),
+                      onPressed: () async {
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        var token = prefs.getString("token");
+                        if (token == null) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginScreen(widget.latitude, widget.longitude)));
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            )
           ],
         ),
       ),
@@ -300,8 +349,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
     return InkWell(
       onTap: () async {},
       child: Container(
-        width: MediaQuery.of(context).size.width * .4,
-        height: MediaQuery.of(context).size.height * .04,
+        height: MediaQuery.of(context).size.height * .06,
         decoration: BoxDecoration(
           color: CustomColors.primary,
           boxShadow: [
@@ -312,12 +360,16 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
               offset: Offset(0.0, 0.0),
             )
           ],
-          borderRadius: BorderRadius.circular(7),
+          borderRadius: BorderRadius.circular(5),
         ),
         child: Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
+              Icon(
+                Icons.shopping_cart,
+                color: CustomColors.whiteBG,
+              ),
               Text(
                 AppLocale.of(context).getTranslated("add_cart"),
                 textAlign: TextAlign.center,
@@ -325,10 +377,6 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                   fontWeight: FontWeight.w500,
                   color: Colors.white,
                 ),
-              ),
-              Icon(
-                Icons.shopping_cart,
-                color: CustomColors.whiteBG,
               ),
             ],
           ),

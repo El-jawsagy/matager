@@ -5,12 +5,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
 import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/theme.dart';
 
 class DisplayMarketItemDetails extends StatefulWidget {
   Map map;
+  String marketName;
+  double latitude, longitude;
 
-  DisplayMarketItemDetails(this.map);
+  DisplayMarketItemDetails(
+      this.map, this.marketName, this.latitude, this.longitude);
 
   @override
   _DisplayMarketItemDetailsState createState() =>
@@ -26,7 +30,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
   @override
   void initState() {
     pos = 0;
-    widget.map["unit"] == 0
+    widget.map["unit"] == "0"
         ? posOfProducts = ValueNotifier(1)
         : posOfProducts = ValueNotifier(0.25);
     _counterController = TextEditingController();
@@ -40,12 +44,11 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: NavDrawer(widget.latitude, widget.longitude),
       appBar: AppBar(
         elevation: 0,
         title: Text(
-          AppLocale.of(context).getTranslated("lang") == 'English'
-              ? widget.map["name_ar"]
-              : widget.map["name_en"],
+          widget.marketName,
           style: TextStyle(
             color: CustomColors.whiteBG,
             fontSize: 22,
@@ -89,16 +92,24 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                   ? widget.map["name_ar"]
                   : widget.map["name_en"],
               style: TextStyle(
-                color: Colors.black,
+                color: CustomColors.primary,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
               overflow: TextOverflow.visible,
             ),
           ),
-          _drawPrice(),
-          _drawDescriptionText(),
+          Padding(
+            padding:
+                const EdgeInsets.only(left: 22, right: 22, top: 10, bottom: 10),
+            child: Container(
+              width: double.infinity,
+              height: 1,
+              color: Colors.grey[300],
+            ),
+          ),
           _drawItemDescription(),
+          _drawPrice(),
           _drawCounterRow(posOfProducts.value),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -142,7 +153,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                         image: NetworkImage(
                           imagePath[index],
                         ),
-                        fit: BoxFit.fill,
+                        fit: BoxFit.contain,
                       ),
               );
             },
@@ -157,8 +168,18 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
     return Padding(
       padding: EdgeInsets.only(left: 24, right: 24, top: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
+          Text(
+            AppLocale.of(context).getTranslated("price"),
+            style: TextStyle(
+                color: CustomColors.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 24),
+          ),
+          SizedBox(
+            width: 5,
+          ),
           Text.rich(
             widget.map['offer']
                 ? TextSpan(
@@ -167,7 +188,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                         text:
                             " ${widget.map["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                         style: new TextStyle(
-                            color: CustomColors.gray,
+                            color: CustomColors.red,
                             decoration: TextDecoration.lineThrough,
                             fontSize: 18),
                       ),
@@ -178,7 +199,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                         text:
                             " ${widget.map["offer_price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                         style: new TextStyle(
-                            color: CustomColors.red, fontSize: 24),
+                            color: CustomColors.primary, fontSize: 24),
                       ),
                     ],
                   )
@@ -266,7 +287,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                   iconSize: 36,
                   icon: Icon(Icons.add),
                   onPressed: () {
-                    posOfProducts.value = widget.map["unit"] == 0
+                    posOfProducts.value = widget.map["unit"] == "0"
                         ? posOfProducts.value + 1
                         : (posOfProducts.value + .25);
 
@@ -291,19 +312,26 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                   keyboardType: TextInputType.numberWithOptions(decimal: false),
                 ),
               ),
-              IconButton(
-                  highlightColor: Colors.red,
-                  iconSize: 36,
-                  icon: Icon(Icons.remove),
-                  onPressed: () {
-                    if (posOfProducts.value > 0) {
-                      posOfProducts.value = widget.map["unit"] == 0
-                          ? posOfProducts.value
-                          : (posOfProducts.value - .25);
+              posOfProducts.value > 0
+                  ? IconButton(
+                      highlightColor: Colors.red,
+                      iconSize: 36,
+                      icon: Icon(Icons.remove, color: CustomColors.dark),
+                      onPressed: () {
+                        if (posOfProducts.value > 0) {
+                          posOfProducts.value = widget.map["unit"] == "0"
+                              ? posOfProducts.value - 1
+                              : (posOfProducts.value - .25);
 
-                      _counterController.text = posOfProducts.value.toString();
-                    }
-                  }),
+                          _counterController.text =
+                              posOfProducts.value.toString();
+                        }
+                      })
+                  : Icon(
+                      Icons.remove,
+                      color: CustomColors.darkOne,
+                      size: 36,
+                    ),
             ],
           ),
         );
@@ -315,7 +343,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
     return Container(
       padding: EdgeInsets.all(16),
       width: MediaQuery.of(context).size.width * .8,
-      height: MediaQuery.of(context).size.height * .08,
+      height: MediaQuery.of(context).size.height * .1,
       decoration: BoxDecoration(
         color: CustomColors.primary,
         boxShadow: [
@@ -334,6 +362,11 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
+              Icon(
+                Icons.shopping_cart,
+                color: CustomColors.whiteBG,
+                size: 30,
+              ),
               Text(
                 AppLocale.of(context).getTranslated("add_cart"),
                 textAlign: TextAlign.center,
@@ -342,11 +375,6 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
-              ),
-              Icon(
-                Icons.shopping_cart,
-                color: CustomColors.whiteBG,
-                size: 30,
               ),
             ],
           ),

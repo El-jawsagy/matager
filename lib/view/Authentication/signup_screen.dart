@@ -10,6 +10,10 @@ import '../homepage.dart';
 import 'login.dart';
 
 class SignUpScreen extends StatefulWidget {
+  double latitude, longitude;
+
+  SignUpScreen(this.latitude, this.longitude);
+
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
 }
@@ -397,8 +401,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               default:
                 if (value.length > 100) {
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => HomeScreen()));
+                  // Navigator.pushReplacement(context,
+                  //     MaterialPageRoute(builder: (context) => HomeScreen()));
                 } else
                   showDialogWidget("we have an error", context);
                 break;
@@ -443,7 +447,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return InkWell(
       onTap: () {
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => LoginScreen()),
+          MaterialPageRoute(builder: (context) => LoginScreen(widget.latitude, widget.longitude)),
         );
       },
       child: Row(

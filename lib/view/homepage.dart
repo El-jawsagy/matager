@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:matager/controller/home_api.dart';
 import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/get_location.dart';
 import 'package:matager/view/supermarket/market.dart';
 import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
@@ -10,6 +12,12 @@ import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
+  double latitude, longitude;
+
+  String locationDetails;
+
+  HomeScreen(this.latitude, this.longitude, this.locationDetails);
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -44,8 +52,51 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: Size(
+            MediaQuery.of(context).size.width,
+            MediaQuery.of(context).size.height * 0.05,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Center(
+              child: InkWell(
+                onTap: () {
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => CheckLocation()));
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.75,
+                      child: Text(
+                        widget.locationDetails,
+                        maxLines: 2,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: CustomColors.whiteBG,
+                        ),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    FaIcon(
+                      FontAwesomeIcons.mapMarkerAlt,
+                      color: CustomColors.whiteBG,
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
-      drawer: NavDrawer(),
+      drawer: NavDrawer(widget.latitude, widget.longitude),
       body: ListView(
         children: <Widget>[
           FutureBuilder(
@@ -95,12 +146,13 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => CheckLocation(
-                map["id"],
-                AppLocale.of(context).getTranslated("lang") == 'English'
-                    ? map["name"]
-                    : map["name_en"],
-              ),
+              builder: (context) => Markets(
+                  map["id"],
+                  AppLocale.of(context).getTranslated("lang") == 'English'
+                      ? map["name"]
+                      : map["name_en"],
+                  widget.latitude,
+                  widget.longitude),
             ),
           );
         },
@@ -143,14 +195,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      Container(
-                        width: 75,
-                        height: 30,
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(7)),
-                        child: Center(
-                          child: Icon(Icons.arrow_forward_ios),
+                      Opacity(
+                        opacity: 0.8,
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * .15,
+                          height: MediaQuery.of(context).size.height * .05,
+                          decoration: BoxDecoration(
+                              color: CustomColors.primary,
+                              borderRadius: BorderRadius.circular(9)),
+                          child: Center(
+                            child: Icon(
+                              Icons.shopping_cart,
+                              color: CustomColors.whiteBG,
+                            ),
+                          ),
                         ),
                       ),
                     ],

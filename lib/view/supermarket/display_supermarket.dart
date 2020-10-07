@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:matager/controller/home_api.dart';
 import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
 
@@ -12,8 +13,10 @@ class DisplayMarket extends StatefulWidget {
   int categoryID;
   int marketId;
   String marketName;
+  double latitude, longitude;
 
-  DisplayMarket(this.categoryID, this.marketName, this.marketId);
+  DisplayMarket(this.categoryID, this.marketId, this.marketName, this.latitude,
+      this.longitude);
 
   @override
   _DisplayMarketState createState() => _DisplayMarketState();
@@ -34,6 +37,7 @@ class _DisplayMarketState extends State<DisplayMarket> {
       length: 2,
       child: Scaffold(
         backgroundColor: CustomColors.whiteBG,
+        drawer: NavDrawer(widget.latitude, widget.longitude),
         appBar: AppBar(
           centerTitle: true,
           title: Text(
@@ -109,10 +113,13 @@ class _DisplayMarketState extends State<DisplayMarket> {
                   if (snapshot.hasData) {
                     List<Widget> TabsHomePage = [
                       TabScreenoFCategory(
-                        snapshot.data["categories"],
-                        widget.marketId,
-                      ),
-                      TabScreenOfOffer(snapshot.data["offers"]),
+                          snapshot.data["categories"],
+                          widget.marketId,
+                          widget.marketName,
+                          widget.latitude,
+                          widget.longitude),
+                      TabScreenOfOffer(snapshot.data["offers"],
+                          widget.marketName, widget.latitude, widget.longitude),
                     ];
 
                     return Padding(

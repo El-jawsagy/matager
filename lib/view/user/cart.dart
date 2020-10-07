@@ -6,6 +6,10 @@ import 'package:matager/view/utilities/prefrences.dart';
 import 'package:matager/view/utilities/theme.dart';
 
 class CartScreen extends StatefulWidget {
+  double latitude, longitude;
+
+  CartScreen(this.latitude, this.longitude);
+
   @override
   _CartScreenState createState() => _CartScreenState();
 }
@@ -28,7 +32,7 @@ class _CartScreenState extends State<CartScreen> {
         ),
         centerTitle: true,
       ),
-      drawer: NavDrawer(),
+      drawer: NavDrawer(widget.latitude,widget.longitude),
       body: FutureBuilder(
         future: Preference.getToken(),
         builder: (context, snapshot) {
@@ -67,7 +71,7 @@ class _CartScreenState extends State<CartScreen> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => LoginScreen()));
+                                    builder: (context) => LoginScreen(widget.latitude, widget.longitude)));
                           },
                           child: Text(
                             AppLocale.of(context).getTranslated("log"),
