@@ -5,6 +5,19 @@ import 'package:http/http.dart' as http;
 import 'package:matager/view/utilities/api_paths.dart';
 
 class MarketAndCategoryApi {
+
+  Future<List> getSliderImages() async {
+    String url = ApiPaths.sliderImage;
+    var response = await http.get(
+      url,
+    );
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      return data['data'];
+    }
+    return null;
+  }
+
   Future<List> getAllCategory() async {
     String url = ApiPaths.allCategory;
     var response = await http.get(
@@ -52,6 +65,7 @@ class MarketAndCategoryApi {
     }
     return null;
   }
+
   Future<List> getSingleMarketCategoryProducts(matgerId, categoryId) async {
     String url = ApiPaths.storeSubCategoryProduct(matgerId, categoryId);
     var response = await http.get(
@@ -59,7 +73,6 @@ class MarketAndCategoryApi {
     );
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      print(data);
       return data['data'];
     }
     return null;
@@ -92,11 +105,8 @@ class ProductBloc {
   }
 
   Future<void> _fetchProductsFromApi(int categoryId) async {
-    print(categoryId);
-    print(storeId);
     this.products = await marketAndCategoryApi.getSingleMarketCategoryProducts(
         storeId, categoryId);
-    print(this.products.length);
     _productsController.add(this.products);
   }
 

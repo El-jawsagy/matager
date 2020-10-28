@@ -56,6 +56,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
       ),
     );
   }
+
 //   map["id"],
   //   AppLocale.of(context).getTranslated("lang") == 'English'
   //       ? map["name"]
@@ -63,11 +64,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   Widget _drawLoginButton(double textButtonSize) {
     return InkWell(
       onTap: () async {
-        Navigator.of(context).push(
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => CheckLocation(
-
-                ),
+            builder: (context) => CheckLocation(0),
           ),
         );
       },

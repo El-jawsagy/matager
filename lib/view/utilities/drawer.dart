@@ -4,13 +4,15 @@ import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/Authentication/login.dart';
-import 'package:matager/view/user/address.dart';
-import 'package:matager/view/user/cart.dart';
-import 'package:matager/view/user/favorite.dart';
+import 'package:matager/view/user/cart/cart_offline.dart';
+import 'package:matager/view/user/cart/cart_online.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/view/user/address/address.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/view/user/favorite/favorite.dart';
 import 'package:matager/view/user/order.dart';
 import 'package:matager/view/utilities/prefrences.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 import '../homepage.dart';
 
@@ -201,14 +203,15 @@ class _NavDrawerState extends State<NavDrawer> {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => HomeScreen(
-                                      widget.lat, widget.lng, address)));
+                                  builder: (context) => HomeScreen()));
                         }),
                         menuDrawer(
                             Icons.favorite,
                             AppLocale.of(context).getTranslated('drawer_fav'),
                             Icons.arrow_forward_ios, () {
-                          Navigator.pushReplacement(
+                          Navigator.pop(context);
+
+                          Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
@@ -218,17 +221,28 @@ class _NavDrawerState extends State<NavDrawer> {
                             Icons.shopping_cart,
                             AppLocale.of(context).getTranslated('drawer_cart'),
                             Icons.arrow_forward_ios, () {
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      CartScreen(widget.lat, widget.lng)));
+                          if (token == null) {                              Navigator.pop(context);
+
+                          Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CartOffLineScreen(
+                                        widget.lat, widget.lng)));
+                          } else {                              Navigator.pop(context);
+
+                          Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CartOnLineScreen(
+                                        widget.lat, widget.lng)));
+                          }
                         }),
                         menuDrawer(
                             Icons.shopping_bag,
                             AppLocale.of(context).getTranslated('drawer_order'),
                             Icons.arrow_forward_ios, () {
-                          Navigator.pushReplacement(
+                              Navigator.pop(context);
+                          Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
@@ -239,7 +253,9 @@ class _NavDrawerState extends State<NavDrawer> {
                             AppLocale.of(context)
                                 .getTranslated('drawer_address'),
                             Icons.arrow_forward_ios, () {
-                          Navigator.pushReplacement(
+                          Navigator.pop(context);
+
+                          Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
@@ -249,6 +265,8 @@ class _NavDrawerState extends State<NavDrawer> {
                             Icons.error_outline,
                             AppLocale.of(context).getTranslated('drawer_about'),
                             Icons.arrow_forward_ios, () {
+                          Navigator.pop(context);
+
                           // Navigator.pushReplacement(
                           //     context,
                           //     MaterialPageRoute(
@@ -258,11 +276,13 @@ class _NavDrawerState extends State<NavDrawer> {
                             FontAwesomeIcons.fileAlt,
                             AppLocale.of(context).getTranslated('drawer_terms'),
                             Icons.arrow_forward_ios, () {
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      AddressScreen(widget.lat, widget.lng)));
+                          Navigator.pop(context);
+
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) =>
+                          //             AddressScreen(widget.lat, widget.lng)));
                         }),
                         SizedBox(
                           height: 30,
@@ -276,7 +296,7 @@ class _NavDrawerState extends State<NavDrawer> {
                                 Icons.arrow_forward_ios, () async {
                                 SharedPreferences prefs =
                                     await SharedPreferences.getInstance();
-                                prefs.clear();
+                                prefs.setString("token", null);
                                 setState(() {});
                               }),
                         Padding(

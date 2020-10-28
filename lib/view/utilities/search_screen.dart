@@ -21,7 +21,6 @@ class SearchScreen extends SearchDelegate {
 
   @override
   List<Widget> buildActions(BuildContext context) {
-    // TODO: implement buildActions
     return [
       IconButton(icon: Icon(Icons.clear), onPressed: () {query='';})
     ];

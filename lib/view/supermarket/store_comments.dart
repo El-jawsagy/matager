@@ -52,9 +52,11 @@ class _StoreCCommentsScreejState extends State<StoreCommentsScreen> {
               child: Row(
                 children: [
                   Text(
-                    AppLocale.of(context)
-                        .getTranslated("comments"),
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,color: CustomColors.primary  ),
+                    AppLocale.of(context).getTranslated("comments"),
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: CustomColors.primary),
                     textWidthBasis: TextWidthBasis.parent,
                   ),
                 ],
@@ -69,7 +71,7 @@ class _StoreCCommentsScreejState extends State<StoreCommentsScreen> {
                 break;
               case ConnectionState.waiting:
               case ConnectionState.active:
-                return loading(context);
+                return loading(context, 1);
                 break;
               case ConnectionState.done:
                 if (snapshot.hasData) {
@@ -87,17 +89,20 @@ class _StoreCCommentsScreejState extends State<StoreCommentsScreen> {
                               )
                             : Container(
                                 width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height * 0.3,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.3,
                                 child: Center(
                                   child: Column(
                                     children: [
                                       Container(
                                         child: Image.asset(
                                           "assets/images/box.jpg",
-                                          width: MediaQuery.of(context).size.width,
-                                          height:
-                                              MediaQuery.of(context).size.height *
-                                                  0.25,
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.25,
                                         ),
                                       ),
                                       Text(

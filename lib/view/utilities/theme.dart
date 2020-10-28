@@ -12,8 +12,8 @@ class CustomColors {
   static Color darkBlue = Color(0xff17223b);
   static Color darkRed = Colors.red.shade700;
   static Color gray = Colors.grey;
-  static Color grayOne = Colors.grey[200];
-  static Color grayTow = Colors.grey[300];
+  static Color grayOne = Color(0xffa5a5a5);
+  static Color grayTow = Color(0xffe9eef2);
   static Color primary = Color(0xff0101b2);
 
   static Color whiteBG = Colors.white;

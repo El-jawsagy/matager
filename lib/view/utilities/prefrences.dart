@@ -13,10 +13,34 @@ class Preference {
     return datId;
   }
 
+  static Future<double> getLat() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var datId = prefs.get("lat");
+    return datId;
+  }
+
+  static Future<double> getLng() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var datId = prefs.get("lng");
+    return datId;
+  }
+
+  static Future<String> getAddress() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var datId = prefs.get("address");
+    return datId;
+  }
+
   static Future<String> getName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var name = prefs.get("name");
     return name;
+  }
+
+  static Future<int> getUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var userId = prefs.get("UserId");
+    return userId;
   }
 
   static Future<String> getEmail() async {

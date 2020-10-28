@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Authentication {
   Future<String> login(email, password) async {
     String url = ApiPaths.login;
-
     Map<String, dynamic> postBody = {
       'email': email,
       'password': password,
@@ -16,14 +15,27 @@ class Authentication {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      if (data['data']['token'].length > 50) {
-        setToken(data['data']['token']);
-        setEmail(email);
-        setName(data['data']['name']);
-        setPhoto(data['data']['image']);
-      }
+      print(response.body);
 
-      return data['data']['token'];
+      switch (data['data']) {
+        case "email wrong":
+        case "password wrong":
+          return data['data'];
+          break;
+
+        default:
+          print("this is value of login ${data['data']}");
+          if (data['data']['token'].length > 50) {
+            setToken(data['data']['token']);
+            setEmail(email);
+            setName(data['data']['name']);
+            setPhoto(data['data']['image']);
+            setId(data['data']["id"]);
+          }
+          return data['data']['token'];
+
+          break;
+      }
     }
   }
 
@@ -61,6 +73,12 @@ setToken(String token) async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
   print("token is change");
   await preferences.setString("token", token);
+}
+
+setId(int id) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  print("name is change");
+  await preferences.setInt("UserId", id);
 }
 
 setEmail(String email) async {

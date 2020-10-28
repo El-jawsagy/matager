@@ -8,6 +8,9 @@ import 'package:matager/view/Authentication/signup_screen.dart';
 import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/controller/cart/cart_items_bloc_and_Api.dart';
 
 import '../homepage.dart';
 
@@ -22,6 +25,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   Authentication authentication = Authentication();
+  CardMethodApi cardMethodApi = CardMethodApi();
+
   TextEditingController _emailTextController;
 
   TextEditingController _passwordTextController;
@@ -48,82 +53,85 @@ class _LoginScreenState extends State<LoginScreen> {
     LoginScreenProperties loginScreenProperties =
         LoginScreenProperties(detectedScreen);
     //WillPopScope make you can control with back button in android
-    return Stack(
-      children: <Widget>[
-        Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-                image: ExactAssetImage("assets/images/banner_two.jpg"),
-                fit: BoxFit.cover),
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Stack(
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: ExactAssetImage("assets/images/banner_two.jpg"),
+                  fit: BoxFit.cover),
+            ),
           ),
-        ),
-        Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: Stack(
-              children: <Widget>[
-                SingleChildScrollView(
-                  physics: NeverScrollableScrollPhysics(),
-                  child: Form(
-                    key: _formKey,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Container(
-                        height: MediaQuery.of(context).size.height,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            _drawLogo(),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * .04),
-                            _drawEditText(
-                              Icons.email,
-                              AppLocale.of(context).getTranslated("email"),
-                              AppLocale.of(context).getTranslated("wrong"),
-                              loginScreenProperties.editTextSize,
-                            ),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * .04),
-                            _drawPasswordEditText(
-                              loginScreenProperties.editTextSize,
-                            ),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * .005),
-                            _drawForgetPass(
-                                loginScreenProperties.forgetTextSize),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * .08),
-                            _drawLoginButton(
-                                loginScreenProperties.loginTextSize),
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * .1,
-                            ),
-                            Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 2),
-                                child: _drawSignUp(
-                                    loginScreenProperties.signUpText),
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Stack(
+                children: <Widget>[
+                  SingleChildScrollView(
+                    physics: NeverScrollableScrollPhysics(),
+                    child: Form(
+                      key: _formKey,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Container(
+                          height: MediaQuery.of(context).size.height,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              _drawLogo(),
+                              SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * .04),
+                              _drawEditText(
+                                Icons.email,
+                                AppLocale.of(context).getTranslated("email"),
+                                AppLocale.of(context).getTranslated("wrong"),
+                                loginScreenProperties.editTextSize,
                               ),
-                            )
-                          ],
+                              SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * .04),
+                              _drawPasswordEditText(
+                                loginScreenProperties.editTextSize,
+                              ),
+                              SizedBox(
+                                  height: MediaQuery.of(context).size.height *
+                                      .005),
+                              _drawForgetPass(
+                                  loginScreenProperties.forgetTextSize),
+                              SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * .08),
+                              _drawLoginButton(
+                                  loginScreenProperties.loginTextSize),
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height * .1,
+                              ),
+                              Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 2),
+                                  child: _drawSignUp(
+                                      loginScreenProperties.signUpText),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -260,7 +268,8 @@ class _LoginScreenState extends State<LoginScreen> {
         if (_formKey.currentState.validate()) {
           authentication
               .login(_emailTextController.text, _passwordTextController.text)
-              .then((value) {
+              .then((value) async {
+            print("this is value of login $value");
             switch (value) {
               case "email wrong":
                 showDialogWidget("make sure of email ", context);
@@ -272,8 +281,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
               default:
                 if (value.length > 100) {
-                  // Navigator.pushReplacement(context,
-                  //     MaterialPageRoute(builder: (context) => HomeScreen()));
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()));
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+
+                  if (prefs.get("cart") != null) {
+                    cardMethodApi.cartUpLoadBeforLogin(
+                      prefs.get("cart"),
+                      value,
+                      prefs.get("UserId"),
+                    );
+                  }
                 } else
                   showDialogWidget("we have an error", context);
                 break;
@@ -332,8 +351,11 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.all(8.0),
           child: InkWell(
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SignUpScreen(widget.latitude,widget.longitude)));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          SignUpScreen(widget.latitude, widget.longitude)));
             },
             child: Text(
               AppLocale.of(context).getTranslated("sign"),
@@ -357,10 +379,12 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> pop() async {
-    await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop');
-  }
 
+
+  Future<bool> _onBackPressed() {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => HomeScreen()));
+  }
 //  Future<void> ValidateForm() {
 //    String name, pass;
 //    name = _emailTextController.text;
@@ -377,21 +401,3 @@ class _LoginScreenState extends State<LoginScreen> {
 //    }
 //  }
 }
-// todo: this methods will use for save token and change language
-//setLanguage(bool language) async {
-//  SharedPreferences prefs = await SharedPreferences.getInstance();
-//  await prefs.setBool('language', language);
-//}
-//
-//setToken(String token) async {
-//  SharedPreferences preferences = await SharedPreferences.getInstance();
-//  print("token is change");
-//  await preferences.setString("token", token);
-//}
-//
-//getToken() async {
-//  SharedPreferences prefs = await SharedPreferences.getInstance();
-//  String isLogin = prefs.getString('token');
-//  print("the token from pref is $isLogin");
-//  return isLogin;
-//}

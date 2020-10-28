@@ -7,10 +7,17 @@ class TabScreenoFCategory extends StatefulWidget {
   List map;
   int marketId;
   String marketName;
+  String token;
   double latitude, longitude;
 
   TabScreenoFCategory(
-      this.map, this.marketId, this.marketName, this.latitude, this.longitude);
+    this.map,
+    this.marketId,
+    this.marketName,
+    this.token,
+    this.latitude,
+    this.longitude,
+  );
 
   @override
   _TabScreenoFCategoryState createState() => _TabScreenoFCategoryState();
@@ -54,6 +61,7 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
             ));
   }
 
+//display list of products
   Widget _drawListOfCategoryProduct(List map) {
     return GridView.count(
       crossAxisCount: 2,
@@ -66,7 +74,7 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
     );
   }
 
-//
+// display each product
   Widget _drawCardOfProducts(Map data) {
     return Card(
       shape: RoundedRectangleBorder(
@@ -80,18 +88,21 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
         height: MediaQuery.of(context).size.height * 0.15,
         child: InkWell(
           onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => DisplayMarketProduct(
-                widget.marketId,
-                data["id"],
-                AppLocale.of(context).getTranslated("lang") == 'English'
-                    ? data["name"]
-                    : data["name_en"],
-                widget.marketName,
-                widget.latitude,
-                widget.longitude,
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => DisplayMarketProduct(
+                  widget.marketId,
+                  data["id"],
+                  AppLocale.of(context).getTranslated("lang") == 'English'
+                      ? data["name"]
+                      : data["name_en"],
+                  widget.marketName,
+                  widget.token,
+                  widget.latitude,
+                  widget.longitude,
+                ),
               ),
-            ));
+            );
           },
           child: Stack(
             children: <Widget>[

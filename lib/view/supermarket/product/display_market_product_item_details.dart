@@ -4,17 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
+import 'package:matager/controller/cart/cart_bloc_off.dart';
 import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/user/cart/cart_offline.dart';
+import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/theme.dart';
 
 class DisplayMarketItemDetails extends StatefulWidget {
   Map map;
-  String marketName;
+  int marketId;
+  String token;
+
   double latitude, longitude;
 
   DisplayMarketItemDetails(
-      this.map, this.marketName, this.latitude, this.longitude);
+    this.map,
+    this.token,
+    this.latitude,
+    this.longitude,
+  );
 
   @override
   _DisplayMarketItemDetailsState createState() =>
@@ -26,6 +35,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
   TextEditingController _counterController;
   double pos;
   ValueNotifier<double> posOfProducts;
+  final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -38,17 +48,19 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
     _controller = PageController(
       initialPage: pos.floor(),
     );
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldkey,
       drawer: NavDrawer(widget.latitude, widget.longitude),
       appBar: AppBar(
         elevation: 0,
         title: Text(
-          widget.marketName,
+          widget.map["store_name"],
           style: TextStyle(
             color: CustomColors.whiteBG,
             fontSize: 22,
@@ -60,7 +72,21 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
         centerTitle: true,
         actions: <Widget>[
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              if (widget.token == null) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CartOffLineScreen(
+                            widget.latitude, widget.longitude)));
+              } else {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CartOnLineScreen(
+                            widget.latitude, widget.longitude)));
+              }
+            },
             icon: Icon(
               Icons.shopping_cart,
             ),
@@ -113,7 +139,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
           _drawCounterRow(posOfProducts.value),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: _drawAddToCartButton(),
+            child: _drawAddToCartButton(posOfProducts, widget.token),
           )
         ],
       ),
@@ -339,7 +365,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
     );
   }
 
-  Widget _drawAddToCartButton() {
+  Widget _drawAddToCartButton(ValueNotifier<double> quantity, token) {
     return Container(
       padding: EdgeInsets.all(16),
       width: MediaQuery.of(context).size.width * .8,
@@ -357,7 +383,36 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
         borderRadius: BorderRadius.circular(7),
       ),
       child: InkWell(
-        onTap: () async {},
+        //todo:add to cart offline or online
+        onTap: () async {
+          if (quantity.value == 0) {
+            final snackBar = SnackBar(
+              content: Text("Sorry put you can't add 0 quantity of product "),
+              duration: Duration(seconds: 3),
+            );
+            _scaffoldkey.currentState.showSnackBar(snackBar);
+          } else {
+            if (token == null) {
+              itemBlocOffLine.addToCart(widget.map, quantity.value,
+                  widget.marketId, double.tryParse(widget.map["price"]));
+              final snackBar = SnackBar(
+                content: Text('thanks for your order'),
+                duration: Duration(seconds: 3),
+              );
+              _scaffoldkey.currentState.showSnackBar(snackBar);
+            } else {
+              print(quantity.value);
+              itemBlocOnLineN.addToCart(widget.map, quantity.value,
+                  widget.marketId, double.tryParse(widget.map["price"]));
+
+              final snackBar = SnackBar(
+                content: Text('thanks for your order'),
+                duration: Duration(seconds: 3),
+              );
+              _scaffoldkey.currentState.showSnackBar(snackBar);
+            }
+          }
+        },
         child: Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,

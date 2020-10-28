@@ -1,22 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:matager/controller/cart/cart_bloc_off.dart';
+import 'package:matager/controller/cart/cart_items_bloc_and_Api.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/Authentication/login.dart';
 import 'package:matager/view/supermarket/product/display_market_product_item_details.dart';
+import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TabScreenOfOffer extends StatefulWidget {
   List map;
   String marketName;
+  int subMarketId;
+  String token;
+
   double latitude, longitude;
 
-  TabScreenOfOffer(this.map, this.marketName, this.latitude, this.longitude);
+  TabScreenOfOffer(this.map, this.subMarketId, this.marketName, this.token,
+      this.latitude, this.longitude);
 
   @override
   _TabScreenOfOfferState createState() => _TabScreenOfOfferState();
 }
 
 class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
+  CardMethodApi cardMethodApi;
+
+  @override
+  void initState() {
+    cardMethodApi = CardMethodApi();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return widget.map.length >= 1
@@ -66,7 +81,7 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => DisplayMarketItemDetails(
-                  data, widget.marketName, widget.latitude, widget.longitude)));
+                  data, widget.token, widget.latitude, widget.longitude)));
         },
         child: Stack(
           children: <Widget>[
@@ -147,7 +162,7 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
                       ),
                     ],
                   ),
-                  _drawAddToCartButton(),
+                  _drawAddToCartButton(data, widget.token),
                 ],
               ),
             ),
@@ -206,9 +221,40 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
     );
   }
 
-  Widget _drawAddToCartButton() {
+  Widget _drawAddToCartButton(Map data, String token) {
     return InkWell(
-      onTap: () async {},
+      onTap: () async {
+        if (token == null) {
+          var quant;
+          if (data['unit'] == "0") {
+            quant = 1.0;
+          } else {
+            quant = .25;
+          }
+          itemBlocOffLine.addToCart(
+              data, quant, widget.subMarketId, double.tryParse(data['price']));
+          final snackBar = SnackBar(
+            content: Text('thanks for your order'),
+            duration: Duration(seconds: 3),
+          );
+          Scaffold.of(context).showSnackBar(snackBar);
+        } else {
+          var quant;
+          if (data['unit'] == "0") {
+            quant = 1.0;
+          } else {
+            quant = .25;
+          }
+          itemBlocOnLineN.addToCart(
+              data, quant, widget.subMarketId, double.tryParse(data['price']));
+
+          final snackBar = SnackBar(
+            content: Text('thanks for your order'),
+            duration: Duration(seconds: 3),
+          );
+          Scaffold.of(context).showSnackBar(snackBar);
+        }
+      },
       child: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height * .04,

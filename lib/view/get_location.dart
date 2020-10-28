@@ -4,10 +4,15 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/homepage.dart';
+import 'package:matager/view/user/address/setAddress.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CheckLocation extends StatefulWidget {
+  int index;
+
+  CheckLocation(this.index);
+
   @override
   _CheckLocationState createState() => _CheckLocationState();
 }
@@ -60,14 +65,31 @@ class _CheckLocationState extends State<CheckLocation> {
                           apiKey: "AIzaSyAgT7WlFOpeuez5qKBL-yDXkuRpCUol0Rg",
                           onPlacePicked: (result) async {
                             saveLocation(result.formattedAddress);
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => HomeScreen(
-                                    result.geometry.location.lat,
-                                    result.geometry.location.lng,
-                                    result.formattedAddress),
-                              ),
+                            saveLat(
+                              result.geometry.location.lat,
                             );
+                            saveLng(
+                              result.geometry.location.lng,
+                            );
+                            if (widget.index == 0) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => HomeScreen(),
+                                ),
+                              );
+                            } else {
+                              print("i am here");
+
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AddAddressScreen(
+                                      result.geometry.location.lat,
+                                      result.geometry.location.lng),
+                                ),
+                              );
+                            }
                           },
                           usePlaceDetailSearch: true,
                           initialPosition: cameraPosition.target,
@@ -127,8 +149,40 @@ class _CheckLocationState extends State<CheckLocation> {
   }
 }
 
-saveLocation(String add) async {
+saveLat(double lat) async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
   print("location is change");
+  await preferences.setDouble("lat", lat);
+}
+
+saveLng(double lng) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  print("location is change");
+
+  await preferences.setDouble("lng", lng);
+}
+
+saveLocation(String add) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  print("address is change");
   await preferences.setString("address", add);
+}
+
+saveCreatedLat(double lat) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  print("location is change");
+  await preferences.setDouble("createdLat", lat);
+}
+
+saveCreatedLng(double lng) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  print("location is change");
+
+  await preferences.setDouble("createdLng", lng);
+}
+
+saveCreatedLocation(String add) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  print("address is change");
+  await preferences.setString("createdAddress", add);
 }

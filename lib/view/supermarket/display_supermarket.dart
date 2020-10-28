@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:matager/controller/home_api.dart';
 import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/user/cart/cart_offline.dart';
+import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
@@ -13,10 +15,11 @@ class DisplayMarket extends StatefulWidget {
   int categoryID;
   int marketId;
   String marketName;
+  String token;
   double latitude, longitude;
 
-  DisplayMarket(this.categoryID, this.marketId, this.marketName, this.latitude,
-      this.longitude);
+  DisplayMarket(this.categoryID, this.marketId, this.marketName, this.token,
+      this.latitude, this.longitude);
 
   @override
   _DisplayMarketState createState() => _DisplayMarketState();
@@ -55,7 +58,21 @@ class _DisplayMarketState extends State<DisplayMarket> {
               ),
             ),
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                if (widget.token == null) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CartOffLineScreen(
+                              widget.latitude, widget.longitude)));
+                } else {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CartOnLineScreen(
+                              widget.latitude, widget.longitude)));
+                }
+              },
               icon: Icon(
                 Icons.shopping_cart,
                 color: CustomColors.whiteBG,
@@ -107,7 +124,7 @@ class _DisplayMarketState extends State<DisplayMarket> {
                   break;
                 case ConnectionState.waiting:
                 case ConnectionState.active:
-                  return loading(context);
+                  return loading(context, 1);
                   break;
                 case ConnectionState.done:
                   if (snapshot.hasData) {
@@ -116,10 +133,17 @@ class _DisplayMarketState extends State<DisplayMarket> {
                           snapshot.data["categories"],
                           widget.marketId,
                           widget.marketName,
+                          widget.token,
                           widget.latitude,
                           widget.longitude),
-                      TabScreenOfOffer(snapshot.data["offers"],
-                          widget.marketName, widget.latitude, widget.longitude),
+                      TabScreenOfOffer(
+                        snapshot.data["offers"],
+                        widget.marketId,
+                        widget.marketName,
+                        widget.token,
+                        widget.latitude,
+                        widget.longitude,
+                      ),
                     ];
 
                     return Padding(

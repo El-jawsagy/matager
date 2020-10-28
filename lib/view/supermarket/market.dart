@@ -12,9 +12,11 @@ import 'display_supermarket.dart';
 class Markets extends StatefulWidget {
   int id;
   String name;
+  String token;
+
   double latitude, longitude;
 
-  Markets(this.id, this.name, this.latitude, this.longitude);
+  Markets(this.id, this.name, this.token, this.latitude, this.longitude);
 
   @override
   _MarketsState createState() => _MarketsState();
@@ -49,13 +51,6 @@ class _MarketsState extends State<Markets> {
               color: CustomColors.whiteBG,
             ),
           ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.shopping_cart,
-              color: CustomColors.whiteBG,
-            ),
-          ),
         ],
       ),
       body: FutureBuilder(
@@ -68,7 +63,7 @@ class _MarketsState extends State<Markets> {
                 break;
               case ConnectionState.waiting:
               case ConnectionState.active:
-                return loading(context);
+                return loading(context, 1);
                 break;
               case ConnectionState.done:
                 if (snapshot.hasData) {
@@ -141,12 +136,17 @@ class _MarketsState extends State<Markets> {
                   children: [
                     InkWell(
                       onTap: () {
+                        print(widget.id);
+                        print(data["name"]);
+                        print(data["id"]);
+
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => DisplayMarket(
                                 widget.id,
-                                data["name"],
                                 data["id"],
+                                data["name"],
+                                widget.token,
                                 widget.latitude,
                                 widget.longitude),
                           ),
@@ -317,7 +317,7 @@ class _MarketsState extends State<Markets> {
                                   borderRadius: BorderRadius.circular(10)),
                               child: Center(
                                   child: Text(
-                                "${AppLocale.of(context).getTranslated("delivery_time")}  ${data["shipping_cost"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")} ",
+                                "${AppLocale.of(context).getTranslated("delivery_cost")}  ${data["shipping_cost"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")} ",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 12),
                               )),

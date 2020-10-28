@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:matager/controller/cart/cart_bloc_off.dart';
 import 'package:matager/controller/home_api.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/Authentication/login.dart';
+import 'package:matager/view/user/cart/cart_offline.dart';
+import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
@@ -14,10 +17,12 @@ class DisplayMarketProduct extends StatefulWidget {
   int storeId, categoryId;
   String categoryName;
   String marketName;
+  String token;
+
   double latitude, longitude;
 
   DisplayMarketProduct(this.storeId, this.categoryId, this.categoryName,
-      this.marketName, this.latitude, this.longitude);
+      this.marketName, this.token, this.latitude, this.longitude);
 
   @override
   _DisplayMarketProductState createState() => _DisplayMarketProductState();
@@ -29,12 +34,14 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
   TabController tabController;
   int currentIndex = 0;
   ProductBloc bloc;
+  final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     bloc = ProductBloc(widget.storeId);
     homePage = MarketAndCategoryApi();
     tabController = TabController(length: 0, vsync: this, initialIndex: 0);
+
     super.initState();
   }
 
@@ -51,11 +58,9 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                 break;
               case ConnectionState.waiting:
               case ConnectionState.active:
-                return loading(context);
+                return loading(context, 1);
                 break;
               case ConnectionState.done:
-                print(snapshot.data);
-                print(snapshot.data.length);
                 if (snapshot.hasData) {
                   List list = snapshot.data;
                   bloc.categoryIdSink.add(list[0]["id"]);
@@ -75,6 +80,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
 
   Widget _screen(List<dynamic> data) {
     return Scaffold(
+      key: _scaffoldkey,
       drawer: NavDrawer(widget.latitude, widget.longitude),
       appBar: AppBar(
         elevation: 0,
@@ -94,7 +100,21 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
             ),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              if (widget.token == null) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CartOffLineScreen(
+                            widget.latitude, widget.longitude)));
+              } else {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CartOnLineScreen(
+                            widget.latitude, widget.longitude)));
+              }
+            },
             icon: Icon(
               Icons.shopping_cart,
             ),
@@ -123,7 +143,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                 return emptyPage(context);
                 break;
               case ConnectionState.waiting:
-                return loading(context);
+                return loading(context, 1);
                 break;
               case ConnectionState.active:
 
@@ -193,7 +213,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => DisplayMarketItemDetails(
-                  data, widget.marketName, widget.latitude, widget.longitude)));
+                  data, widget.token, widget.latitude, widget.longitude)));
         },
         child: Stack(
           children: <Widget>[
@@ -285,7 +305,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                       ),
                     ],
                   ),
-                  _drawAddToCartButton(),
+                  _drawAddToCartButton(data, widget.token),
                 ],
               ),
             ),
@@ -331,7 +351,8 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => LoginScreen(widget.latitude, widget.longitude)));
+                                  builder: (context) => LoginScreen(
+                                      widget.latitude, widget.longitude)));
                         }
                       },
                     ),
@@ -345,9 +366,50 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
     );
   }
 
-  Widget _drawAddToCartButton() {
+  Widget _drawAddToCartButton(Map data, String token) {
     return InkWell(
-      onTap: () async {},
+      //todo:add to cart offline or online
+
+      onTap: () async {
+        if (token == null) {
+          var quant;
+          if (data['unit'] == "0") {
+            quant = 1.0;
+          } else {
+            quant = .25;
+          }
+          itemBlocOffLine.addToCart(
+            data,
+            quant,
+            widget.storeId,
+            double.tryParse(data['price']),
+          );
+          final snackBar = SnackBar(
+            content: Text('thanks for your order'),
+            duration: Duration(seconds: 3),
+          );
+          _scaffoldkey.currentState.showSnackBar(snackBar);
+        } else {
+          var quant;
+          if (data['unit'] == "0") {
+            quant = 1.0;
+          } else {
+            quant = .25;
+          }
+          itemBlocOnLineN.addToCart(
+            data,
+            quant,
+            widget.storeId,
+            double.tryParse(data['price']),
+          );
+
+          final snackBar = SnackBar(
+            content: Text('thanks for your order'),
+            duration: Duration(seconds: 3),
+          );
+          _scaffoldkey.currentState.showSnackBar(snackBar);
+        }
+      },
       child: Container(
         height: MediaQuery.of(context).size.height * .06,
         decoration: BoxDecoration(

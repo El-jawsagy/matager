@@ -77,12 +77,10 @@ bool switchLang(bool lang) {
   return true;
 }
 
-Widget loading(
-  BuildContext context,
-) {
+Widget loading(BuildContext context, double size) {
   return Container(
       width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height * 0.6,
+      height: MediaQuery.of(context).size.height * size,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
