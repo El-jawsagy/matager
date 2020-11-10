@@ -8,7 +8,6 @@ import 'package:matager/view/utilities/prefrences.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'controller/cart/cart_items_bloc_and_Api.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,7 +66,9 @@ class _MyAppState extends State<MyApp> {
           primaryColor: CustomColors.primary,
           appBarTheme: AppBarTheme(
             iconTheme: IconThemeData(color: CustomColors.whiteBG),
+
           ),
+
         ),
         localizationsDelegates: [
           AppLocale.delegate,

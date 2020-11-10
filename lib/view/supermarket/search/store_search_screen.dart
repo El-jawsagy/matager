@@ -1,129 +1,124 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:matager/controller/store/search_api.dart';
 import 'package:matager/lang/applocate.dart';
-import 'package:matager/view/supermarket/search/store_search_screen.dart';
-import 'package:matager/view/supermarket/store_comments.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
-import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/controller/store/home_api.dart';
+import '../display_supermarket.dart';
+import '../store_comments.dart';
 
-import 'display_supermarket.dart';
-
-class Markets extends StatefulWidget {
+class StoreSearchScreen extends SearchDelegate {
   int id;
-  String name;
+  double lat, lng;
   String token;
 
-  double latitude, longitude;
-
-  Markets(this.id, this.name, this.token, this.latitude, this.longitude);
+  StoreSearchScreen(this.id, this.lat, this.lng, this.token);
 
   @override
-  _MarketsState createState() => _MarketsState();
-}
-
-class _MarketsState extends State<Markets> {
-  MarketAndCategoryApi homePage;
-
-  @override
-  void initState() {
-    homePage = MarketAndCategoryApi();
-    super.initState();
+  ThemeData appBarTheme(BuildContext context) {
+    assert(context != null);
+    final ThemeData theme = Theme.of(context);
+    assert(theme != null);
+    return theme.copyWith(
+      primaryColor: CustomColors.primary,
+      primaryIconTheme:
+          theme.primaryIconTheme.copyWith(color: Colors.grey[200]),
+      primaryColorBrightness: Brightness.light,
+      primaryTextTheme: TextTheme(
+        headline1: TextStyle(color: CustomColors.whiteBG),
+        headline2: TextStyle(color: CustomColors.whiteBG),
+      ),
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: CustomColors.whiteBG,
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          widget.name,
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          textWidthBasis: TextWidthBasis.parent,
-        ),
-        elevation: 0,
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: StoreSearchScreen(
-                    widget.id, widget.latitude, widget.longitude,widget.token),
-              );
-            },
-            icon: Icon(
-              Icons.search,
-              color: CustomColors.whiteBG,
-            ),
-          ),
-        ],
-      ),
-      body: FutureBuilder(
-          future: homePage.getSingleCategory(
-              widget.id, widget.latitude, widget.longitude),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.none:
-                return emptyPage(context);
-                break;
-              case ConnectionState.waiting:
-              case ConnectionState.active:
-                return loading(context, 1);
-                break;
-              case ConnectionState.done:
-                if (snapshot.hasData) {
-                  return Container(
-                    child: ListView.builder(
+  // TODO: implement searchFieldLabel
+  String get searchFieldLabel => 'Search for Stores';
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+          icon: Icon(Icons.clear),
+          onPressed: () {
+            query = '';
+          })
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: () {
+          close(context, null);
+        });
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    SearchProductsAndStoresApi searchProductsAndStoresApi =
+        SearchProductsAndStoresApi();
+    return FutureBuilder(
+      future: searchProductsAndStoresApi.getStores(
+          query, this.id, this.lat, this.lng),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return emptyPage(context);
+            break;
+          case ConnectionState.waiting:
+          case ConnectionState.active:
+            return loading(context, 1);
+            break;
+          case ConnectionState.done:
+            if (snapshot.hasData) {
+              print(snapshot.data.length);
+              return snapshot.data.length >= 1
+                  ? ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       itemCount: snapshot.data.length,
                       padding: EdgeInsets.symmetric(horizontal: 8),
                       itemBuilder: (context, pos) {
                         Map map = snapshot.data[pos];
-                        return snapshot.data.length >= 1
-                            ? _drawCardOfStore(
-                                map,
-                              )
-                            : Container(
+                        return _drawCardOfStore(
+                          map,
+                        );
+                      },
+                    )
+                  : Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      child: Center(
+                        child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              child: Image.asset(
+                                "assets/images/box.jpg",
                                 width: MediaQuery.of(context).size.width,
                                 height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                                child: Center(
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        child: Image.asset(
-                                          "assets/images/box.jpg",
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.25,
-                                        ),
-                                      ),
-                                      Text(
-                                        AppLocale.of(context)
-                                            .getTranslated("category_dis"),
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20),
-                                      ),
-                                    ],
-                                  ),
-                                ));
-                      },
-                    ),
-                  );
-                } else
-                  return emptyPage(context);
-                break;
-            }
-            return emptyPage(context);
-          }),
+                                    MediaQuery.of(context).size.height * 0.25,
+                              ),
+                            ),
+                            Text(
+                              AppLocale.of(context)
+                                  .getTranslated("stores_dis"),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+            } else
+              return emptyPage(context);
+            break;
+        }
+        return emptyPage(context);
+      },
     );
   }
 
@@ -144,19 +139,19 @@ class _MarketsState extends State<Markets> {
                   children: [
                     InkWell(
                       onTap: () {
-                        print(widget.id);
+                        print(this.id);
                         print(data["name"]);
                         print(data["id"]);
 
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => DisplayMarket(
-                                widget.id,
+                                this.id,
                                 data["id"],
                                 data["name"],
-                                widget.token,
-                                widget.latitude,
-                                widget.longitude),
+                                this.token,
+                                this.lat,
+                                this.lng),
                           ),
                         );
                       },
@@ -338,5 +333,29 @@ class _MarketsState extends State<Markets> {
         );
       },
     );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "برجاء الانتظار...",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              CircularProgressIndicator(
+                backgroundColor: CustomColors.primary,
+              ),
+            ],
+          ),
+        ));
   }
 }

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:matager/controller/home_api.dart';
 import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/supermarket/search/product_search_screen.dart';
 import 'package:matager/view/user/cart/cart_offline.dart';
 import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
 
-import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/view/supermarket/offer/screen_of_offer.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/controller/store/home_api.dart';
 
+import 'offer/screen_of_offer.dart';
 import 'product/screen_of_proudect.dart';
 
 class DisplayMarket extends StatefulWidget {
@@ -51,7 +52,13 @@ class _DisplayMarketState extends State<DisplayMarket> {
           elevation: 0,
           actions: <Widget>[
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                showSearch(
+                  context: context,
+                  delegate: ProductSearchScreen(widget.marketId, widget.token,
+                      widget.latitude, widget.longitude),
+                );
+              },
               icon: Icon(
                 Icons.search,
                 color: CustomColors.whiteBG,

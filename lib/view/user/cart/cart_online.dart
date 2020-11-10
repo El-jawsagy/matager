@@ -9,9 +9,10 @@ import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../homepage.dart';
 import 'cart_check_out.dart';
 
-CartItemsBlocOn itemBlocOnLineN;
+CartItemsBlocOn itemBlocOnLineN = CartItemsBlocOn();
 
 class CartOnLineScreen extends StatefulWidget {
   double latitude, longitude;
@@ -30,112 +31,115 @@ class _CartOnLineScreenState extends State<CartOnLineScreen> {
 
   @override
   void initState() {
-    itemBlocOnLineN = CartItemsBlocOn();
+    itemBlocOnLineN.setToCart();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldkey,
-      appBar: AppBar(
-        elevation: 0,
-        title: Text(
-          AppLocale.of(context).getTranslated("drawer_cart"),
-          style: TextStyle(
-            color: CustomColors.whiteBG,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-          overflow: TextOverflow.visible,
-          textAlign: TextAlign.center,
-        ),
-        centerTitle: true,
-      ),
-      drawer: NavDrawer(widget.latitude, widget.longitude),
-      body: StreamBuilder(
-        stream: itemBlocOnLineN.getStream,
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-              return Center(
-                  child: Text(
-                AppLocale.of(context).getTranslated("lang") == 'English'
-                    ? "لم تختار أي عنصر حتى الآن"
-                    : "You haven't taken any item yet",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                ),
-              ));
-              break;
-            case ConnectionState.waiting:
-              print("i'm here waiting");
-              return loading(context, 1);
-
-              break;
-            case ConnectionState.active:
-            case ConnectionState.done:
-              print("i'm here done");
-
-              if (snapshot.hasData) {
-                allItems = snapshot.data;
-
-                return snapshot.data['cart_items'].length > 0
-                    ? Stack(
-                        children: [
-                          ListView.builder(
-                            itemBuilder: (context, index) {
-                              return _drawCardOfStore(
-                                  snapshot.data['cart_items'][index]);
-                            },
-                            itemCount: snapshot.data['cart_items'].length,
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              _drawCompleteOrder(snapshot.data['cart_items']),
-                              SizedBox(
-                                height: 50,
-                              )
-                            ],
-                          ),
-                        ],
-                      )
-                    : Center(
-                        child: Text(
-                        AppLocale.of(context).getTranslated("lang") == 'English'
-                            ? "لم تختار أي عنصر حتى الآن"
-                            : "You haven't taken any item yet",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                        ),
-                      ));
-              }
-              return Center(
-                  child: Text(
-                AppLocale.of(context).getTranslated("lang") == 'English'
-                    ? "لم تختار أي عنصر حتى الآن"
-                    : "You haven't taken any item yet",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                ),
-              ));
-              break;
-          }
-          return Center(
-              child: Text(
-            AppLocale.of(context).getTranslated("lang") == 'English'
-                ? "لم تختار أي عنصر حتى الآن"
-                : "You haven't taken any item yet",
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+        key: _scaffoldkey,
+        appBar: AppBar(
+          elevation: 0,
+          title: Text(
+            AppLocale.of(context).getTranslated("drawer_cart"),
             style: TextStyle(
-              fontWeight: FontWeight.bold,
+              color: CustomColors.whiteBG,
               fontSize: 22,
+              fontWeight: FontWeight.bold,
             ),
-          ));
-        },
+            overflow: TextOverflow.visible,
+            textAlign: TextAlign.center,
+          ),
+          centerTitle: true,
+        ),
+        drawer: NavDrawer(widget.latitude, widget.longitude),
+        body: StreamBuilder(
+          stream: itemBlocOnLineN.getStream,
+          builder: (context, snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+                return Center(
+                    child: Text(
+                  AppLocale.of(context).getTranslated("lang") == 'English'
+                      ? "لم تختار أي عنصر حتى الآن"
+                      : "You haven't taken any item yet",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                  ),
+                ));
+                break;
+              case ConnectionState.waiting:
+                print("i'm here waiting");
+                return loading(context, 1);
+
+                break;
+              case ConnectionState.active:
+              case ConnectionState.done:
+                print("i'm here done");
+
+                if (snapshot.hasData) {
+                  allItems = snapshot.data;
+
+                  return snapshot.data['cart_items'].length > 0
+                      ? Stack(
+                          children: [
+                            ListView.builder(
+                              itemBuilder: (context, index) {
+                                return _drawCardOfStore(
+                                    snapshot.data['cart_items'][index]);
+                              },
+                              itemCount: snapshot.data['cart_items'].length,
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                _drawCompleteOrder(snapshot.data['cart_items']),
+                                SizedBox(
+                                  height: 50,
+                                )
+                              ],
+                            ),
+                          ],
+                        )
+                      : Center(
+                          child: Text(
+                          AppLocale.of(context).getTranslated("lang") == 'English'
+                              ? "لم تختار أي عنصر حتى الآن"
+                              : "You haven't taken any item yet",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ));
+                }
+                return Center(
+                    child: Text(
+                  AppLocale.of(context).getTranslated("lang") == 'English'
+                      ? "لم تختار أي عنصر حتى الآن"
+                      : "You haven't taken any item yet",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                  ),
+                ));
+                break;
+            }
+            return Center(
+                child: Text(
+              AppLocale.of(context).getTranslated("lang") == 'English'
+                  ? "لم تختار أي عنصر حتى الآن"
+                  : "You haven't taken any item yet",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+              ),
+            ));
+          },
+        ),
       ),
     );
   }
@@ -453,7 +457,10 @@ class _CartOnLineScreenState extends State<CartOnLineScreen> {
       ],
     );
   }
-
+  Future<bool> _onBackPressed() {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => HomeScreen()));
+  }
   @override
   void dispose() {
     itemBlocOnLineN.upgradeUserCart();

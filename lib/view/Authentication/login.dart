@@ -148,6 +148,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _drawEditText(IconData icon, String boxName, String validatorText,
       double titleTextSize) {
+    Pattern pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    RegExp regex = new RegExp(pattern);
     return Container(
       width: MediaQuery.of(context).size.width * 0.85,
       child: TextFormField(
@@ -170,6 +173,10 @@ class _LoginScreenState extends State<LoginScreen> {
         validator: (onValue) {
           if (onValue.isEmpty) {
             return validatorText;
+          } else {
+            if (!(regex.hasMatch(onValue))) {
+              return "Invalid Email";
+            }
           }
           return null;
         },
@@ -378,8 +385,6 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailTextController.dispose();
     super.dispose();
   }
-
-
 
   Future<bool> _onBackPressed() {
     Navigator.pushReplacement(

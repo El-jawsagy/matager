@@ -13,7 +13,7 @@ class CartItemsBlocOff {
     SharedPreferences.getInstance().then((value) async {
       SharedPreferences pref = value;
       var data = await json.decode(pref.getString("cart"));
-      if (data != null) {
+      if (data != null || data != "null") {
         this.allItems = {
           'cart_items': data['cart_items'],
         };

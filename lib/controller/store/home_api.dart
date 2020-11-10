@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:matager/view/utilities/api_paths.dart';
+import 'package:matager/controller/utilities/api_paths.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MarketAndCategoryApi {
-
   Future<List> getSliderImages() async {
     String url = ApiPaths.sliderImage;
     var response = await http.get(
@@ -43,7 +43,8 @@ class MarketAndCategoryApi {
   }
 
   Future<Map> getSingleMarket(matgerId) async {
-    String url = ApiPaths.singleStore(matgerId);
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String url = ApiPaths.singleStore(matgerId, pref.get("UserId"));
     var response = await http.get(
       url,
     );
@@ -55,7 +56,9 @@ class MarketAndCategoryApi {
   }
 
   Future<List> getSingleMarketSubcategory(matgerId, categoryId) async {
-    String url = ApiPaths.storeSubCategory(matgerId, categoryId);
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String url =
+        ApiPaths.storeSubCategory(matgerId, categoryId, pref.get("UserId"));
     var response = await http.get(
       url,
     );
@@ -67,10 +70,28 @@ class MarketAndCategoryApi {
   }
 
   Future<List> getSingleMarketCategoryProducts(matgerId, categoryId) async {
-    String url = ApiPaths.storeSubCategoryProduct(matgerId, categoryId);
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String url = ApiPaths.storeSubCategoryProduct(
+        matgerId, categoryId, pref.get("UserId"));
     var response = await http.get(
       url,
     );
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      return data['data'];
+    }
+    return null;
+  }
+
+  Future<Map> getSingleProduct(productId) async {
+    String url = ApiPaths.singleProduct(
+      productId,
+    );
+    var response = await http.get(
+      url,
+    );
+    print(response.body);
+
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
       return data['data'];

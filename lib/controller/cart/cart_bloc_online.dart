@@ -13,7 +13,7 @@ class CartItemsBlocOn {
   CardMethodApi cardMethodApi = CardMethodApi();
 
   CartItemsBlocOn() {
-    setToCart();
+
   }
 
   /// The [cartOnlineStreamController] is an object of the StreamController class

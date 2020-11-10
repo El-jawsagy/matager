@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:http/http.dart' as http;
+import 'package:matager/controller/utilities/api_paths.dart';
 import 'package:matager/view/user/cart/cart_online.dart';
-import 'package:matager/view/utilities/api_paths.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrdersApi {
@@ -53,6 +53,22 @@ class OrdersApi {
         }
         return data['data'];
       }
+    }
+  }
+
+  Future<List> getOrdersItems() async {
+    print("i'm here get Items");
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String url = ApiPaths.getOrders(pref.get("UserId"));
+    Map<String, String> auth = {
+      'Authorization': "Bearer " + pref.getString("token"),
+    };
+    var response = await http.get(url, headers: auth);
+    print(response.body);
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      return data["data"];
     }
   }
 }

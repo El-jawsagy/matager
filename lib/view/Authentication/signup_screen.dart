@@ -6,7 +6,6 @@ import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
 
-import '../homepage.dart';
 import 'login.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -91,19 +90,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         children: <Widget>[
                           _drawLogo(),
                           SizedBox(
-                              height: MediaQuery.of(context).size.height * .012),
+                              height:
+                                  MediaQuery.of(context).size.height * .012),
                           _drawFirstName(signUpProperties.editTextSize),
                           SizedBox(
-                              height: MediaQuery.of(context).size.height * .012),
+                              height:
+                                  MediaQuery.of(context).size.height * .012),
                           _drawLastName(signUpProperties.editTextSize),
                           SizedBox(
-                              height: MediaQuery.of(context).size.height * .012),
+                              height:
+                                  MediaQuery.of(context).size.height * .012),
+                          _drawPhone(signUpProperties.editTextSize),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * .012),
                           _drawEmail(signUpProperties.editTextSize),
                           SizedBox(
-                              height: MediaQuery.of(context).size.height * .012),
+                              height:
+                                  MediaQuery.of(context).size.height * .012),
                           _drawPasswordEditText(signUpProperties.editTextSize),
                           SizedBox(
-                              height: MediaQuery.of(context).size.height * .012),
+                              height:
+                                  MediaQuery.of(context).size.height * .012),
                           _drawConfPasswordEditText(
                               signUpProperties.editTextSize),
                           SizedBox(
@@ -212,7 +220,45 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  Widget _drawPhone(double textSize) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.85,
+      child: TextFormField(
+        controller: _phoneEditingText,
+        decoration: InputDecoration(
+          labelText: AppLocale.of(context).getTranslated("email"),
+          labelStyle: TextStyle(
+            fontSize: textSize,
+          ),
+          suffixIcon: Icon(
+            Icons.phone,
+            color: CustomColors.dark,
+          ),
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: CustomColors.dark,
+            ),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: CustomColors.dark,
+            ),
+          ),
+        ),
+        validator: (onValue) {
+          if (onValue.isEmpty) {
+            return AppLocale.of(context).getTranslated("wrong");
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
   Widget _drawEmail(double textSize) {
+    Pattern pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    RegExp regex = new RegExp(pattern);
     return Container(
       width: MediaQuery.of(context).size.width * 0.85,
       child: TextFormField(
@@ -240,6 +286,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
         validator: (onValue) {
           if (onValue.isEmpty) {
             return AppLocale.of(context).getTranslated("wrong");
+          } else {
+            if (!(regex.hasMatch(onValue))) {
+              return "Invalid Email";
+            }
           }
           return null;
         },
@@ -447,7 +497,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return InkWell(
       onTap: () {
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => LoginScreen(widget.latitude, widget.longitude)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  LoginScreen(widget.latitude, widget.longitude)),
         );
       },
       child: Row(

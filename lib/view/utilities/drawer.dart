@@ -2,19 +2,25 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:matager/controller/Authentication_api.dart';
+import 'package:matager/controller/store/home_api.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/Authentication/login.dart';
 import 'package:matager/view/user/cart/cart_offline.dart';
 import 'package:matager/view/user/cart/cart_online.dart';
-import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/view/user/address/address.dart';
-import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/view/user/favorite/favorite.dart';
-import 'package:matager/view/user/order.dart';
+import 'package:matager/view/user/updata_profile.dart';
 import 'package:matager/view/utilities/prefrences.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/view/user/address/address.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/view/user/favorite/favorite.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/view/user/orders/order.dart';
 
+import '../about_us.dart';
+import '../contact_us.dart';
 import '../homepage.dart';
+import '../terms_of_use.dart';
 
 class NavDrawer extends StatefulWidget {
   double lat, lng;
@@ -90,8 +96,8 @@ class _NavDrawerState extends State<NavDrawer> {
                                           CrossAxisAlignment.start,
                                       children: <Widget>[
                                         Container(
-                                          width: 60,
-                                          height: 60,
+                                          width: 75,
+                                          height: 75,
                                           decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               border: Border.all(width: 0.4)),
@@ -120,7 +126,7 @@ class _NavDrawerState extends State<NavDrawer> {
                                                     fit: BoxFit.cover,
                                                   ),
                                           ),
-                                        ),
+                                        ),SizedBox(width: 8,),
                                         Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -128,7 +134,7 @@ class _NavDrawerState extends State<NavDrawer> {
                                             Padding(
                                               padding: const EdgeInsets.all(5),
                                               child: Text(
-                                                name,
+                                                name == null ? "" : name,
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 16,
@@ -138,9 +144,9 @@ class _NavDrawerState extends State<NavDrawer> {
                                             Padding(
                                               padding: const EdgeInsets.all(5),
                                               child: Text(
-                                                email,
+                                                email == null ? "" : email,
                                                 style: TextStyle(
-                                                    fontSize: 12,
+                                                    fontSize: 14,
                                                     color: Colors.white),
                                               ),
                                             ),
@@ -211,26 +217,28 @@ class _NavDrawerState extends State<NavDrawer> {
                             Icons.arrow_forward_ios, () {
                           Navigator.pop(context);
 
-                          Navigator.push(
+                          Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      FavoriteScreen(widget.lat, widget.lng)));
+                                  builder: (context) => FavoriteOnLineScreen(
+                                      widget.lat, widget.lng)));
                         }),
                         menuDrawer(
                             Icons.shopping_cart,
                             AppLocale.of(context).getTranslated('drawer_cart'),
                             Icons.arrow_forward_ios, () {
-                          if (token == null) {                              Navigator.pop(context);
+                          if (token == null) {
+                            Navigator.pop(context);
 
-                          Navigator.push(
+                            Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => CartOffLineScreen(
                                         widget.lat, widget.lng)));
-                          } else {                              Navigator.pop(context);
+                          } else {
+                            Navigator.pop(context);
 
-                          Navigator.push(
+                            Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => CartOnLineScreen(
@@ -238,16 +246,18 @@ class _NavDrawerState extends State<NavDrawer> {
                           }
                         }),
                         menuDrawer(
-                            Icons.shopping_bag,
-                            AppLocale.of(context).getTranslated('drawer_order'),
-                            Icons.arrow_forward_ios, () {
-                              Navigator.pop(context);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      OrderScreen(widget.lat, widget.lng)));
-                        }),
+                          Icons.shopping_bag,
+                          AppLocale.of(context).getTranslated('drawer_order'),
+                          Icons.arrow_forward_ios,
+                          () {
+                            Navigator.pop(context);
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        OrderScreen(widget.lat, widget.lng)));
+                          },
+                        ),
                         menuDrawer(
                             Icons.location_on,
                             AppLocale.of(context)
@@ -255,7 +265,7 @@ class _NavDrawerState extends State<NavDrawer> {
                             Icons.arrow_forward_ios, () {
                           Navigator.pop(context);
 
-                          Navigator.push(
+                          Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
@@ -267,26 +277,40 @@ class _NavDrawerState extends State<NavDrawer> {
                             Icons.arrow_forward_ios, () {
                           Navigator.pop(context);
 
-                          // Navigator.pushReplacement(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //         builder: (context) => HomeScreen()));
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => AboutUsScreen()));
                         }),
+                        (!snapshot.hasData)
+                            ? Container()
+                            : menuDrawer(
+                                Icons.settings,
+                                AppLocale.of(context)
+                                    .getTranslated('drawer_update'),
+                                Icons.arrow_forward_ios, () async {
+                                Authentication auth = Authentication();
+                                await auth.getUser(snapshot.data).then((value) {
+                                  Navigator.pop(context);
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              UpdateProfileScreen(
+                                                  value, snapshot.data)));
+                                });
+                              }),
                         menuDrawer(
                             FontAwesomeIcons.fileAlt,
                             AppLocale.of(context).getTranslated('drawer_terms'),
                             Icons.arrow_forward_ios, () {
                           Navigator.pop(context);
 
-                          // Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //         builder: (context) =>
-                          //             AddressScreen(widget.lat, widget.lng)));
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TermsOfUseScreen()));
                         }),
-                        SizedBox(
-                          height: 30,
-                        ),
                         (!snapshot.hasData)
                             ? Container()
                             : menuDrawer(
@@ -297,10 +321,17 @@ class _NavDrawerState extends State<NavDrawer> {
                                 SharedPreferences prefs =
                                     await SharedPreferences.getInstance();
                                 prefs.setString("token", null);
-                                setState(() {});
+                                prefs.setString("cart", null);
+                                prefs.setString("favorite", null);
+
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => HomeScreen()));
                               }),
                         Padding(
-                          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                          padding: const EdgeInsets.only(
+                              top: 8, left: 8.0, right: 8.0),
                           child: ListTile(
                               contentPadding:
                                   EdgeInsets.only(right: 10, left: 10),
@@ -354,24 +385,25 @@ class _NavDrawerState extends State<NavDrawer> {
                       ),
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        menuDrawerBottom(
-                          Icons.feedback,
-                          AppLocale.of(context).getTranslated("drawer_feed"),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Container(
-                          width: 1,
-                          height: 30,
-                          color: Colors.grey[300],
-                        ),
-                        menuDrawerBottom(
-                          Icons.help,
-                          AppLocale.of(context).getTranslated("drawer_help"),
-                        ),
+                        menuDrawerBottom(Icons.feedback,
+                            AppLocale.of(context).getTranslated("drawer_feed"),
+                            () async {
+                          MarketAndCategoryApi homePage =
+                              MarketAndCategoryApi();
+                          await homePage.getAllCategory().then((value) {
+                            Navigator.pop(context);
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ContactUsScreen(
+                                          value,
+                                          AppLocale.of(context)
+                                              .getTranslated("lang"),
+                                        )));
+                          });
+                        }),
                       ],
                     ),
                   ],
@@ -410,11 +442,11 @@ class _NavDrawerState extends State<NavDrawer> {
     );
   }
 
-  Widget menuDrawerBottom(leading, title) {
+  Widget menuDrawerBottom(leading, title, function) {
     return Container(
       width: 145,
       child: ListTile(
-        onTap: () {},
+        onTap: function,
         dense: true,
         leading: Icon(
           leading,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:matager/controller/Favorite/favorite_items_and_api.dart';
 import 'package:matager/controller/cart/cart_bloc_off.dart';
 import 'package:matager/controller/cart/cart_items_bloc_and_Api.dart';
 import 'package:matager/lang/applocate.dart';
@@ -25,10 +26,13 @@ class TabScreenOfOffer extends StatefulWidget {
 
 class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
   CardMethodApi cardMethodApi;
+  FavoriteMethodAPI favoriteMethodAPI;
 
   @override
   void initState() {
     cardMethodApi = CardMethodApi();
+    favoriteMethodAPI = FavoriteMethodAPI();
+
     super.initState();
   }
 
@@ -73,151 +77,196 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
   }
 
   Widget _drawCardOfStore(Map data) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 6),
-      width: MediaQuery.of(context).size.width * 0.4,
-      height: MediaQuery.of(context).size.height * 0.6,
-      child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => DisplayMarketItemDetails(
-                  data, widget.token, widget.latitude, widget.longitude)));
-        },
-        child: Stack(
-          children: <Widget>[
-            Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(7.0),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(7),
-                          topRight: Radius.circular(7),
-                        ),
-                        child: (data["image"] == null)
-                            ? Image.asset(
-                                "assets/images/boxImage.png",
-                              )
-                            : Image(
-                                width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height * .2,
-                                loadingBuilder: (context, image,
-                                    ImageChunkEvent loadingProgress) {
-                                  if (loadingProgress == null) {
-                                    return image;
-                                  }
-                                  return Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                },
-                                image: NetworkImage(data["image"], scale: 1.0),
-                                fit: BoxFit.contain,
-                              ),
-                      ),
-                      Text(
-                        AppLocale.of(context).getTranslated("lang") == 'English'
-                            ? data["name_ar"]
-                            : data["name_en"],
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                      ),
-                      Text.rich(
-                        TextSpan(
-                          children: <TextSpan>[
+    ValueNotifier<int> favoriteNotifier;
+    favoriteNotifier = ValueNotifier(data["favourite"]);
+
+    return ValueListenableBuilder(
+      valueListenable: favoriteNotifier,
+      builder: (BuildContext context, int value, Widget child) {
+        return Container(
+          margin: EdgeInsets.symmetric(vertical: 6),
+          width: MediaQuery.of(context).size.width * 0.4,
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => DisplayMarketItemDetails(
+                      data, widget.token, widget.latitude, widget.longitude)));
+            },
+            child: Stack(
+              children: <Widget>[
+                Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(7.0),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(7),
+                              topRight: Radius.circular(7),
+                            ),
+                            child: (data["image"] == null)
+                                ? Image.asset(
+                                    "assets/images/boxImage.png",
+                                  )
+                                : Image(
+                                    width: MediaQuery.of(context).size.width,
+                                    height:
+                                        MediaQuery.of(context).size.height * .2,
+                                    loadingBuilder: (context, image,
+                                        ImageChunkEvent loadingProgress) {
+                                      if (loadingProgress == null) {
+                                        return image;
+                                      }
+                                      return Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    },
+                                    image:
+                                        NetworkImage(data["image"], scale: 1.0),
+                                    fit: BoxFit.contain,
+                                  ),
+                          ),
+                          Text(
+                            AppLocale.of(context).getTranslated("lang") ==
+                                    'English'
+                                ? data["name_ar"]
+                                : data["name_en"],
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                          ),
+                          Text.rich(
                             TextSpan(
-                              text:
-                                  " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                              style: new TextStyle(
-                                color: Colors.red,
-                                decoration: TextDecoration.lineThrough,
-                              ),
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text:
+                                      " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                  style: new TextStyle(
+                                    color: Colors.red,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: " ",
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                new TextSpan(
+                                  text:
+                                      " ${data["offer_price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                  style: new TextStyle(
+                                    color: CustomColors.primary,
+                                  ),
+                                ),
+                              ],
                             ),
-                            TextSpan(
-                              text: " ",
-                              style: TextStyle(
-                                color: Colors.red,
-                              ),
-                            ),
-                            new TextSpan(
-                              text:
-                                  " ${data["offer_price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                              style: new TextStyle(
-                                color: CustomColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
+                      _drawAddToCartButton(data, widget.token),
                     ],
                   ),
-                  _drawAddToCartButton(data, widget.token),
-                ],
-              ),
-            ),
-            Opacity(
-              opacity: 0.8,
-              child: Container(
-                width: 50,
-                height: 25,
-                margin: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                    color: CustomColors.primary,
-                    borderRadius: BorderRadius.circular(7)),
-                child: Center(
-                    child: Text(
-                  " ${data["discount"]} %",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: Colors.white),
-                )),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  width: 50,
-                  height: 25,
-                  margin: EdgeInsets.all(12),
-                  child: Center(
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.favorite_border,
-                        color: Colors.black,
-                      ),
-                      onPressed: () async {
-                        SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
-                        var token = prefs.getString("token");
-                        if (token == null) {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginScreen(
-                                      widget.latitude, widget.longitude)));
-                        }
-                      },
-                    ),
+                ),
+                Opacity(
+                  opacity: 0.8,
+                  child: Container(
+                    width: 50,
+                    height: 25,
+                    margin: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                        color: CustomColors.primary,
+                        borderRadius: BorderRadius.circular(7)),
+                    child: Center(
+                        child: Text(
+                      " ${data["discount"]} %",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.white),
+                    )),
                   ),
                 ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 25,
+                      margin: EdgeInsets.all(12),
+                      child: Center(
+                        child: IconButton(
+                          icon: Icon(
+                            favoriteNotifier.value == 0
+                                ? Icons.favorite_border
+                                : Icons.favorite,
+                            color: Colors.black,
+                          ),
+                          onPressed: () async {
+                            SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
+                            var token = prefs.getString("token");
+                            if (token == null) {
+                              Navigator.pop(context);
+
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => LoginScreen(
+                                          widget.latitude, widget.longitude)));
+                            } else {
+                              if (favoriteNotifier.value == 0) {
+                                favoriteMethodAPI
+                                    .addToFavorite(
+                                  data['id'],
+                                  widget.subMarketId,
+                                )
+                                    .then((value) {
+                                  final snackBar = SnackBar(
+                                    content: Text(
+                                        'Product added to your favorites list'),
+                                    duration: Duration(seconds: 3),
+                                  );
+                                  Scaffold.of(context).showSnackBar(snackBar);
+                                });
+
+                                favoriteNotifier.value == 1;
+                              } else if (favoriteNotifier.value == 1) {
+                                favoriteMethodAPI
+                                    .removeFavorite(data["id"])
+                                    .then((value) {
+                                  final snackBar = SnackBar(
+                                    content: Text(
+                                        'Product removed from your favorites list'),
+                                    duration: Duration(seconds: 3),
+                                  );
+                                  Scaffold.of(context).showSnackBar(snackBar);
+                                });
+                                favoriteNotifier.value == 1;
+                              }
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                )
               ],
-            )
-          ],
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 

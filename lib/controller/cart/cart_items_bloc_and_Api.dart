@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:http/http.dart' as http;
-import 'package:matager/view/utilities/api_paths.dart';
+import 'package:matager/controller/utilities/api_paths.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cart_bloc_off.dart';
