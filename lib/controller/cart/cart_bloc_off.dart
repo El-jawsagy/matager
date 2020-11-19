@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:matager/view/homepage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CartItemsBlocOff {
@@ -90,6 +91,7 @@ class CartItemsBlocOff {
 
       pref.setString("cart", data);
     });
+    countOfProducts.value = allItems['cart_items'].length;
     cartOffLineStreamController.sink.add(allItems);
   }
 
@@ -186,6 +188,7 @@ class CartItemsBlocOff {
       var data = json.encode(allItems);
       pref.setString("cart", data);
     });
+    countOfProducts.value = allItems['cart_items'].length;
     cartOffLineStreamController.sink.add(allItems);
   }
 

@@ -11,14 +11,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class TabScreenOfOffer extends StatefulWidget {
   List map;
+  String status;
   String marketName;
   int subMarketId;
   String token;
-
   double latitude, longitude;
+  double nameSize;
+  double iconSize;
 
-  TabScreenOfOffer(this.map, this.subMarketId, this.marketName, this.token,
-      this.latitude, this.longitude);
+  TabScreenOfOffer(
+    this.map,
+    this.status,
+    this.subMarketId,
+    this.marketName,
+    this.token,
+    this.latitude,
+    this.longitude,
+    this.nameSize,
+    this.iconSize,
+  );
 
   @override
   _TabScreenOfOfferState createState() => _TabScreenOfOfferState();
@@ -47,8 +58,7 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
             // Generate 100 widgets that display their index in the List.
             children: List.generate(widget.map.length, (index) {
               return _drawCardOfStore(
-                widget.map[index],
-              );
+                  widget.map[index], widget.nameSize, widget.iconSize);
             }),
             childAspectRatio: .6,
           )
@@ -76,7 +86,7 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
           );
   }
 
-  Widget _drawCardOfStore(Map data) {
+  Widget _drawCardOfStore(Map data, double nameSize, iconSize) {
     ValueNotifier<int> favoriteNotifier;
     favoriteNotifier = ValueNotifier(data["favourite"]);
 
@@ -91,7 +101,11 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => DisplayMarketItemDetails(
-                      data, widget.token, widget.latitude, widget.longitude)));
+                      data,
+                      widget.status,
+                      widget.token,
+                      widget.latitude,
+                      widget.longitude)));
             },
             child: Stack(
               children: <Widget>[
@@ -151,7 +165,7 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
                               children: <TextSpan>[
                                 TextSpan(
                                   text:
-                                      " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                      " ${data["oldprice"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                                   style: new TextStyle(
                                     color: Colors.red,
                                     decoration: TextDecoration.lineThrough,
@@ -165,7 +179,7 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
                                 ),
                                 new TextSpan(
                                   text:
-                                      " ${data["offer_price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                      " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                                   style: new TextStyle(
                                     color: CustomColors.primary,
                                   ),
@@ -175,7 +189,9 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
                           ),
                         ],
                       ),
-                      _drawAddToCartButton(data, widget.token),
+                      widget.status == "غير متاح"
+                          ? _drawStoreClose(nameSize, iconSize)
+                          : _drawAddToCartButton(data, widget.token),
                     ],
                   ),
                 ),
@@ -234,10 +250,18 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
                                 )
                                     .then((value) {
                                   final snackBar = SnackBar(
-                                    content: Text(
-                                        'Product added to your favorites list'),
-                                    duration: Duration(seconds: 3),
-                                  );
+                                      backgroundColor:
+                                          CustomColors.greenLightBG,
+                                      content: Text(
+                                        AppLocale.of(context)
+                                                    .getTranslated("lang") ==
+                                                'English'
+                                            ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                                            : 'Hello: The product has been added to the cart with success.. ',
+                                        style: TextStyle(
+                                            color: CustomColors.greenLightFont),
+                                      ));
+
                                   Scaffold.of(context).showSnackBar(snackBar);
                                 });
 
@@ -247,10 +271,18 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
                                     .removeFavorite(data["id"])
                                     .then((value) {
                                   final snackBar = SnackBar(
-                                    content: Text(
-                                        'Product removed from your favorites list'),
-                                    duration: Duration(seconds: 3),
-                                  );
+                                      backgroundColor:
+                                          CustomColors.greenLightBG,
+                                      content: Text(
+                                        AppLocale.of(context)
+                                                    .getTranslated("lang") ==
+                                                'English'
+                                            ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                                            : 'Hello: The product has been added to the cart with success.. ',
+                                        style: TextStyle(
+                                            color: CustomColors.greenLightFont),
+                                      ));
+
                                   Scaffold.of(context).showSnackBar(snackBar);
                                 });
                                 favoriteNotifier.value == 1;
@@ -283,9 +315,13 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
           itemBlocOffLine.addToCart(
               data, quant, widget.subMarketId, double.tryParse(data['price']));
           final snackBar = SnackBar(
-            content: Text('thanks for your order'),
-            duration: Duration(seconds: 3),
-          );
+              backgroundColor: CustomColors.greenLightBG,
+              content: Text(
+                AppLocale.of(context).getTranslated("lang") == 'English'
+                    ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                    : 'Hello: The product has been added to the cart with success.. ',
+                style: TextStyle(color: CustomColors.greenLightFont),
+              ));
           Scaffold.of(context).showSnackBar(snackBar);
         } else {
           var quant;
@@ -298,9 +334,13 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
               data, quant, widget.subMarketId, double.tryParse(data['price']));
 
           final snackBar = SnackBar(
-            content: Text('thanks for your order'),
-            duration: Duration(seconds: 3),
-          );
+              backgroundColor: CustomColors.greenLightBG,
+              content: Text(
+                AppLocale.of(context).getTranslated("lang") == 'English'
+                    ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                    : 'Hello: The product has been added to the cart with success.. ',
+                style: TextStyle(color: CustomColors.greenLightFont),
+              ));
           Scaffold.of(context).showSnackBar(snackBar);
         }
       },
@@ -332,6 +372,64 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _drawStoreClose(
+    nameSize,
+    iconSize,
+  ) {
+    return InkWell(
+      //todo:add to cart offline or online
+      onTap: () async {
+        final snackBar = SnackBar(
+            backgroundColor: CustomColors.ratingLightBG,
+            content: Text(
+              AppLocale.of(context).getTranslated("lang") == 'English'
+                  ? "مرحباُ : ناسف هذا المتجر مغلق الان.."
+                  : 'Hello: Sorry, this store is now closed ..',
+              style: TextStyle(color: CustomColors.ratingLightFont),
+            ));
+
+        Scaffold.of(context).showSnackBar(snackBar);
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height * .04,
+        decoration: BoxDecoration(
+          color: CustomColors.primary,
+          boxShadow: [
+            BoxShadow(
+              color: CustomColors.whiteBG,
+              blurRadius: .75,
+              spreadRadius: .75,
+              offset: Offset(0.0, 0.0),
+            )
+          ],
+          borderRadius: BorderRadius.circular(7),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Icon(
+                Icons.shopping_cart,
+                color: CustomColors.whiteBG,
+                size: iconSize,
+              ),
+              Text(
+                AppLocale.of(context).getTranslated("add_cart"),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: nameSize,
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),

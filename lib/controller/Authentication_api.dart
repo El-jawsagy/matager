@@ -41,7 +41,7 @@ class Authentication {
     }
   }
 
-  Future signUp(name, lastName, phone, email, password) async {
+  Future<String> signUp(name, lastName, phone, email, password) async {
     String url = ApiPaths.signUp;
 
     Map<String, dynamic> postBody = {
@@ -61,7 +61,7 @@ class Authentication {
         setName(name + '' + lastName);
       }
 
-      return data['data'];
+      return data['data']["token"];
     }
   }
 

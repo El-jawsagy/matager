@@ -124,6 +124,7 @@ class _CheckLocationState extends State<CheckLocation> {
                           style: TextStyle(
                             color: CustomColors.whiteBG,
                           ),
+                          textAlign: TextAlign.center,
                         ),
                         color: CustomColors.primary,
                       ),

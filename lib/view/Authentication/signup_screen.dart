@@ -6,6 +6,7 @@ import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
 
+import '../homepage.dart';
 import 'login.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -18,7 +19,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final _signUpKey = GlobalKey<FormState>();
+   final _signUpKey = GlobalKey<FormState>();
 
   Authentication authentication = Authentication();
 
@@ -226,7 +227,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       child: TextFormField(
         controller: _phoneEditingText,
         decoration: InputDecoration(
-          labelText: AppLocale.of(context).getTranslated("email"),
+          labelText: AppLocale.of(context).getTranslated("phone"),
           labelStyle: TextStyle(
             fontSize: textSize,
           ),
@@ -441,18 +442,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   _emailEditingText.text)
               .then((value) {
             switch (value) {
-              case "email wrong":
-                showDialogWidget("make sure of email ", context);
+              case "email exist":
+                showDialogWidget("email is already exist ", context);
                 break;
-
+              case "phone exist":
+                showDialogWidget("phone is already exist ", context);
+                break;
               case "password wrong":
                 showDialogWidget("make sure of password ", context);
                 break;
 
               default:
+                print(value);
                 if (value.length > 100) {
-                  // Navigator.pushReplacement(context,
-                  //     MaterialPageRoute(builder: (context) => HomeScreen()));
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()));
                 } else
                   showDialogWidget("we have an error", context);
                 break;

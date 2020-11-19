@@ -53,7 +53,10 @@ class _TermsOfUseScreenState extends State<TermsOfUseScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               FutureBuilder(
-                  future: aboutUsAPI.getTermsOfUse(),
+                  future: aboutUsAPI.getTermsOfUse(
+                      AppLocale.of(context).getTranslated("lang") == "English"
+                          ? "ar"
+                          : "en"),
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     switch (snapshot.connectionState) {
                       case ConnectionState.none:

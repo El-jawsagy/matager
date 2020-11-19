@@ -20,7 +20,8 @@ class UpdateProfileScreen extends StatefulWidget {
 }
 
 class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> _profileScaffoldKey =
+      new GlobalKey<ScaffoldState>();
 
   Authentication authentication;
   TextEditingController _firstNameEditingText;
@@ -57,7 +58,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
-        key: _scaffoldkey,
+        key: _profileScaffoldKey,
         backgroundColor: CustomColors.grayThree,
         appBar: AppBar(
           centerTitle: true,
@@ -506,12 +507,16 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               .then((value) {
             if (value == "true") {
               final snackBar = SnackBar(
-                  content: Text(
-                      AppLocale.of(context).getTranslated("lang") == 'English'
-                          ? "تم تحديث معلوماتك"
-                          : 'Your information has been updated'));
+                backgroundColor: CustomColors.greenLightBG,
+                content: Text(
+                  AppLocale.of(context).getTranslated("lang") == 'English'
+                      ? "تم تحديث معلوماتك"
+                      : 'Your information has been updated',
+                  style: TextStyle(color: CustomColors.greenLightFont),
+                ),
+              );
 
-              _scaffoldkey.currentState.showSnackBar(snackBar);
+              _profileScaffoldKey.currentState.showSnackBar(snackBar);
             }
           });
         }

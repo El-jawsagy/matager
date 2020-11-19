@@ -13,6 +13,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: CustomColors.primary,
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -21,13 +22,14 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
+              _drawTextGetLocation(),
               Container(
                   child: Column(
                 children: [
                   _drawLogo(),
                 ],
               )),
-              _drawLoginButton(18),
+              _drawLoginButton(34),
             ],
           ),
         ),
@@ -48,12 +50,16 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   Widget _drawTextGetLocation() {
     return Text(
-      AppLocale.of(context).getTranslated("your_loc"),
+      AppLocale.of(context).getTranslated("lang") == "English"
+          ? "كل طلباتك... وانت فى بيتك"
+          : "All your requests ... while you are at home",
       maxLines: 3,
       style: TextStyle(
         fontWeight: FontWeight.bold,
-        fontSize: 18,
+        fontSize: 24,
+        color: CustomColors.whiteBG,
       ),
+      textAlign: TextAlign.center,
     );
   }
 
@@ -75,12 +81,12 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         height: MediaQuery.of(context).size.height * .07,
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: [
-            CustomColors.primary,
-            CustomColors.primary,
+            CustomColors.blueThree,
+            CustomColors.blueThree,
           ]),
           boxShadow: [
             BoxShadow(
-              color: CustomColors.whiteBG,
+              color: CustomColors.primary,
               blurRadius: .75,
               spreadRadius: .75,
               offset: Offset(0.0, 0.0),
@@ -90,11 +96,12 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         ),
         child: Center(
           child: Text(
-            AppLocale.of(context).getTranslated("start"),
+            "START",
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w400,
               fontSize: textButtonSize,
+              letterSpacing: 2,
               color: Colors.white,
             ),
           ),

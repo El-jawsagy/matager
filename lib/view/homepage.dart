@@ -1,43 +1,79 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/controller/store/home_api.dart';
+import 'package:matager/controller/cart/cart_items_bloc_and_Api.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/get_location.dart';
 import 'package:matager/view/supermarket/market.dart';
 import 'package:matager/view/user/cart/cart_offline.dart';
 import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/drawer.dart';
+import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/controller/store/home_api.dart';
+
 //todo: make cart choice between before login and after that
+ValueNotifier<int> countOfProducts = ValueNotifier(0);
+
+void getCounterProduct() {
+  SharedPreferences.getInstance().then((SharedPreferences value) {
+    SharedPreferences prefs = value;
+    int count = 0;
+
+    if (prefs.get("token") == null) {
+      String data = prefs.getString("cart");
+      if (data != null) {
+        var cart = json.decode(prefs.getString("cart"));
+        if (cart != null || cart != "null") {
+          print(cart);
+          count =
+              cart['cart_items'].length == null ? 0 : cart['cart_items'].length;
+          countOfProducts.value = count;
+        } else {
+          countOfProducts.value = count;
+        }
+      } else {
+        countOfProducts.value = count;
+      }
+    } else {
+      getCount().then((value) {
+        countOfProducts.value = value;
+      });
+    }
+  });
+}
 
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
+ final GlobalKey<ScaffoldState> homePageScaffoldKey =
+    new GlobalKey<ScaffoldState>();
+
 class _HomeScreenState extends State<HomeScreen> {
   MarketAndCategoryApi homePage;
 
   double latitude, longitude;
-
   String locationDetails, token;
-  PageController _controller;
   ValueNotifier<double> posOfProducts;
+  CarouselController _controller;
 
   @override
   void initState() {
-    posOfProducts = ValueNotifier(1);
-    _controller = PageController(
-        initialPage: posOfProducts.value.floor(), viewportFraction: 1);
+    posOfProducts = ValueNotifier(0);
+    _controller = CarouselController();
     homePage = MarketAndCategoryApi();
     SharedPreferences.getInstance().then((SharedPreferences value) {
       SharedPreferences prefs = value;
+
       latitude = prefs.getDouble("lat");
       longitude = prefs.getDouble("lng");
       print(latitude);
@@ -51,40 +87,60 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    getCounterProduct();
+    DetectedScreen detectedScreen = DetectedScreen(context);
+    HomePageSize homePageSize = HomePageSize(detectedScreen);
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
+        key: homePageScaffoldKey,
         backgroundColor: CustomColors.whiteBG,
         appBar: AppBar(
-          title: Text(
-            AppLocale.of(context).getTranslated("app_name"),
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            textWidthBasis: TextWidthBasis.parent,
-            textAlign: TextAlign.right,
-          ),
+          title: Image.asset(AppLocale.of(context).getTranslated("image")),
           centerTitle: true,
           elevation: 0,
           actions: <Widget>[
-            IconButton(
-              onPressed: () {
-                print(token);
-                if (token == null) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              CartOffLineScreen(latitude, longitude)));
-                } else {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              CartOnLineScreen(latitude, longitude)));
-                }
+            ValueListenableBuilder(
+              valueListenable: countOfProducts,
+              builder: (BuildContext context, int value, Widget child) {
+                return Stack(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                              color: CustomColors.red, shape: BoxShape.circle),
+                          child: Text(countOfProducts.value.toString()),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      iconSize: homePageSize.iconHeaderSize,
+                      onPressed: () {
+                        print(token);
+                        if (token == null) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      CartOffLineScreen(latitude, longitude)));
+                        } else {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      CartOnLineScreen(latitude, longitude)));
+                        }
+                      },
+                      icon: Icon(
+                        Icons.shopping_cart,
+                      ),
+                    ),
+                  ],
+                );
               },
-              icon: Icon(
-                Icons.shopping_cart,
-              ),
             ),
           ],
           bottom: PreferredSize(
@@ -112,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           maxLines: 2,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: homePageSize.nameSize,
                             color: CustomColors.whiteBG,
                           ),
                           textAlign: TextAlign.center,
@@ -125,6 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       FaIcon(
                         FontAwesomeIcons.mapMarkerAlt,
                         color: CustomColors.whiteBG,
+                        size: homePageSize.iconSize,
                       )
                     ],
                   ),
@@ -155,8 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         case ConnectionState.done:
                           if (snapshot.hasData) {
                             return _drawSlider(
-                              snapshot.data,
-                            );
+                                snapshot.data, homePageSize.iconSize);
                           } else
                             return emptyPage(context);
                           break;
@@ -164,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return emptyPage(context);
                     }),
               ),
-              _drawTextMataget(),
+              _drawTextMataget(homePageSize.headerTextSize),
               Container(
                 child: FutureBuilder(
                     future: homePage.getAllCategory(),
@@ -187,9 +243,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 itemCount: snapshot.data.length,
                                 padding: EdgeInsets.symmetric(horizontal: 8),
                                 itemBuilder: (context, pos) {
-                                  return _drawCardOfStore(
-                                    snapshot.data[pos],
-                                  );
+                                  return _drawCardOfStore(snapshot.data[pos],
+                                      homePageSize.iconSize);
                                 },
                               ),
                             );
@@ -208,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 // draw slider image for offer and last images
-  Widget _drawSlider(List images) {
+  Widget _drawSlider(List images, fontSize) {
     return ValueListenableBuilder(
         valueListenable: posOfProducts,
         builder: (BuildContext context, double value, Widget child) {
@@ -217,11 +272,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * .25,
-                child: PageView.builder(
-                  controller: _controller,
-                  onPageChanged: (val) {
-                    posOfProducts.value = val.floorToDouble();
-                  },
+                child: CarouselSlider.builder(
+                  carouselController: _controller,
+                  itemCount: images.length,
                   itemBuilder: (BuildContext context, int index) {
                     String image =
                         AppLocale.of(context).getTranslated("lang") == 'English'
@@ -245,11 +298,19 @@ class _HomeScreenState extends State<HomeScreen> {
                               image: NetworkImage(
                                 image,
                               ),
-                              fit: BoxFit.contain,
+                              width: MediaQuery.of(context).size.width,
+                              fit: BoxFit.fitWidth,
                             ),
                     );
                   },
-                  itemCount: images.length,
+                  options: CarouselOptions(
+                    autoPlayCurve: Curves.easeInOut,
+                    autoPlay: true,
+                    enlargeCenterPage: true,
+                    autoPlayAnimationDuration: Duration(seconds: 3),
+                    viewportFraction: 1,
+                    initialPage: 0,
+                  ),
                 ),
               ),
               Container(
@@ -261,6 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Opacity(
                           opacity: 0.7,
@@ -283,12 +345,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: CustomColors.primary,
                                 borderRadius: BorderRadius.circular(7),
                               ),
-                              child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Icon(
-                                    Icons.arrow_back_ios,
-                                    color: CustomColors.whiteBG,
-                                  )),
+                              child: Icon(
+                                Icons.arrow_back_ios,
+                                color: CustomColors.whiteBG,
+                                size: fontSize,
+                              ),
                             ),
                           ),
                         ),
@@ -313,12 +374,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: CustomColors.primary,
                                 borderRadius: BorderRadius.circular(7),
                               ),
-                              child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: CustomColors.whiteBG,
-                                  )),
+                              child: Center(
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: CustomColors.whiteBG,
+                                  size: fontSize,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -332,18 +394,18 @@ class _HomeScreenState extends State<HomeScreen> {
         });
   }
 
-  Widget _drawTextMataget() {
+  Widget _drawTextMataget(fontSize) {
     return Text(
       AppLocale.of(context).getTranslated("app_name"),
       style: TextStyle(
-          fontSize: 28,
+          fontSize: fontSize,
           fontWeight: FontWeight.w600,
           color: CustomColors.primary),
     );
   }
 
   // display category of all stores
-  Widget _drawCardOfStore(Map map) {
+  Widget _drawCardOfStore(Map map, iconSize) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 4),
       width: MediaQuery.of(context).size.width * 0.9,
@@ -414,6 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Icon(
                               Icons.shopping_cart,
                               color: CustomColors.whiteBG,
+                              size: iconSize,
                             ),
                           ),
                         ),

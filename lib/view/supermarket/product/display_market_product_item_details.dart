@@ -6,20 +6,23 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
 import 'package:matager/controller/cart/cart_bloc_off.dart';
 import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/homepage.dart';
 import 'package:matager/view/user/cart/cart_offline.dart';
 import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/drawer.dart';
+import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/theme.dart';
 
 class DisplayMarketItemDetails extends StatefulWidget {
   Map map;
   int marketId;
   String token;
-
+  String status;
   double latitude, longitude;
 
   DisplayMarketItemDetails(
     this.map,
+    this.status,
     this.token,
     this.latitude,
     this.longitude,
@@ -35,7 +38,8 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
   TextEditingController _counterController;
   double pos;
   ValueNotifier<double> posOfProducts;
-  final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> _marketProductScaffoldKey =
+      new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -54,8 +58,10 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
 
   @override
   Widget build(BuildContext context) {
+    DetectedScreen detectedScreen = DetectedScreen(context);
+    ProductSize productSize = ProductSize(detectedScreen);
     return Scaffold(
-      key: _scaffoldkey,
+      key: _marketProductScaffoldKey,
       drawer: NavDrawer(widget.latitude, widget.longitude),
       appBar: AppBar(
         elevation: 0,
@@ -63,7 +69,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
           widget.map["store_name"],
           style: TextStyle(
             color: CustomColors.whiteBG,
-            fontSize: 22,
+            fontSize: productSize.headerTextSize,
             fontWeight: FontWeight.bold,
           ),
           overflow: TextOverflow.visible,
@@ -71,25 +77,46 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
         ),
         centerTitle: true,
         actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              if (widget.token == null) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CartOffLineScreen(
-                            widget.latitude, widget.longitude)));
-              } else {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CartOnLineScreen(
-                            widget.latitude, widget.longitude)));
-              }
+          ValueListenableBuilder(
+            valueListenable: countOfProducts,
+            builder: (BuildContext context, int value, Widget child) {
+              return Stack(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                            color: CustomColors.red, shape: BoxShape.circle),
+                        child: Text(countOfProducts.value.toString()),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      print(widget.token);
+                      if (widget.token == null) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CartOffLineScreen(
+                                    widget.latitude, widget.longitude)));
+                      } else {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CartOnLineScreen(
+                                    widget.latitude, widget.longitude)));
+                      }
+                    },
+                    icon: Icon(
+                      Icons.shopping_cart,
+                    ),
+                  ),
+                ],
+              );
             },
-            icon: Icon(
-              Icons.shopping_cart,
-            ),
           ),
         ],
       ),
@@ -104,8 +131,9 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
               decorator: DotsDecorator(
                 color: Colors.grey,
                 activeColor: CustomColors.primary,
-                size: const Size.square(10.0),
-                activeSize: const Size(20.0, 10.0),
+                size: Size.square(productSize.dotsSize),
+                activeSize:
+                    Size(productSize.dotsSize * 2.0, productSize.dotsSize),
                 activeShape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5.0)),
               ),
@@ -119,7 +147,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                   : widget.map["name_en"],
               style: TextStyle(
                 color: CustomColors.primary,
-                fontSize: 22,
+                fontSize: productSize.nameSize,
                 fontWeight: FontWeight.bold,
               ),
               overflow: TextOverflow.visible,
@@ -134,13 +162,30 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
               color: Colors.grey[300],
             ),
           ),
-          _drawItemDescription(),
-          _drawPrice(),
-          _drawCounterRow(posOfProducts.value),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _drawAddToCartButton(posOfProducts, widget.token),
-          )
+          _drawItemDescription(productSize.nameSize),
+          _drawPrice(productSize.nameSize),
+          _drawCounterRow(
+            posOfProducts.value,
+            productSize.nameSize,
+            productSize.iconSize,
+          ),
+          widget.status == "غير متاح"
+              ? Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: _drawStoreClose(
+                    productSize.nameSize,
+                    productSize.iconSize,
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: _drawAddToCartButton(
+                    posOfProducts,
+                    widget.token,
+                    productSize.nameSize,
+                    productSize.iconSize,
+                  ),
+                )
         ],
       ),
     );
@@ -190,7 +235,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
     );
   }
 
-  Widget _drawPrice() {
+  Widget _drawPrice(size) {
     return Padding(
       padding: EdgeInsets.only(left: 24, right: 24, top: 8),
       child: Row(
@@ -201,7 +246,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
             style: TextStyle(
                 color: CustomColors.primary,
                 fontWeight: FontWeight.bold,
-                fontSize: 24),
+                fontSize: size),
           ),
           SizedBox(
             width: 5,
@@ -212,20 +257,20 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                     children: <TextSpan>[
                       TextSpan(
                         text:
-                            " ${widget.map["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                            " ${widget.map["oldprice"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                         style: new TextStyle(
                             color: CustomColors.red,
                             decoration: TextDecoration.lineThrough,
-                            fontSize: 18),
+                            fontSize: size),
                       ),
                       TextSpan(
                         text: " ",
                       ),
                       new TextSpan(
                         text:
-                            " ${widget.map["offer_price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                            " ${widget.map["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                         style: new TextStyle(
-                            color: CustomColors.primary, fontSize: 24),
+                            color: CustomColors.primary, fontSize: size),
                       ),
                     ],
                   )
@@ -235,7 +280,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                         text:
                             " ${widget.map["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                         style: new TextStyle(
-                            color: CustomColors.red, fontSize: 24),
+                            color: CustomColors.red, fontSize: size),
                       ),
                     ],
                   ),
@@ -245,29 +290,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
     );
   }
 
-  Widget _drawDescriptionText() {
-    return (widget.map["content_ar"] == null &&
-            widget.map["content_en"] == null)
-        ? Container()
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.only(left: 24, right: 24, top: 8),
-                width: MediaQuery.of(context).size.width,
-                child: Text(
-                  AppLocale.of(context).getTranslated("details"),
-                  style: TextStyle(
-                      color: CustomColors.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24),
-                ),
-              ),
-            ],
-          );
-  }
-
-  Widget _drawItemDescription() {
+  Widget _drawItemDescription(size) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -285,11 +308,11 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
             //Optional parameters:
             style: {
               "div": Style(
-                  fontSize: FontSize(20),
+                  fontSize: FontSize(size),
                   textDecorationStyle: TextDecorationStyle.double,
                   fontWeight: FontWeight.w600),
               "p": Style(
-                  fontSize: FontSize(18),
+                  fontSize: FontSize(size),
                   textDecorationStyle: TextDecorationStyle.double,
                   fontWeight: FontWeight.w600),
             },
@@ -299,7 +322,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
     );
   }
 
-  Widget _drawCounterRow(double count) {
+  Widget _drawCounterRow(double count, nameSize, iconSize) {
     return ValueListenableBuilder(
       valueListenable: posOfProducts,
       builder: (BuildContext context, double value, Widget child) {
@@ -310,7 +333,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
             children: <Widget>[
               IconButton(
                   highlightColor: Colors.red,
-                  iconSize: 36,
+                  iconSize: iconSize,
                   icon: Icon(Icons.add),
                   onPressed: () {
                     posOfProducts.value = widget.map["unit"] == "0"
@@ -327,7 +350,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                   backgroundCursorColor: Colors.black,
                   style: TextStyle(
                       color: Colors.black,
-                      fontSize: 22,
+                      fontSize: nameSize,
                       fontWeight: FontWeight.bold),
                   cursorColor: Colors.black,
                   textAlign: TextAlign.center,
@@ -341,7 +364,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
               posOfProducts.value > 0
                   ? IconButton(
                       highlightColor: Colors.red,
-                      iconSize: 36,
+                      iconSize: iconSize,
                       icon: Icon(Icons.remove, color: CustomColors.dark),
                       onPressed: () {
                         if (posOfProducts.value > 0) {
@@ -356,7 +379,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                   : Icon(
                       Icons.remove,
                       color: CustomColors.darkOne,
-                      size: 36,
+                      size: iconSize,
                     ),
             ],
           ),
@@ -365,7 +388,12 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
     );
   }
 
-  Widget _drawAddToCartButton(ValueNotifier<double> quantity, token) {
+  Widget _drawAddToCartButton(
+    ValueNotifier<double> quantity,
+    token,
+    nameSize,
+    iconSize,
+  ) {
     return Container(
       padding: EdgeInsets.all(16),
       width: MediaQuery.of(context).size.width * .8,
@@ -387,29 +415,44 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
         onTap: () async {
           if (quantity.value == 0) {
             final snackBar = SnackBar(
-              content: Text("Sorry put you can't add 0 quantity of product "),
-              duration: Duration(seconds: 3),
-            );
-            _scaffoldkey.currentState.showSnackBar(snackBar);
+                backgroundColor: CustomColors.ratingLightBG,
+                content: Text(
+                  AppLocale.of(context).getTranslated("lang") == 'English'
+                      ? "مرحباُ :آسف ولكن لا يمكنك إضافة 0 كمية من المنتج.."
+                      : "Hello: Sorry but you can't add 0 quantity of product..",
+                  style: TextStyle(color: CustomColors.ratingLightFont),
+                ));
+
+            _marketProductScaffoldKey.currentState.showSnackBar(snackBar);
           } else {
             if (token == null) {
               itemBlocOffLine.addToCart(widget.map, quantity.value,
                   widget.marketId, double.tryParse(widget.map["price"]));
               final snackBar = SnackBar(
-                content: Text('thanks for your order'),
-                duration: Duration(seconds: 3),
-              );
-              _scaffoldkey.currentState.showSnackBar(snackBar);
+                  backgroundColor: CustomColors.greenLightBG,
+                  content: Text(
+                    AppLocale.of(context).getTranslated("lang") == 'English'
+                        ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                        : 'Hello: The product has been added to the cart with success.. ',
+                    style: TextStyle(color: CustomColors.greenLightFont),
+                  ));
+
+              _marketProductScaffoldKey.currentState.showSnackBar(snackBar);
             } else {
               print(quantity.value);
               itemBlocOnLineN.addToCart(widget.map, quantity.value,
                   widget.marketId, double.tryParse(widget.map["price"]));
 
               final snackBar = SnackBar(
-                content: Text('thanks for your order'),
-                duration: Duration(seconds: 3),
-              );
-              _scaffoldkey.currentState.showSnackBar(snackBar);
+                  backgroundColor: CustomColors.greenLightBG,
+                  content: Text(
+                    AppLocale.of(context).getTranslated("lang") == 'English'
+                        ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                        : 'Hello: The product has been added to the cart with success.. ',
+                    style: TextStyle(color: CustomColors.greenLightFont),
+                  ));
+
+              _marketProductScaffoldKey.currentState.showSnackBar(snackBar);
             }
           }
         },
@@ -420,13 +463,72 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
               Icon(
                 Icons.shopping_cart,
                 color: CustomColors.whiteBG,
-                size: 30,
+                size: iconSize,
               ),
               Text(
                 AppLocale.of(context).getTranslated("add_cart"),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: nameSize,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _drawStoreClose(
+    nameSize,
+    iconSize,
+  ) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      width: MediaQuery.of(context).size.width * .8,
+      height: MediaQuery.of(context).size.height * .1,
+      decoration: BoxDecoration(
+        color: CustomColors.primary,
+        boxShadow: [
+          BoxShadow(
+            color: CustomColors.whiteBG,
+            blurRadius: .75,
+            spreadRadius: .75,
+            offset: Offset(0.0, 0.0),
+          )
+        ],
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: InkWell(
+        //todo:add to cart offline or online
+        onTap: () async {
+          final snackBar = SnackBar(
+              backgroundColor: CustomColors.ratingLightBG,
+              content: Text(
+                AppLocale.of(context).getTranslated("lang") == 'English'
+                    ? "مرحباُ : ناسف هذا المتجر مغلق الان.."
+                    : 'Hello: Sorry, this store is now closed ..',
+                style: TextStyle(color: CustomColors.ratingLightFont),
+              ));
+
+          _marketProductScaffoldKey.currentState.showSnackBar(snackBar);
+        },
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Icon(
+                Icons.shopping_cart,
+                color: CustomColors.whiteBG,
+                size: iconSize,
+              ),
+              Text(
+                AppLocale.of(context).getTranslated("add_cart"),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: nameSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),

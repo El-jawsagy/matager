@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:matager/controller/store/search_api.dart';
 import 'package:matager/lang/applocate.dart';
-import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
-import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 import '../display_supermarket.dart';
 import '../store_comments.dart';
@@ -61,65 +60,6 @@ class StoreSearchScreen extends SearchDelegate {
   Widget buildResults(BuildContext context) {
     SearchProductsAndStoresApi searchProductsAndStoresApi =
         SearchProductsAndStoresApi();
-    return FutureBuilder(
-      future: searchProductsAndStoresApi.getStores(
-          query, this.id, this.lat, this.lng),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.none:
-            return emptyPage(context);
-            break;
-          case ConnectionState.waiting:
-          case ConnectionState.active:
-            return loading(context, 1);
-            break;
-          case ConnectionState.done:
-            if (snapshot.hasData) {
-              print(snapshot.data.length);
-              return snapshot.data.length >= 1
-                  ? ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: snapshot.data.length,
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      itemBuilder: (context, pos) {
-                        Map map = snapshot.data[pos];
-                        return _drawCardOfStore(
-                          map,
-                        );
-                      },
-                    )
-                  : Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      child: Center(
-                        child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              child: Image.asset(
-                                "assets/images/box.jpg",
-                                width: MediaQuery.of(context).size.width,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.25,
-                              ),
-                            ),
-                            Text(
-                              AppLocale.of(context)
-                                  .getTranslated("stores_dis"),
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 20),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-            } else
-              return emptyPage(context);
-            break;
-        }
-        return emptyPage(context);
-      },
-    );
   }
 
   Widget _drawCardOfStore(Map data) {
@@ -148,6 +88,7 @@ class StoreSearchScreen extends SearchDelegate {
                             builder: (context) => DisplayMarket(
                                 this.id,
                                 data["id"],
+                                data["shipping_time"],
                                 data["name"],
                                 this.token,
                                 this.lat,
@@ -279,18 +220,21 @@ class StoreSearchScreen extends SearchDelegate {
                               ),
                             ),
                           ),
-                          SmoothStarRating(
-                              allowHalfRating: false,
-                              onRated: (v) {},
-                              starCount: 5,
-                              rating: double.parse(data["rate"].toString()),
-                              size: 20.0,
-                              isReadOnly: true,
-                              filledIconData: Icons.star,
-                              defaultIconData: Icons.star_border,
+                          RatingBar.builder(
+                            ignoreGestures: true,
+                            initialRating: data["rate"],
+                            direction: Axis.horizontal,
+                            allowHalfRating: false,
+                            itemCount: 5,
+                            itemSize: 20.0,
+                            itemBuilder: (context, _) => Icon(
+                              Icons.star,
                               color: CustomColors.ratingBG,
-                              borderColor: CustomColors.gray,
-                              spacing: 0.0)
+                            ),
+                            onRatingUpdate: (rating) {
+                              print(rating);
+                            },
+                          ),
                         ],
                       ),
                     )

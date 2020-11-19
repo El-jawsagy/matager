@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:matager/controller/orders_api.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/supermarket/product/display_order_product_item_details.dart';
+import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/theme.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
@@ -15,23 +18,30 @@ class OrderDetailsScreen extends StatefulWidget {
 }
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
+  OrdersApi ordersApi;
+  static final GlobalKey<ScaffoldState> orderScaffoldKey =
+      new GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
+    ordersApi = OrdersApi();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    print("this is ${widget.data}");
-
-    return Scaffold(backgroundColor: CustomColors.whiteBG,
+    DetectedScreen detectedScreen = DetectedScreen(context);
+    OrderDetailsSize orderDetailsSize = OrderDetailsSize(detectedScreen);
+    return Scaffold(
+      key: orderScaffoldKey,
+      backgroundColor: CustomColors.whiteBG,
       appBar: AppBar(
         elevation: 0,
         title: Text(
           AppLocale.of(context).getTranslated("order_details"),
           style: TextStyle(
             color: CustomColors.whiteBG,
-            fontSize: 22,
+            fontSize: orderDetailsSize.headerTextSize,
             fontWeight: FontWeight.bold,
           ),
           overflow: TextOverflow.visible,
@@ -57,7 +67,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: CustomColors.primary,
-                          fontSize: 22,
+                          fontSize: orderDetailsSize.nameSize,
                         ),
                         maxLines: 1,
                         textAlign: TextAlign.center,
@@ -72,7 +82,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: CustomColors.gray,
-                          fontSize: 18,
+                          fontSize: orderDetailsSize.nameSize,
                         ),
                         maxLines: 1,
                         textAlign: TextAlign.center,
@@ -81,7 +91,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       ),
                     ],
                   ),
-                  if (widget.data["status"] == 0)
+                  if (widget.data["status"] == 2)
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Container(
@@ -90,7 +100,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         decoration: BoxDecoration(
                             border: Border.all(color: Color(0xff3898FF))),
                         child: InkWell(
-                          // onTap: ,
+                          onTap: showMaterialDialog,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -102,18 +112,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xff3898FF),
-                                  fontSize: 16,
+                                  fontSize: orderDetailsSize.nameSize,
                                 ),
                                 maxLines: 1,
                                 textAlign: TextAlign.center,
                                 overflow: TextOverflow.ellipsis,
                                 softWrap: true,
                               ),
-
                               FaIcon(
                                 FontAwesomeIcons.solidStar,
                                 color: Color(0xff3898FF),
-                                size: 16,
+                                size: orderDetailsSize.iconSize,
                               )
                             ],
                           ),
@@ -126,10 +135,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               ),
             ),
             _drawHeadrLine(
-                AppLocale.of(context).getTranslated("lang") == 'English'
-                    ? "بيانات المشترى :"
-                    : "Customer's data :",
-                FontAwesomeIcons.info),
+              AppLocale.of(context).getTranslated("lang") == 'English'
+                  ? "بيانات المشترى :"
+                  : "Customer's data :",
+              FontAwesomeIcons.info,
+              orderDetailsSize.nameSize,
+              orderDetailsSize.iconSize,
+            ),
             _drawBodyItemLine(
               AppLocale.of(context).getTranslated("lang") == 'English'
                   ? "الاسم بالكامل :"
@@ -137,6 +149,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               widget.data["user"]['name'].toString(),
               1,
               FontAwesomeIcons.userAlt,
+              orderDetailsSize.nameSize,
+              orderDetailsSize.iconSize,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
@@ -146,7 +160,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   FaIcon(
                     FontAwesomeIcons.mapMarkerAlt,
                     color: CustomColors.dark,
-                    size: 14,
+                    size: orderDetailsSize.iconSize,
                   ),
                   SizedBox(
                     width: 6,
@@ -158,7 +172,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: CustomColors.dark,
-                      fontSize: 18,
+                      fontSize: orderDetailsSize.nameSize,
                     ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
@@ -169,11 +183,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   Container(
                     width: MediaQuery.of(context).size.width * 0.55,
                     child: Text(
-                      widget.data["address_details"],
+                      widget.data["address"] == null
+                          ? ""
+                          : widget.data["address_details"],
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
                         color: CustomColors.dark,
-                        fontSize: 16,
+                        fontSize: orderDetailsSize.nameSize,
                       ),
                       maxLines: 3,
                     ),
@@ -185,31 +201,45 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               AppLocale.of(context).getTranslated("lang") == 'English'
                   ? " رقم الموبيل :"
                   : "mobile number :",
-              widget.data["address"]['phone'].toString(),
+              widget.data["address"] == null
+                  ? ""
+                  : widget.data["address"]['phone'].toString(),
               1,
               FontAwesomeIcons.mobileAlt,
+              orderDetailsSize.nameSize,
+              orderDetailsSize.iconSize,
             ),
             _drawBodyItemLine(
               AppLocale.of(context).getTranslated("lang") == 'English'
                   ? "رقم الهاتف الارضى :"
                   : "telephone phone number :",
-              widget.data["address"]['telephone'].toString(),
+              widget.data["address"] == null
+                  ? ""
+                  : widget.data["address"]['telephone'].toString(),
               1,
               FontAwesomeIcons.phone,
+              orderDetailsSize.nameSize,
+              orderDetailsSize.iconSize,
             ),
             _drawBodyItemLine(
               AppLocale.of(context).getTranslated("lang") == 'English'
                   ? "المدينة :"
                   : "city :",
-              widget.data["address"]['city'].toString(),
+              widget.data["address"] == null
+                  ? ""
+                  : widget.data["address"]['city'].toString(),
               1,
               FontAwesomeIcons.home,
+              orderDetailsSize.nameSize,
+              orderDetailsSize.iconSize,
             ),
             _drawHeadrLine(
               AppLocale.of(context).getTranslated("lang") == 'English'
                   ? "بيانات المتجر :"
                   : "Store data :",
               FontAwesomeIcons.info,
+              orderDetailsSize.nameSize,
+              orderDetailsSize.iconSize,
             ),
             _drawBodyItemLine(
               AppLocale.of(context).getTranslated("lang") == 'English'
@@ -218,6 +248,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               widget.data['storename'].toString(),
               1,
               FontAwesomeIcons.userAlt,
+              orderDetailsSize.nameSize,
+              orderDetailsSize.iconSize,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
@@ -228,7 +260,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   FaIcon(
                     FontAwesomeIcons.creditCard,
                     color: CustomColors.primary,
-                    size: 14,
+                    size: orderDetailsSize.iconSize,
                   ),
                   SizedBox(
                     width: 6,
@@ -240,7 +272,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: CustomColors.primary,
-                      fontSize: 18,
+                      fontSize: orderDetailsSize.nameSize,
                     ),
                     maxLines: 1,
                     textAlign: TextAlign.center,
@@ -258,7 +290,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
                         color: CustomColors.dark,
-                        fontSize: 16,
+                        fontSize: orderDetailsSize.nameSize,
                       ),
                       maxLines: 3,
                       textAlign: TextAlign.center,
@@ -276,7 +308,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   FaIcon(
                     FontAwesomeIcons.calendarDay,
                     color: CustomColors.primary,
-                    size: 14,
+                    size: orderDetailsSize.iconSize,
                   ),
                   SizedBox(
                     width: 6,
@@ -288,7 +320,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: CustomColors.primary,
-                      fontSize: 16,
+                      fontSize: orderDetailsSize.nameSize,
                     ),
                     maxLines: 1,
                     textAlign: TextAlign.center,
@@ -304,7 +336,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
                         color: CustomColors.dark,
-                        fontSize: 14,
+                        fontSize: orderDetailsSize.nameSize,
                       ),
                       maxLines: 1,
                       textAlign: TextAlign.center,
@@ -324,18 +356,24 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     widget.data["products_names"][index],
                     widget.data["quantities"][index],
                     widget.data["prices"][index],
-                    widget.data["storename"]);
+                    widget.data["storename"],
+                    orderDetailsSize.nameSize);
               },
               itemCount: widget.data["products_id"].length,
             ),
-            _drawPrice(),
+            _drawPrice(orderDetailsSize.nameSize),
           ],
         ),
       ),
     );
   }
 
-  Widget _drawHeadrLine(String type, IconData iconData) {
+  Widget _drawHeadrLine(
+    String type,
+    IconData iconData,
+    iconSize,
+    nameSize,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: Row(
@@ -344,7 +382,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           FaIcon(
             iconData,
             color: CustomColors.primary,
-            size: 14,
+            size: iconSize,
           ),
           SizedBox(
             width: 4,
@@ -354,7 +392,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: CustomColors.primary,
-              fontSize: 22,
+              fontSize: nameSize,
             ),
             maxLines: 1,
             textAlign: TextAlign.center,
@@ -366,7 +404,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     );
   }
 
-  Widget _drawBodyItemLine(String title, value, int lines, IconData iconData) {
+  Widget _drawBodyItemLine(
+    String title,
+    value,
+    int lines,
+    IconData iconData,
+    nameSize,
+    iconSize,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
       child: Container(
@@ -377,7 +422,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             FaIcon(
               iconData,
               color: CustomColors.dark,
-              size: 14,
+              size: iconSize,
             ),
             SizedBox(
               width: 6,
@@ -387,7 +432,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: CustomColors.dark,
-                fontSize: 18,
+                fontSize: nameSize,
               ),
               maxLines: 1,
               textAlign: TextAlign.center,
@@ -398,12 +443,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               width: 5,
             ),
             Container(
+              width: MediaQuery.of(context).size.width * 0.4,
               child: Text(
                 value,
                 style: TextStyle(
                   fontWeight: FontWeight.w400,
                   color: CustomColors.dark,
-                  fontSize: 16,
+                  fontSize: nameSize,
                 ),
                 maxLines: lines,
                 textAlign: TextAlign.center,
@@ -416,16 +462,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Widget _drawCardOfStore(
-    id,
-    image,
-    name,
-    quantity,
-    price,
-    storeName,
-  ) {
+      id, image, name, quantity, price, storeName, nameSize) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 2),
-      height: MediaQuery.of(context).size.height * 0.13,
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -450,8 +489,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     height: 50,
                     child: ClipRRect(
                       borderRadius: BorderRadius.all(
-                           Radius.circular(7),
-                          ),
+                        Radius.circular(7),
+                      ),
                       child: (image == null)
                           ? Image.asset(
                               "assets/images/boxImage.png",
@@ -475,22 +514,24 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   ),
                   Column(
                     children: [
-                      Text(
-                        name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 14,
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        child: Text(
+                          name,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            fontSize: nameSize,
+                          ),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.visible,
+                          softWrap: true,
                         ),
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            height: MediaQuery.of(context).size.height * 0.03,
+                            width: MediaQuery.of(context).size.width * 0.3,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -499,9 +540,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                       .getTranslated("quantity"),
                                   style: TextStyle(
                                     fontWeight: FontWeight.w400,
-                                    fontSize: 16,
+                                    fontSize: nameSize,
                                   ),
-                                  maxLines: 1,
                                   textAlign: TextAlign.center,
                                   overflow: TextOverflow.ellipsis,
                                   softWrap: true,
@@ -513,9 +553,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                   quantity,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                    fontSize: nameSize,
                                   ),
-                                  maxLines: 1,
                                   textAlign: TextAlign.center,
                                   overflow: TextOverflow.ellipsis,
                                   softWrap: true,
@@ -524,8 +563,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                             ),
                           ),
                           Container(
-                            height: MediaQuery.of(context).size.height * 0.03,
-                            width: MediaQuery.of(context).size.width * 0.5,
+                            width: MediaQuery.of(context).size.width * 0.3,
                             child: Center(
                               child: Text.rich(
                                 TextSpan(
@@ -535,6 +573,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                           " ${price.toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                                       style: new TextStyle(
                                         color: CustomColors.red,
+                                        fontSize: nameSize,
                                       ),
                                     ),
                                   ],
@@ -546,7 +585,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       ),
                       Container(
                         padding: EdgeInsets.symmetric(vertical: 2),
-                        height: MediaQuery.of(context).size.height * 0.04,
+                        width: MediaQuery.of(context).size.width * 0.5,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -554,9 +593,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                               AppLocale.of(context).getTranslated("seller"),
                               style: TextStyle(
                                 fontWeight: FontWeight.w400,
-                                fontSize: 16,
+                                fontSize: nameSize,
                               ),
-                              maxLines: 1,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
                               softWrap: true,
@@ -564,16 +602,18 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                             SizedBox(
                               width: 10,
                             ),
-                            Text(
-                              storeName,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              child: Text(
+                                storeName,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: nameSize,
+                                ),
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.visible,
+                                softWrap: true,
                               ),
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              softWrap: true,
                             ),
                           ],
                         ),
@@ -589,7 +629,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     );
   }
 
-  Widget _drawPrice() {
+  Widget _drawPrice(nameSize) {
+    print(widget.data["coupon_id"]);
+
     return Container(
       decoration: BoxDecoration(color: CustomColors.whiteBG, boxShadow: [
         BoxShadow(
@@ -611,7 +653,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 children: [
                   Text(
                     AppLocale.of(context).getTranslated("sub_total"),
-                    style: TextStyle(fontSize: 16, color: CustomColors.grayOne),
+                    style: TextStyle(
+                        fontSize: nameSize, color: CustomColors.grayOne),
                     maxLines: 1,
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
@@ -621,12 +664,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     width: 10,
                   ),
                   Text(
-                    (double.tryParse(widget.data["total_price"]) -
-                            widget.data["shipping_cost"])
-                        .toString(),
+                    widget.data["coupon_id"] == null
+                        ? "${(double.tryParse(widget.data["total_price"]) - widget.data["shipping_cost"]).toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}"
+                        : "${((double.tryParse(widget.data["total_price"]) + widget.data["coupon_disc"]) - widget.data["shipping_cost"]).toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: nameSize,
                     ),
                     maxLines: 1,
                     textAlign: TextAlign.center,
@@ -636,6 +679,41 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 ],
               ),
             ),
+            widget.data["coupon_id"] != null
+                ? Container(
+                    padding: const EdgeInsets.all(2),
+                    width: MediaQuery.of(context).size.width,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          AppLocale.of(context).getTranslated("cart_discount"),
+                          style: TextStyle(
+                              fontSize: nameSize,
+                              color: CustomColors.greenLightFont),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          "${widget.data["coupon_disc"].toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: nameSize,
+                          ),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                        ),
+                      ],
+                    ),
+                  )
+                : Container(),
             Container(
               padding: const EdgeInsets.all(2),
               height: MediaQuery.of(context).size.height * 0.04,
@@ -645,7 +723,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 children: [
                   Text(
                     AppLocale.of(context).getTranslated("shipping_cost"),
-                    style: TextStyle(fontSize: 16, color: CustomColors.grayOne),
+                    style: TextStyle(
+                        fontSize: nameSize, color: CustomColors.grayOne),
                     maxLines: 1,
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
@@ -655,10 +734,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     width: 10,
                   ),
                   Text(
-                    widget.data["shipping_cost"].toString(),
+                    "${widget.data["shipping_cost"].toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: nameSize,
                     ),
                     maxLines: 1,
                     textAlign: TextAlign.center,
@@ -677,7 +756,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 children: [
                   Text(
                     AppLocale.of(context).getTranslated("total"),
-                    style: TextStyle(fontSize: 16, color: CustomColors.grayOne),
+                    style: TextStyle(
+                        fontSize: nameSize, color: CustomColors.grayOne),
                     maxLines: 1,
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
@@ -687,10 +767,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     width: 10,
                   ),
                   Text(
-                    widget.data["total_price"].toString(),
+                    "${widget.data["total_price"].toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: nameSize,
                     ),
                     maxLines: 1,
                     textAlign: TextAlign.center,
@@ -702,6 +782,138 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             )
           ],
         ),
+      ),
+    );
+  }
+
+  showMaterialDialog() {
+    TextEditingController massageController = TextEditingController();
+    ValueNotifier<double> count = ValueNotifier(0);
+    showDialog(
+      context: context,
+      builder: (_) => new AlertDialog(
+        title: new Text(AppLocale.of(context).getTranslated("lang") == "English"
+            ? "قم بتقييم المتجر"
+            : "Rate the store"),
+        content: Container(
+          height: MediaQuery.of(context).size.height * 0.5,
+          child: ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    RatingBar.builder(
+                      itemSize: 30,
+                      initialRating: 0,
+                      minRating: 0,
+                      direction: Axis.horizontal,
+                      allowHalfRating: false,
+                      itemCount: 5,
+                      itemBuilder: (context, _) => Icon(
+                        Icons.star,
+                        color: CustomColors.ratingBG,
+                      ),
+                      onRatingUpdate: (rating) {
+                        count.value = rating;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: TextFormField(
+                  controller: massageController,
+                  autofocus: false,
+                  onChanged: (value) {},
+                  maxLines: 10,
+                  cursorColor: Colors.black,
+                  textAlign: TextAlign.right,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    hintText:
+                        AppLocale.of(context).getTranslated("lang") == "English"
+                            ? "اكتب تعليقك"
+                            : "Write your comment",
+                    hintStyle: TextStyle(fontSize: 15),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          Row(
+            children: [
+              FlatButton(
+                child: Text(
+                    AppLocale.of(context).getTranslated("lang") == "English"
+                        ? "تراجع"
+                        : "Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              FlatButton(
+                child: Text(AppLocale.of(context).getTranslated("send")),
+                onPressed: () {
+                  ordersApi
+                      .rattingOrder(widget.data["store_id"],
+                          massageController.text, count.value)
+                      .then((value) {
+                    if (value['data'] == "true") {
+                      Navigator.pop(context);
+                      final snackBar = SnackBar(
+                          backgroundColor: CustomColors.greenLightBG,
+                          content: Text(
+                            AppLocale.of(context).getTranslated("lang") ==
+                                    'English'
+                                ? "تم اضافه التعليق ."
+                                : "Comment added.",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: CustomColors.greenLightFont),
+                          ));
+
+                      orderScaffoldKey.currentState.showSnackBar(snackBar);
+                    } else {
+                      Navigator.pop(context);
+
+                      final snackBar = SnackBar(
+                          backgroundColor: CustomColors.ratingLightBG,
+                          content: Text(
+                            AppLocale.of(context).getTranslated("lang") ==
+                                    'English'
+                                ? "حدث خطأ من فضلك تاكد من الاتصال بالانترنت وحاول مرة اخري"
+                                : "An error occurred. Please check your internet connection and try again",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: CustomColors.ratingLightFont),
+                          ));
+
+                      orderScaffoldKey.currentState.showSnackBar(snackBar);
+                    }
+                  });
+                },
+              ),
+            ],
+          )
+        ],
       ),
     );
   }

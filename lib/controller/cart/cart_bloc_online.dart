@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:matager/view/homepage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cart_items_bloc_and_Api.dart';
@@ -10,11 +11,12 @@ class CartItemsBlocOn {
   Map allItems = {
     'cart_items': [],
   };
+  Map temp = {
+    'cart_items': [],
+  };
   CardMethodApi cardMethodApi = CardMethodApi();
 
-  CartItemsBlocOn() {
-
-  }
+  CartItemsBlocOn() {}
 
   /// The [cartOnlineStreamController] is an object of the StreamController class
   /// .broadcast enables the stream to be read in multiple screens of our app
@@ -26,51 +28,43 @@ class CartItemsBlocOn {
   Function deepEq = const DeepCollectionEquality().equals;
 
   void setToCart() {
+    restCart();
+
     SharedPreferences.getInstance().then((value) async {
       SharedPreferences pref = value;
+      await cardMethodApi
+          .getCartItems(pref.getString('token'), pref.get('UserId').toString())
+          .then((value) {
+        if (value != null) {
+          for (var i in value) {
+            print("value id $i");
+            allItems['cart_items'].add(
+              ({
+                "data": i["product"],
+                "quantity": double.tryParse(i['quantity']),
+                "sub_store_id": i['store_id'],
+                "new_price": double.tryParse(i['quantity']) *
+                    double.tryParse(i['product']['price']),
+                "cart_id": i["id"]
+              }),
+            );
+          }
+          cartOnlineStreamController.add(allItems);
+        } else {
+          this.allItems = {
+            'cart_items': [],
+          };
+        }
+      });
       var string = pref.getString("cart");
       print(string);
       if (string != null && string != "null") {
-        var data = await json.decode(pref.getString("cart"));
         print("i try now to get user");
-
-        if (data != null) {
-          this.allItems = {
-            'cart_items': data['cart_items'],
-          };
-          cartOnlineStreamController.add(allItems);
-        }
-      } else if (string == null || string == "null") {
-        await cardMethodApi
-            .getCartItems(
-                pref.getString('token'), pref.get('UserId').toString())
-            .then((value) {
-          if (value != null) {
-            for (var i in value) {
-              print("value id $i");
-              allItems['cart_items'].add(
-                ({
-                  "data": i["product"],
-                  "quantity": double.tryParse(i['quantity']),
-                  "sub_store_id": i['store_id'],
-                  "new_price": double.tryParse(i['quantity']) *
-                      double.tryParse(i['product']['price']),
-                  "cart_id": i["id"]
-                }),
-              );
-            }
-          } else {
-            this.allItems = {
-              'cart_items': [],
-            };
-          }
-        });
-        var string = json.encode(allItems);
-        pref.setString("cart", string);
-        cartOnlineStreamController.add(allItems);
       }
+      countOfProducts.value = allItems['cart_items'].length;
+
+      cartOnlineStreamController.add(allItems);
     });
-    cartOnlineStreamController.add(allItems);
   }
 
   void addToCart(item, quantity, id, price) {
@@ -84,31 +78,40 @@ class CartItemsBlocOn {
 
       for (var i in map) {
         index = map.indexOf(i);
+        print(item);
+        print(i['data']);
+        if (deepEq(i['data']['id'], item["id"])) {
+          if (deepEq(i['data']['product_id'], item["product_id"])) {
+            storeID = i['sub_store_id'];
+            price = double.tryParse(i['data']["price"]);
+            fex = i['quantity'];
 
-        if (deepEq(i['data'], item)) {
-          storeID = i['sub_store_id'];
-          price = double.tryParse(i['data']["price"]);
-          fex = i['quantity'];
+            if (i['data']["unit"] == "0") {
+              newQuantity = fex + quantity;
+            } else {
+              newQuantity = fex + quantity;
+            }
 
-          if (i['data']["unit"] == "0") {
-            newQuantity = fex + quantity;
-          } else {
-            newQuantity = fex + quantity;
+            removeLocalFromCart(i);
+            allItems['cart_items'].insert(
+              index,
+              ({
+                "data": item,
+                "quantity": newQuantity,
+                "sub_store_id": storeID,
+                "new_price": price * newQuantity
+              }),
+            );
+
+            cardMethodApi
+                .addToCart(item['id'], storeID, quantity, price)
+                .then((value) {
+              if (value == "true") {
+                countOfProducts.value = allItems['cart_items'].length;
+              }
+            });
+            at = true;
           }
-
-          removeFromCart(i);
-          allItems['cart_items'].insert(
-            index,
-            ({
-              "data": item,
-              "quantity": newQuantity,
-              "sub_store_id": storeID,
-              "new_price": price * newQuantity
-            }),
-          );
-
-          cardMethodApi.addToCart(item['id'], storeID, quantity, price);
-          at = true;
         }
       }
     }
@@ -125,7 +128,13 @@ class CartItemsBlocOn {
         "sub_store_id": storeID,
         "new_price": price * newQuantity
       });
-      cardMethodApi.addToCart(item['id'], storeID, 1, price);
+      cardMethodApi
+          .addToCart(item['id'], storeID, quantity, price)
+          .then((value) {
+        if (value == "true") {
+          getCounterProduct();
+        }
+      });
       cartOnlineStreamController.sink.add(allItems);
     }
     SharedPreferences.getInstance().then((value) {
@@ -146,31 +155,32 @@ class CartItemsBlocOn {
       var map = allItems['cart_items'];
       for (var i in map) {
         index = map.indexOf(i);
+        if (deepEq(i['data']['id'], item["id"])) {
+          if (deepEq(i['data']['product_id'], item["product_id"])) {
+            print(i);
+            storeID = i['sub_store_id'];
+            price = double.tryParse(i['data']["price"]);
 
-        if (deepEq(i['data'], item)) {
-          print(i);
-          storeID = i['sub_store_id'];
-          price = double.tryParse(i['data']["price"]);
+            if (i['data']["unit"] == "0") {
+              fixed = 1;
+              newQuantity = quantity + 1.0;
+            } else {
+              fixed = 0.25;
 
-          if (i['data']["unit"] == "0") {
-            fixed = 1;
-            newQuantity = quantity + 1.0;
-          } else {
-            fixed = 0.25;
+              newQuantity = quantity + 0.25;
+            }
 
-            newQuantity = quantity + 0.25;
+            removeLocalFromCart(i);
+            allItems['cart_items'].insert(
+              index,
+              ({
+                "data": item,
+                "quantity": newQuantity,
+                "sub_store_id": storeID,
+                "new_price": price * newQuantity
+              }),
+            );
           }
-
-          removeFromCart(i);
-          allItems['cart_items'].insert(
-            index,
-            ({
-              "data": item,
-              "quantity": newQuantity,
-              "sub_store_id": storeID,
-              "new_price": price * newQuantity
-            }),
-          );
         }
       }
     }
@@ -210,7 +220,8 @@ class CartItemsBlocOn {
             newQuantity = quantity - .25;
           }
 
-          removeFromCart(i);
+          removeLocalFromCart(i);
+
           allItems['cart_items'].insert(
             index,
             ({
@@ -238,12 +249,34 @@ class CartItemsBlocOn {
     cartOnlineStreamController.sink.add(allItems);
   }
 
-  void removeFromCart(item) {
+  void removeLocalFromCart(item) {
     allItems['cart_items'].remove(item);
     SharedPreferences.getInstance().then((value) {
       SharedPreferences pref = value;
       var data = json.encode(allItems);
       pref.setString("cart", data);
+    });
+    cartOnlineStreamController.sink.add(allItems);
+  }
+
+  void removeFromCart(item) {
+    allItems['cart_items'].remove(item);
+    SharedPreferences.getInstance().then((value) async {
+      SharedPreferences pref = value;
+
+      await cardMethodApi
+          .removeFromCart(
+        pref.get('token'),
+        pref.get("UserId"),
+        item["data"]["id"],
+        item["sub_store_id"],
+      )
+          .then((value) async {
+        if (value == "true") {
+          getCounterProduct();
+          cartOnlineStreamController.add(this.allItems);
+        }
+      });
     });
     cartOnlineStreamController.sink.add(allItems);
   }

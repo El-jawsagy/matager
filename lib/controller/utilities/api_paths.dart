@@ -33,16 +33,24 @@ class ApiPaths {
 
   static String cartPriceUser(id) =>
       mainDirection + "/user-cart-total?user_id=$id";
+
   static String addToCartOff = mainDirection + "/add-cart-list";
   static String addToCartOn = mainDirection + "/add-to-cart";
   static String updateCart = mainDirection + "/update-cart-quantity";
-  static String removeFromCart = mainDirection + "/remove-cart-list";
+
+  static String removeFromCart = mainDirection + "/removefromcart";
+  static String removeCart = mainDirection + "/remove-cart-list";
 
   static String singleProduct(productId) =>
       mainDirection + "/stores/product/$productId";
 
   static String getOrders(id) => mainDirection + "/user-orders?user_id=$id";
+
   static String makeOrder = mainDirection + "/makeorder";
+  static String makePharmacyOrder = mainDirection + "/post_medicine";
+
+  static String checkCoupon = mainDirection + "/check-coupon";
+  static String getCartCount(id) => mainDirection + "/cartcount?user_id=$id";
 
   static String addressUser(id) =>
       mainDirection + "/user-addresses?user_id=$id";
@@ -55,9 +63,10 @@ class ApiPaths {
   static String addFavoriteItem = mainDirection + "/add-to-fav";
   static String removeFavoriteItem = mainDirection + "/remove-favourite";
 
-  static String aboutUs = mainDirection + "/about_us";
-  static String termsOfUse = mainDirection + "/privacy_policy";
+  static String aboutUs(lang) => mainDirection + "/about_us?lang=$lang";
+  static String termsOfUse(lang) => mainDirection + "/privacy_policy?lang=$lang";
   static String contactUs = mainDirection + "/contact_us";
+  static String rattingAndCommentStore = mainDirection + "/add-comment";
 
   static String searchProducts(string, id,) =>
       mainDirection + "/productsearch?store_id=$id&search=$string";
@@ -66,4 +75,7 @@ class ApiPaths {
       string, id, lat, lng
   ) =>
       mainDirection + "/stores?matger_id=$id&lat=$lat&lng=$lng&search=$string";
+
+
+
 }

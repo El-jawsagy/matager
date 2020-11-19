@@ -8,7 +8,7 @@ class CustomColors {
   static Color darkOne = Colors.black12;
 
   static Color blueOne = Colors.red.shade600;
-  static Color blueThree = Colors.red[300];
+  static Color blueThree = Color(0xff060691);
   static Color darkBlue = Color(0xff17223b);
   static Color darkRed = Colors.red.shade700;
   static Color gray = Colors.grey;
@@ -22,9 +22,17 @@ class CustomColors {
 
   static Color whiteBG = Colors.white;
   static Color ratingBG = Colors.yellow[600];
+  static Color ratingLightBG = Color(0xfffff3cd);
+  static Color ratingLightFont = Color(0xff906404);
+  static Color greenBG = Colors.green[600];
+
+  static Color greenLightBG = Color(0xffD4EDDA);
+  static Color greenLightFont = Color(0xff008000);
+
   static Color offWhite = Colors.white54;
   static Color red = Colors.red[600];
-
+  static Color redLightBG = Color(0xffff727e);
+  static Color redLightFont = Color(0xffc82333);
   static ThemeData lightTheme = ThemeData(
     backgroundColor: darkRed,
     primaryColor: lightPrimary,

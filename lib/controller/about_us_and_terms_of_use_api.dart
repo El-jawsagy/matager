@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:matager/controller/utilities/api_paths.dart';
 
 class AboutAndTermsOfUseAPI {
-  Future<Map> getInformationAboutUs() async {
-    String url = ApiPaths.aboutUs;
+  Future<Map> getInformationAboutUs(lang) async {
+    String url = ApiPaths.aboutUs(lang);
     var response = await http.get(
       url,
     );
@@ -20,8 +20,8 @@ class AboutAndTermsOfUseAPI {
     return null;
   }
 
-  Future<Map> getTermsOfUse() async {
-    String url = ApiPaths.termsOfUse;
+  Future<Map> getTermsOfUse(lang) async {
+    String url = ApiPaths.termsOfUse(lang);
     var response = await http.get(
       url,
     );

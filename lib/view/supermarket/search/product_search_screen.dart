@@ -9,10 +9,11 @@ import 'package:matager/view/utilities/theme.dart';
 
 class ProductSearchScreen extends SearchDelegate {
   int id;
+  String status;
   String token;
   double lat, lng;
 
-  ProductSearchScreen(this.id, this.token, this.lat, this.lng);
+  ProductSearchScreen(this.id, this.status, this.token, this.lat, this.lng);
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -24,7 +25,11 @@ class ProductSearchScreen extends SearchDelegate {
       primaryIconTheme:
           theme.primaryIconTheme.copyWith(color: Colors.grey[200]),
       primaryColorBrightness: Brightness.light,
-      primaryTextTheme: theme.textTheme,
+      primaryTextTheme: TextTheme(
+        headline1: TextStyle(color: CustomColors.whiteBG),
+        headline2: TextStyle(color: CustomColors.whiteBG),
+        headline3: TextStyle(color: CustomColors.whiteBG),
+      ),
     );
   }
 
@@ -81,7 +86,8 @@ class ProductSearchScreen extends SearchDelegate {
 
                         // Generate 100 widgets that display their index in the List.
                         children: List.generate(snapshot.data.length, (index) {
-                          return _drawCardOfStore(context,snapshot.data[index]);
+                          return _drawCardOfStore(
+                              context, snapshot.data[index]);
                         }),
                         childAspectRatio: .55,
                       )
@@ -101,8 +107,7 @@ class ProductSearchScreen extends SearchDelegate {
                                 ),
                               ),
                               Text(
-                                AppLocale.of(context)
-                                    .getTranslated("prod_dis"),
+                                AppLocale.of(context).getTranslated("prod_dis"),
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 20),
                               ),
@@ -117,7 +122,7 @@ class ProductSearchScreen extends SearchDelegate {
         });
   }
 
-  Widget _drawCardOfStore(BuildContext context,Map data) {
+  Widget _drawCardOfStore(BuildContext context, Map data) {
     print(data);
 
     return Container(
@@ -128,7 +133,7 @@ class ProductSearchScreen extends SearchDelegate {
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => DisplayMarketItemDetails(
-                  data, this.token, this.lat, this.lng)));
+                  data, this.status, this.token, this.lat, this.lng)));
         },
         child: Stack(
           children: <Widget>[
@@ -148,29 +153,26 @@ class ProductSearchScreen extends SearchDelegate {
                             topRight: Radius.circular(7)),
                         child: (data["image"] == null)
                             ? Image.asset(
-                          "assets/images/boxImage.png",
-                        )
+                                "assets/images/boxImage.png",
+                              )
                             : Image(
-                          width: MediaQuery.of(context).size.width,
-                          height:
-                          MediaQuery.of(context).size.height * .2,
-                          loadingBuilder: (context, image,
-                              ImageChunkEvent loadingProgress) {
-                            if (loadingProgress == null) {
-                              return image;
-                            }
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          },
-                          image:
-                          NetworkImage(data["image"], scale: 1.0),
-                          fit: BoxFit.contain,
-                        ),
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height * .2,
+                                loadingBuilder: (context, image,
+                                    ImageChunkEvent loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return image;
+                                  }
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                                image: NetworkImage(data["image"], scale: 1.0),
+                                fit: BoxFit.contain,
+                              ),
                       ),
                       Text(
-                        AppLocale.of(context).getTranslated("lang") ==
-                            'English'
+                        AppLocale.of(context).getTranslated("lang") == 'English'
                             ? data["name_ar"]
                             : data["name_en"],
                         style: TextStyle(
@@ -183,71 +185,72 @@ class ProductSearchScreen extends SearchDelegate {
                         softWrap: true,
                       ),
                       Text.rich(
-                        data['offer']==1
+                        data['offer']
                             ? TextSpan(
-                          children: <TextSpan>[
-                            TextSpan(
-                              text:
-                              " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                              style: new TextStyle(
-                                color: CustomColors.red,
-                                decoration:
-                                TextDecoration.lineThrough,
-                              ),
-                            ),
-                            TextSpan(
-                              text: " ",
-                              style: TextStyle(
-                                color: CustomColors.red,
-                              ),
-                            ),
-                            new TextSpan(
-                              text:
-                              " ${data["offer_price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                              style: new TextStyle(
-                                color: CustomColors.primary,
-                              ),
-                            ),
-                          ],
-                        )
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text:
+                                        " ${data["oldprice"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                    style: new TextStyle(
+                                      color: CustomColors.red,
+                                      decoration: TextDecoration.lineThrough,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: " ",
+                                    style: TextStyle(
+                                      color: CustomColors.red,
+                                    ),
+                                  ),
+                                  new TextSpan(
+                                    text:
+                                        " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                    style: new TextStyle(
+                                      color: CustomColors.primary,
+                                    ),
+                                  ),
+                                ],
+                              )
                             : TextSpan(
-                          children: <TextSpan>[
-                            TextSpan(
-                              text:
-                              " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                              style: new TextStyle(
-                                color: CustomColors.red,
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text:
+                                        " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                    style: new TextStyle(
+                                      color: CustomColors.red,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
                       ),
                     ],
                   ),
-                  _drawAddToCartButton(context, data, this.token),
+                  this.status == "غير متاح"
+                      ? _drawStoreClose(context)
+                      : _drawAddToCartButton(context, data, this.token),
                 ],
               ),
             ),
-            data['offer']==1
+            data['offer'] == 1
                 ? Opacity(
-              opacity: 0.75,
-              child: Container(
-                width: 50,
-                height: 25,
-                margin: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                    color: CustomColors.primary,
-                    borderRadius: BorderRadius.circular(7)),
-                child: Center(
-                    child: Text(
-                      " ${data["discount"]} %",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.white),
-                    )),
-              ),
-            )
+                    opacity: 0.75,
+                    child: Container(
+                      width: 50,
+                      height: 25,
+                      margin: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                          color: CustomColors.primary,
+                          borderRadius: BorderRadius.circular(7)),
+                      child: Center(
+                          child: Text(
+                        " ${data["discount"]} %",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.white),
+                      )),
+                    ),
+                  )
                 : Container(),
           ],
         ),
@@ -274,9 +277,14 @@ class ProductSearchScreen extends SearchDelegate {
             double.tryParse(data['price']),
           );
           final snackBar = SnackBar(
-            content: Text('thanks for your order'),
-            duration: Duration(seconds: 3),
-          );
+              backgroundColor: CustomColors.greenLightBG,
+              content: Text(
+                AppLocale.of(context).getTranslated("lang") == 'English'
+                    ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                    : 'Hello: The product has been added to the cart with success.. ',
+                style: TextStyle(color: CustomColors.greenLightFont),
+              ));
+
           Scaffold.of(context).showSnackBar(snackBar);
         } else {
           var quant;
@@ -293,9 +301,13 @@ class ProductSearchScreen extends SearchDelegate {
           );
 
           final snackBar = SnackBar(
-            content: Text('thanks for your order'),
-            duration: Duration(seconds: 3),
-          );
+              backgroundColor: CustomColors.greenLightBG,
+              content: Text(
+                AppLocale.of(context).getTranslated("lang") == 'English'
+                    ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                    : 'Hello: The product has been added to the cart with success.. ',
+                style: TextStyle(color: CustomColors.greenLightFont),
+              ));
           Scaffold.of(context).showSnackBar(snackBar);
         }
       },
@@ -326,6 +338,60 @@ class ProductSearchScreen extends SearchDelegate {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _drawStoreClose(
+    BuildContext context,
+  ) {
+    return InkWell(
+      //todo:add to cart offline or online
+      onTap: () async {
+        final snackBar = SnackBar(
+            backgroundColor: CustomColors.ratingLightBG,
+            content: Text(
+              AppLocale.of(context).getTranslated("lang") == 'English'
+                  ? "..مرحباُ : ناسف هذا المتجر مغلق الان"
+                  : 'Hello: Sorry, this store is now closed ..',
+              style: TextStyle(color: CustomColors.ratingLightFont),
+            ));
+
+        Scaffold.of(context).showSnackBar(snackBar);
+      },
+      child: Container(
+        height: MediaQuery.of(context).size.height * .06,
+        decoration: BoxDecoration(
+          color: CustomColors.primary,
+          boxShadow: [
+            BoxShadow(
+              color: CustomColors.whiteBG,
+              blurRadius: .75,
+              spreadRadius: .75,
+              offset: Offset(0.0, 0.0),
+            )
+          ],
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Icon(
+                Icons.shopping_cart,
+                color: CustomColors.whiteBG,
+              ),
+              Text(
+                AppLocale.of(context).getTranslated("add_cart"),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),

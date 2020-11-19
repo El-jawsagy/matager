@@ -51,7 +51,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               FutureBuilder(
-                  future: aboutUsAPI.getInformationAboutUs(),
+                  future: aboutUsAPI.getInformationAboutUs(AppLocale.of(context).getTranslated("lang")=="English"?"ar":"en"),
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     switch (snapshot.connectionState) {
                       case ConnectionState.none:
@@ -206,7 +206,6 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   Widget _drawCardOfInfo(Map data, int pos) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 6),
-      height: MediaQuery.of(context).size.height * 0.4,
       child: Stack(
         children: [
           Container(
@@ -239,6 +238,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              SizedBox(height: MediaQuery.of(context).size.height*0.18,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

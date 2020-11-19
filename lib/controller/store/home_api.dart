@@ -108,7 +108,8 @@ class ProductBloc {
   final StreamController<List> _productsController =
       StreamController<List>.broadcast();
 
-  final StreamController<int> _categoryController = StreamController<int>();
+  final StreamController<int> _categoryController =
+      StreamController<int>.broadcast();
 
   Stream<List> get productStream => _productsController.stream;
 

@@ -4,6 +4,7 @@ import 'package:matager/controller/orders_api.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/Authentication/login.dart';
 import 'package:matager/view/utilities/drawer.dart';
+import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/prefrences.dart';
 import 'package:matager/view/utilities/theme.dart';
@@ -20,6 +21,9 @@ class OrderScreen extends StatefulWidget {
   _OrderScreenState createState() => _OrderScreenState();
 }
 
+final GlobalKey<ScaffoldState> orderScaffoldKey =
+    new GlobalKey<ScaffoldState>();
+
 class _OrderScreenState extends State<OrderScreen> {
   OrdersApi ordersApi;
 
@@ -31,16 +35,19 @@ class _OrderScreenState extends State<OrderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    DetectedScreen detectedScreen = DetectedScreen(context);
+    OrderSize orderSize = OrderSize(detectedScreen);
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
+        key: orderScaffoldKey,
         appBar: AppBar(
           elevation: 0,
           title: Text(
             AppLocale.of(context).getTranslated("drawer_order"),
             style: TextStyle(
               color: CustomColors.whiteBG,
-              fontSize: 22,
+              fontSize: orderSize.headerTextSize,
               fontWeight: FontWeight.bold,
             ),
             overflow: TextOverflow.visible,
@@ -74,7 +81,11 @@ class _OrderScreenState extends State<OrderScreen> {
                                     ListView.builder(
                                       itemBuilder: (context, index) {
                                         return _drawCardOfStore(
-                                            snapshot.data[index]);
+                                          snapshot.data[index],
+                                          orderSize.nameSize,
+                                          orderSize.stringSize,
+                                          orderSize.iconSize,
+                                        );
                                       },
                                       itemCount: snapshot.data.length,
                                     ),
@@ -98,8 +109,8 @@ class _OrderScreenState extends State<OrderScreen> {
                             child: Text(
                           AppLocale.of(context).getTranslated("lang") ==
                                   'English'
-                              ? "لم تختار أي عنصر حتى الآن"
-                              : "You haven't taken any item yet",
+                              ? "لم نستطع تحميل البيانات تفقد الانترنت"
+                              : "we can't load data,check internet",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 22,
@@ -161,12 +172,12 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-  Widget _drawCardOfStore(
-    map,
-  ) {
+  Widget _drawCardOfStore(map, nameSize, stringSize, iconSize) {
+    print(MediaQuery.of(context).size.width * 0.08);
+
+    print(MediaQuery.of(context).size.height * 0.05);
     return Container(
       margin: EdgeInsets.symmetric(vertical: 6),
-      height: MediaQuery.of(context).size.height * 0.23,
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -183,7 +194,6 @@ class _OrderScreenState extends State<OrderScreen> {
                 borderRadius: BorderRadius.circular(7.0),
               ),
               child: Container(
-                height: MediaQuery.of(context).size.height * 0.22,
                 child: Column(
                   children: [
                     Padding(
@@ -199,7 +209,7 @@ class _OrderScreenState extends State<OrderScreen> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: CustomColors.primary,
-                              fontSize: 22,
+                              fontSize: nameSize,
                             ),
                             maxLines: 1,
                             textAlign: TextAlign.center,
@@ -214,7 +224,7 @@ class _OrderScreenState extends State<OrderScreen> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: CustomColors.gray,
-                              fontSize: 18,
+                              fontSize: nameSize,
                             ),
                             maxLines: 1,
                             textAlign: TextAlign.center,
@@ -224,15 +234,18 @@ class _OrderScreenState extends State<OrderScreen> {
                         ],
                       ),
                     ),
-                    _drawProductState(map["status"]),
+                    _drawProductState(map["status"], stringSize, iconSize),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "اسم المتجر :",
+                          AppLocale.of(context).getTranslated("lang") ==
+                                  "English"
+                              ? "اسم المتجر"
+                              : "Store Name :",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                            fontSize: nameSize,
                             color: CustomColors.primary,
                           ),
                           maxLines: 1,
@@ -247,7 +260,7 @@ class _OrderScreenState extends State<OrderScreen> {
                           map["storename"],
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: nameSize,
                           ),
                           maxLines: 1,
                           textAlign: TextAlign.center,
@@ -260,10 +273,13 @@ class _OrderScreenState extends State<OrderScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "اجمالى السعر :",
+                          AppLocale.of(context).getTranslated("lang") ==
+                                  "English"
+                              ? "اجمالى السعر :"
+                              : "Total Price :",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                            fontSize: nameSize,
                             color: CustomColors.primary,
                           ),
                           maxLines: 1,
@@ -277,7 +293,7 @@ class _OrderScreenState extends State<OrderScreen> {
                         Text(
                           " ${map["total_price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                           style: new TextStyle(
-                            fontSize: 16,
+                            fontSize: nameSize,
                             color: CustomColors.primary,
                           ),
                         ),
@@ -293,46 +309,61 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-  Widget _drawProductState(status) {
+  Widget _drawProductState(status, stringSize, iconSize) {
+    Color firstColor;
     Color readyColor;
     Color onColor;
     switch (status) {
       case 0:
+        firstColor = Colors.green;
         readyColor = Colors.grey;
         onColor = Colors.grey;
         break;
       case 1:
+        firstColor = Colors.green;
+
         readyColor = Colors.green;
         onColor = Colors.grey;
         break;
       case 2:
+        firstColor = Colors.green;
+
         readyColor = Colors.green;
         onColor = Colors.green;
         break;
+      case 3:
+        firstColor = Colors.red;
+
+        readyColor = Colors.red;
+        onColor = Colors.red;
+        break;
     }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Container(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 margin: EdgeInsets.only(top: 8),
-                height: 25,
-                width: 25,
+                height: MediaQuery.of(context).size.height * 0.05,
+                width: MediaQuery.of(context).size.width * 0.08,
                 child: FaIcon(
                   FontAwesomeIcons.solidCheckCircle,
-                  size: 22,
-                  color: Colors.green,
+                  size: iconSize,
+                  color: firstColor,
                 ),
               ),
               Text(
                 AppLocale.of(context).getTranslated("lang") == 'English'
                     ? "جارى تجهيز الطلب"
-                    : "The order is being processed",
+                    : " being processed",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 10,
+                  fontSize: stringSize,
                 ),
                 maxLines: 1,
                 textAlign: TextAlign.center,
@@ -343,31 +374,32 @@ class _OrderScreenState extends State<OrderScreen> {
           ),
         ),
         Container(
-            width: 65,
+            width: MediaQuery.of(context).size.width * 0.1,
             child: Divider(
               height: 7,
               color: readyColor,
             )),
         Container(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 margin: EdgeInsets.only(top: 8),
-                height: 25,
-                width: 25,
+                height: MediaQuery.of(context).size.height * 0.05,
+                width: MediaQuery.of(context).size.width * 0.08,
                 child: FaIcon(
                   FontAwesomeIcons.solidCheckCircle,
-                  size: 22,
+                  size: iconSize,
                   color: readyColor,
                 ),
               ),
               Text(
                 AppLocale.of(context).getTranslated("lang") == 'English'
                     ? "جارى توصيل الطلب"
-                    : "The order is being delivered",
+                    : " being delivered",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 10,
+                  fontSize: stringSize,
                 ),
                 maxLines: 1,
                 textAlign: TextAlign.center,
@@ -378,31 +410,32 @@ class _OrderScreenState extends State<OrderScreen> {
           ),
         ),
         Container(
-            width: 65,
+            width: MediaQuery.of(context).size.width * 0.1,
             child: Divider(
               height: 7,
               color: onColor,
             )),
         Container(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 margin: EdgeInsets.only(top: 8),
-                height: 25,
-                width: 25,
+                height: MediaQuery.of(context).size.height * 0.05,
+                width: MediaQuery.of(context).size.width * 0.08,
                 child: FaIcon(
                   FontAwesomeIcons.solidCheckCircle,
-                  size: 22,
+                  size: iconSize,
                   color: onColor,
                 ),
               ),
               Text(
                 AppLocale.of(context).getTranslated("lang") == 'English'
                     ? "تم استلام الطلب"
-                    : "The receipt of the order",
+                    : " receipt order",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 10,
+                  fontSize: stringSize,
                 ),
                 maxLines: 1,
                 textAlign: TextAlign.center,

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 enum screenType {
@@ -21,7 +20,7 @@ class DetectedScreen {
 
   void _setNameScreen() {
     //todo: edit screen width conditions
-    if (this.width >= 320 && this.width < 360 ) {
+    if (this.width >= 320 && this.width < 360) {
       sizeName = screenType.Small;
     } else if (this.width >= 360 && this.width < 400) {
       sizeName = screenType.Medium;
@@ -140,221 +139,594 @@ class SignUpScreenProperties {
   }
 }
 
-class CreateEditTask {
+class DrawerPageSize {
+  DetectedScreen detectedScreen;
+  double userNameSize;
+  double emailSize;
+  double titleSize;
+  double iconSize;
+  double imageWidthSize;
+  double imageHeightSize;
+
+  double sizeBoxHeight;
+
+  //todo:add all properties of Edit Create TaskScreen
+  DrawerPageSize(DetectedScreen ourScreen) {
+    this.detectedScreen = ourScreen;
+    print(detectedScreen.sizeName);
+    _initSignUp();
+  }
+
+  void _initSignUp() {
+    switch (this.detectedScreen.sizeName) {
+      case screenType.Small:
+        this.userNameSize = 14;
+        this.emailSize = 12;
+        this.imageHeightSize = 60;
+        this.imageWidthSize = 60;
+        this.iconSize = 16;
+        this.titleSize = 14;
+        this.sizeBoxHeight = 30;
+
+        break;
+      case screenType.Medium:
+        this.userNameSize = 20;
+        this.emailSize = 14;
+
+        this.iconSize = 20;
+        this.imageHeightSize = 80;
+        this.imageWidthSize = 80;
+        this.sizeBoxHeight = 45;
+
+        break;
+      case screenType.Large:
+        this.userNameSize = 20;
+        this.emailSize = 10;
+        this.imageHeightSize = 80;
+        this.imageWidthSize = 80;
+        this.iconSize = 14;
+        this.iconSize = 24;
+        this.sizeBoxHeight = 50;
+
+        break;
+      default:
+        this.userNameSize = 20;
+        this.emailSize = 10;
+        this.imageHeightSize = 80;
+        this.imageWidthSize = 80;
+        this.iconSize = 14;
+
+        this.sizeBoxHeight = 55;
+    }
+  }
+}
+
+class HomePageSize {
   DetectedScreen detectedScreen;
   double headerTextSize;
-  double defaultSizeText;
+  double nameSize;
+  double priceSize;
+  double iconSize;
+  double iconHeaderSize;
+  double sizeBoxHeight;
+
+  //todo:add all properties of Edit Create TaskScreen
+  HomePageSize(DetectedScreen ourScreen) {
+    this.detectedScreen = ourScreen;
+    print(detectedScreen.sizeName);
+    _initSignUp();
+  }
+
+  void _initSignUp() {
+    switch (this.detectedScreen.sizeName) {
+      case screenType.Small:
+        this.headerTextSize = 20;
+        this.nameSize = 10;
+
+        this.iconSize = 14;
+        this.iconHeaderSize = 18;
+        this.sizeBoxHeight = 30;
+
+        break;
+      case screenType.Medium:
+        this.headerTextSize = 24;
+        this.nameSize = 12;
+        this.iconSize = 22;
+        this.iconHeaderSize = 22;
+
+        this.sizeBoxHeight = 45;
+
+        break;
+      case screenType.Large:
+        this.headerTextSize = 26;
+        this.nameSize = 12;
+        this.iconSize = 24;
+        this.iconHeaderSize = 24;
+
+        this.sizeBoxHeight = 50;
+
+        break;
+      default:
+        this.headerTextSize = 22;
+        this.nameSize = 12;
+        this.iconSize = 20;
+        this.iconHeaderSize = 18;
+
+        this.sizeBoxHeight = 55;
+    }
+  }
+}
+
+class CategorySize {
+  DetectedScreen detectedScreen;
+  double headerTextSize;
+  double nameSize;
+  double smallNameSize;
+  double priceSize;
+  double iconSize;
+  double smallIconSize;
+  double iconHeaderSize;
+  double sizeBoxHeight;
+
+  //todo:add all properties of Edit Create TaskScreen
+  CategorySize(DetectedScreen ourScreen) {
+    this.detectedScreen = ourScreen;
+    print(detectedScreen.sizeName);
+    _initSignUp();
+  }
+
+  void _initSignUp() {
+    switch (this.detectedScreen.sizeName) {
+      case screenType.Small:
+        this.headerTextSize = 18;
+        this.nameSize = 14;
+        this.smallNameSize = 10;
+
+        this.iconSize = 16;
+        this.smallIconSize = 12;
+
+        this.iconHeaderSize = 20;
+        this.sizeBoxHeight = 30;
+
+        break;
+      case screenType.Medium:
+        this.headerTextSize = 24;
+        this.nameSize = 20;
+        this.iconSize = 22;
+        this.iconHeaderSize = 22;
+
+        this.sizeBoxHeight = 45;
+
+        break;
+      case screenType.Large:
+        this.headerTextSize = 26;
+        this.nameSize = 20;
+        this.iconSize = 24;
+        this.iconHeaderSize = 24;
+
+        this.sizeBoxHeight = 50;
+
+        break;
+      default:
+        this.headerTextSize = 22;
+        this.nameSize = 20;
+        this.iconSize = 20;
+        this.iconHeaderSize = 18;
+
+        this.sizeBoxHeight = 55;
+    }
+  }
+}
+
+class MarketSize {
+  DetectedScreen detectedScreen;
+  double headerTextSize;
+  double nameSize;
+  double priceSize;
+  double iconSize;
+  double iconHeaderSize;
+  double sizeBoxHeight;
+
+  //todo:add all properties of Edit Create TaskScreen
+  MarketSize(DetectedScreen ourScreen) {
+    this.detectedScreen = ourScreen;
+    print(detectedScreen.sizeName);
+    _initSignUp();
+  }
+
+  void _initSignUp() {
+    switch (this.detectedScreen.sizeName) {
+      case screenType.Small:
+        this.headerTextSize = 16;
+        this.nameSize = 14;
+
+        this.iconSize = 16;
+
+        this.iconHeaderSize = 20;
+        this.sizeBoxHeight = 30;
+
+        break;
+      case screenType.Medium:
+        this.headerTextSize = 20;
+        this.nameSize = 16;
+        this.iconSize = 22;
+        this.iconHeaderSize = 22;
+
+        this.sizeBoxHeight = 45;
+
+        break;
+      case screenType.Large:
+        this.headerTextSize = 26;
+        this.nameSize = 16;
+        this.iconSize = 24;
+        this.iconHeaderSize = 24;
+
+        this.sizeBoxHeight = 50;
+
+        break;
+      default:
+        this.headerTextSize = 22;
+        this.nameSize = 12;
+        this.iconSize = 20;
+        this.iconHeaderSize = 18;
+
+        this.sizeBoxHeight = 55;
+    }
+  }
+}
+
+class ProductSize {
+  DetectedScreen detectedScreen;
+  double headerTextSize;
+  double nameSize;
+  double priceSize;
+  double dotsSize;
   double iconSize;
   double sizeBoxHeight;
 
   //todo:add all properties of Edit Create TaskScreen
-  CreateEditTask(DetectedScreen ourScreen) {
+  ProductSize(DetectedScreen ourScreen) {
     this.detectedScreen = ourScreen;
+    print(detectedScreen.sizeName);
     _initSignUp();
   }
 
   void _initSignUp() {
     switch (this.detectedScreen.sizeName) {
       case screenType.Small:
-        this.headerTextSize = 16;
-        this.defaultSizeText = 14;
-        this.iconSize=16;
-        this.sizeBoxHeight=30;
+        this.headerTextSize = 14;
+        this.nameSize = 12;
+        this.iconSize = 18;
+        this.dotsSize = 6;
+        this.sizeBoxHeight = 30;
 
         break;
       case screenType.Medium:
         this.headerTextSize = 18;
-        this.defaultSizeText = 16;
-        this.iconSize=18;
-        this.sizeBoxHeight=45;
+        this.nameSize = 20;
+        this.iconSize = 20;
+        this.dotsSize = 10;
 
+        this.sizeBoxHeight = 45;
 
         break;
       case screenType.Large:
         this.headerTextSize = 22;
-        this.defaultSizeText = 18;
-        this.iconSize=20;
-        this.sizeBoxHeight=50;
+        this.nameSize = 18;
+        this.iconSize = 20;
+        this.dotsSize = 10;
+
+        this.sizeBoxHeight = 50;
 
         break;
       default:
         this.headerTextSize = 24;
-        this.defaultSizeText = 20;
-        this.iconSize=22;
-        this.sizeBoxHeight=55;
+        this.nameSize = 20;
+        this.iconSize = 20;
+        this.dotsSize = 10;
+
+        this.sizeBoxHeight = 55;
     }
   }
 }
 
-class DateScreen {
-  DetectedScreen detectedScreen;
-  double widthDate;
-  double widthTime;
-  double defaultTextSize;
-  double iconSize;
-
-  //todo:add all properties of Edit Create TaskScreen
-  DateScreen(DetectedScreen ourScreen) {
-    this.detectedScreen = ourScreen;
-    _initSignUp();
-  }
-
-  void _initSignUp() {
-    switch (this.detectedScreen.sizeName) {
-      case screenType.Small:
-        this.widthDate = 130;
-        this.widthTime = 100;
-        this.defaultTextSize=12;
-        this.iconSize =16;
-
-        break;
-      case screenType.Medium:
-        this.widthDate = 145;
-        this.widthTime = 105;
-        this.defaultTextSize=14;
-        this.iconSize =18;
-
-        break;
-      case screenType.Large:
-        this.widthDate = 155;
-        this.widthTime = 110;
-        this.defaultTextSize=16;
-        this.iconSize =20;
-
-        break;
-      default:
-        this.widthDate = 165;
-        this.widthTime = 115;
-        this.defaultTextSize=18;
-        this.iconSize =22;
-
-
-    }
-  }
-}
-
-//todo:this class to add all properties of DisplayProjectScreen AND StoriesAndTasksScreen
-class PersonalStoryTaskProperties {
-  DetectedScreen detectedScreen;
-
-  double storyNameSize;
-  double allTaskUnfinish;
-  double lastUpdateEnded;
-  double processingRatio;
-  double taskName;
-  double taskDescription;
-  double storyCardHeight;
-  double taskCardHeight;
-
-  //todo:add all properties of Personal_Story_Task Screen
-  PersonalStoryTaskProperties(DetectedScreen ourScreen) {
-    this.detectedScreen = ourScreen;
-    _initSignUp();
-  }
-
-  void _initSignUp() {
-    switch (this.detectedScreen.sizeName) {
-      case screenType.Small:
-        this.storyNameSize = 14;
-        this.allTaskUnfinish = 10;
-        this.lastUpdateEnded = 8;
-        this.processingRatio = 10;
-        this.taskName = 12;
-        this.taskDescription = 8;
-        this.storyCardHeight = 180;
-        this.taskCardHeight = 130;
-
-        break;
-      case screenType.Medium:
-        this.storyNameSize = 16;
-        this.allTaskUnfinish = 12;
-        this.lastUpdateEnded = 10;
-        this.processingRatio = 12;
-        this.taskName = 14;
-        this.taskDescription = 10;
-        this.storyCardHeight = 190;
-        this.taskCardHeight = 140;
-
-        break;
-      case screenType.Large:
-        this.storyNameSize = 18;
-        this.allTaskUnfinish = 14;
-        this.lastUpdateEnded = 12;
-        this.processingRatio = 14;
-        this.taskName = 16;
-        this.taskDescription = 12;
-        this.storyCardHeight = 200;
-        this.taskCardHeight = 155;
-
-        break;
-      default:
-        this.storyNameSize = 20;
-        this.allTaskUnfinish = 16;
-        this.lastUpdateEnded = 14;
-        this.processingRatio = 16;
-        this.taskName = 18;
-        this.taskDescription = 14;
-        this.storyCardHeight = 210;
-        this.taskCardHeight = 170;
-
-
-    }
-  }
-}
-
-class AllDetailsScreen {
+class CartSize {
   DetectedScreen detectedScreen;
   double headerTextSize;
-  double defaultTextSize;
-  double defaultTextSize2;
-  double bigCirclesHeight;
-  double smallCirclesHeight;
-  double userImageHeight;
+  double nameSize;
+  double priceSize;
+  double iconSize;
+  double sizeBoxHeight;
 
   //todo:add all properties of Edit Create TaskScreen
-  AllDetailsScreen(DetectedScreen ourScreen) {
+  CartSize(DetectedScreen ourScreen) {
     this.detectedScreen = ourScreen;
+    print(detectedScreen.sizeName);
     _initSignUp();
   }
 
   void _initSignUp() {
     switch (this.detectedScreen.sizeName) {
       case screenType.Small:
-        this.headerTextSize = 16;
-        this.defaultTextSize = 12;
-        this.defaultTextSize2 = 10;
-        this.bigCirclesHeight = 50;
-        this.smallCirclesHeight = 40;
-        this.userImageHeight = 40;
+        this.headerTextSize = 14;
+        this.nameSize = 12;
+        this.iconSize = 14;
+        this.sizeBoxHeight = 30;
 
         break;
       case screenType.Medium:
         this.headerTextSize = 18;
-        this.defaultTextSize = 14;
-        this.defaultTextSize2 = 12;
-        this.bigCirclesHeight = 60;
-        this.smallCirclesHeight = 50;
-        this.userImageHeight = 45;
+        this.nameSize = 16;
+        this.iconSize = 16;
+        this.sizeBoxHeight = 45;
 
         break;
       case screenType.Large:
+        this.headerTextSize = 22;
+        this.nameSize = 18;
+        this.iconSize = 20;
+        this.sizeBoxHeight = 50;
+
+        break;
+      default:
+        this.headerTextSize = 24;
+        this.nameSize = 20;
+        this.iconSize = 20;
+        this.sizeBoxHeight = 55;
+    }
+  }
+}
+
+class CartCheckOutSize {
+  DetectedScreen detectedScreen;
+  double headerTextSize;
+  double nameSize;
+  double stringSize;
+  double priceSize;
+  double iconSize;
+  double iconHeaderSize;
+  double sizeBoxHeight;
+
+  //todo:add all properties of Edit Create TaskScreen
+  CartCheckOutSize(DetectedScreen ourScreen) {
+    this.detectedScreen = ourScreen;
+    print(detectedScreen.sizeName);
+    _initSignUp();
+  }
+
+  void _initSignUp() {
+    switch (this.detectedScreen.sizeName) {
+      case screenType.Small:
         this.headerTextSize = 20;
-        this.defaultTextSize = 16;
-        this.defaultTextSize2 = 14;
-        this.bigCirclesHeight = 70;
-        this.smallCirclesHeight = 60;
-        this.userImageHeight = 50;
+        this.nameSize = 12;
+        this.stringSize = 8;
+        this.iconSize = 12;
+        this.iconHeaderSize = 18;
+        this.sizeBoxHeight = 30;
+
+        break;
+      case screenType.Medium:
+        this.headerTextSize = 24;
+        this.nameSize = 16;
+        this.stringSize = 10;
+
+        this.iconSize = 18;
+        this.iconHeaderSize = 22;
+
+        this.sizeBoxHeight = 45;
+
+        break;
+      case screenType.Large:
+        this.headerTextSize = 26;
+        this.nameSize = 18;
+        this.stringSize = 10;
+
+        this.iconSize = 20;
+        this.iconHeaderSize = 24;
+
+        this.sizeBoxHeight = 50;
 
         break;
       default:
         this.headerTextSize = 22;
-        this.defaultTextSize = 18;
-        this.defaultTextSize2 = 16;
-        this.bigCirclesHeight = 80;
-        this.smallCirclesHeight = 70;
-        this.userImageHeight = 54;
+        this.nameSize = 12;
+        this.stringSize = 10;
 
+        this.iconSize = 20;
+        this.iconHeaderSize = 18;
 
+        this.sizeBoxHeight = 55;
     }
   }
 }
+
+class OrderSize {
+  DetectedScreen detectedScreen;
+  double headerTextSize;
+  double nameSize;
+  double stringSize;
+  double priceSize;
+  double iconSize;
+  double iconHeaderSize;
+  double sizeBoxHeight;
+
+  //todo:add all properties of Edit Create TaskScreen
+  OrderSize(DetectedScreen ourScreen) {
+    this.detectedScreen = ourScreen;
+    print(detectedScreen.sizeName);
+    _initSignUp();
+  }
+
+  void _initSignUp() {
+    switch (this.detectedScreen.sizeName) {
+      case screenType.Small:
+        this.headerTextSize = 20;
+        this.nameSize = 12;
+        this.stringSize = 8;
+        this.iconSize = 12;
+        this.iconHeaderSize = 18;
+        this.sizeBoxHeight = 30;
+
+        break;
+      case screenType.Medium:
+        this.headerTextSize = 24;
+        this.nameSize = 16;
+        this.stringSize = 10;
+
+        this.iconSize = 18;
+        this.iconHeaderSize = 22;
+
+        this.sizeBoxHeight = 45;
+
+        break;
+      case screenType.Large:
+        this.headerTextSize = 26;
+        this.nameSize = 18;
+        this.stringSize = 10;
+
+        this.iconSize = 20;
+        this.iconHeaderSize = 24;
+
+        this.sizeBoxHeight = 50;
+
+        break;
+      default:
+        this.headerTextSize = 22;
+        this.nameSize = 12;
+        this.stringSize = 10;
+
+        this.iconSize = 20;
+        this.iconHeaderSize = 18;
+
+        this.sizeBoxHeight = 55;
+    }
+  }
+}
+
+class OrderDetailsSize {
+  DetectedScreen detectedScreen;
+  double headerTextSize;
+  double nameSize;
+  double ratingSize;
+  double stringSize;
+  double priceSize;
+  double iconSize;
+  double iconHeaderSize;
+  double sizeBoxHeight;
+
+  //todo:add all properties of Edit Create TaskScreen
+  OrderDetailsSize(DetectedScreen ourScreen) {
+    this.detectedScreen = ourScreen;
+    print(detectedScreen.sizeName);
+    _initSignUp();
+  }
+
+  void _initSignUp() {
+    switch (this.detectedScreen.sizeName) {
+      case screenType.Small:
+        this.headerTextSize = 20;
+
+        this.nameSize = 10;
+        this.stringSize = 8;
+        this.iconSize = 12;
+        this.iconHeaderSize = 18;
+        this.sizeBoxHeight = 30;
+
+        break;
+      case screenType.Medium:
+        this.headerTextSize = 24;
+        this.nameSize = 14;
+        this.stringSize = 10;
+
+        this.iconSize = 18;
+        this.iconHeaderSize = 22;
+
+        this.sizeBoxHeight = 45;
+
+        break;
+      case screenType.Large:
+        this.headerTextSize = 26;
+        this.nameSize = 14;
+        this.stringSize = 10;
+
+        this.iconSize = 18;
+        this.iconHeaderSize = 24;
+
+        this.sizeBoxHeight = 50;
+
+        break;
+      default:
+        this.headerTextSize = 22;
+        this.nameSize = 12;
+        this.stringSize = 10;
+
+        this.iconSize = 20;
+        this.iconHeaderSize = 18;
+
+        this.sizeBoxHeight = 55;
+    }
+  }
+}
+class AddressSize {
+  DetectedScreen detectedScreen;
+  double headerTextSize;
+  double nameSize;
+  double stringSize;
+  double priceSize;
+  double iconSize;
+  double iconHeaderSize;
+  double sizeBoxHeight;
+
+  //todo:add all properties of Edit Create TaskScreen
+  AddressSize(DetectedScreen ourScreen) {
+    this.detectedScreen = ourScreen;
+    print(detectedScreen.sizeName);
+    _initSignUp();
+  }
+
+  void _initSignUp() {
+    switch (this.detectedScreen.sizeName) {
+      case screenType.Small:
+        this.headerTextSize = 20;
+        this.nameSize = 12;
+        this.stringSize = 8;
+        this.iconSize = 12;
+        this.iconHeaderSize = 18;
+        this.sizeBoxHeight = 30;
+
+        break;
+      case screenType.Medium:
+        this.headerTextSize = 24;
+        this.nameSize = 16;
+        this.stringSize = 10;
+
+        this.iconSize = 18;
+        this.iconHeaderSize = 22;
+
+        this.sizeBoxHeight = 45;
+
+        break;
+      case screenType.Large:
+        this.headerTextSize = 26;
+        this.nameSize = 18;
+        this.stringSize = 10;
+
+        this.iconSize = 20;
+        this.iconHeaderSize = 24;
+
+        this.sizeBoxHeight = 50;
+
+        break;
+      default:
+        this.headerTextSize = 22;
+        this.nameSize = 12;
+        this.stringSize = 10;
+
+        this.iconSize = 20;
+        this.iconHeaderSize = 18;
+
+        this.sizeBoxHeight = 55;
+    }
+  }
+}
+

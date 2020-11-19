@@ -3,20 +3,27 @@ import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/supermarket/product/display_super_market_prodect.dart';
 import 'package:matager/view/utilities/theme.dart';
 
+import 'display_pharmace_medications.dart';
+
 class TabScreenoFCategory extends StatefulWidget {
   List map;
+  String status;
+
   int marketId;
   String marketName;
   String token;
   double latitude, longitude;
+  double nameSize;
 
   TabScreenoFCategory(
     this.map,
+    this.status,
     this.marketId,
     this.marketName,
     this.token,
     this.latitude,
     this.longitude,
+    this.nameSize,
   );
 
   @override
@@ -35,7 +42,7 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
             padding: EdgeInsets.only(top: 8),
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            child: _drawListOfCategoryProduct(map),
+            child: _drawListOfCategoryProduct(map, widget.nameSize),
           )
         : Container(
             padding: EdgeInsets.symmetric(horizontal: 20),
@@ -62,11 +69,15 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
   }
 
 //display list of products
-  Widget _drawListOfCategoryProduct(List map) {
+  Widget _drawListOfCategoryProduct(
+    List map,
+    nameSize,
+  ) {
     return GridView.count(
       crossAxisCount: 2,
       children: List.generate(map.length, (index) {
         return _drawCardOfProducts(
+          nameSize,
           map[index],
         );
       }),
@@ -75,7 +86,10 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
   }
 
 // display each product
-  Widget _drawCardOfProducts(Map data) {
+  Widget _drawCardOfProducts(
+    nameSize,
+    Map data,
+  ) {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
@@ -88,21 +102,35 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
         height: MediaQuery.of(context).size.height * 0.15,
         child: InkWell(
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => DisplayMarketProduct(
-                  widget.marketId,
-                  data["id"],
-                  AppLocale.of(context).getTranslated("lang") == 'English'
-                      ? data["name"]
-                      : data["name_en"],
-                  widget.marketName,
-                  widget.token,
-                  widget.latitude,
-                  widget.longitude,
+            if (data['name'] == "ادويه" || data["name_en"] == "Medicines") {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => PharmacyPrescriptionScreen(
+                    widget.token,
+                    widget.status,
+                    widget.marketId,
+                  ),
                 ),
-              ),
-            );
+              );
+            } else {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => DisplayMarketProduct(
+                    widget.marketId,
+                    data["id"],
+                    widget.status,
+                    AppLocale.of(context).getTranslated("lang") == 'English'
+                        ? data["name"]
+                        : data["name_en"],
+                    widget.marketName,
+                    widget.token,
+                    widget.latitude,
+                    widget.longitude,
+                    0,
+                  ),
+                ),
+              );
+            }
           },
           child: Stack(
             children: <Widget>[
@@ -132,8 +160,7 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   Container(
-                    height: MediaQuery.of(context).size.height * 0.05,
-                    margin: const EdgeInsets.only(top: 16.0),
+                    padding: const EdgeInsets.only(top: 4, bottom: 4),
                     decoration: BoxDecoration(
                         color: CustomColors.primary,
                         borderRadius: BorderRadius.only(
@@ -146,8 +173,9 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
                           : data["name_en"],
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: nameSize,
                           color: CustomColors.whiteBG),
+                      textAlign: TextAlign.center,
                     )),
                   ),
                 ],

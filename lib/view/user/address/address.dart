@@ -5,6 +5,7 @@ import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/Authentication/login.dart';
 import 'package:matager/view/user/address/setAddress.dart';
 import 'package:matager/view/utilities/drawer.dart';
+import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/prefrences.dart';
 import 'package:matager/view/utilities/theme.dart';
@@ -19,6 +20,9 @@ class AddressScreen extends StatefulWidget {
   @override
   _AddressScreenState createState() => _AddressScreenState();
 }
+
+ final GlobalKey<ScaffoldState> addressscaffoldKey =
+    new GlobalKey<ScaffoldState>();
 
 class _AddressScreenState extends State<AddressScreen> {
   AddressAPI addressAPI = AddressAPI();
@@ -35,16 +39,19 @@ class _AddressScreenState extends State<AddressScreen> {
 
   @override
   Widget build(BuildContext context) {
+    DetectedScreen detectedScreen = DetectedScreen(context);
+    AddressSize addressSize = AddressSize(detectedScreen);
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
+        key: addressscaffoldKey,
         appBar: AppBar(
           elevation: 0,
           title: Text(
             AppLocale.of(context).getTranslated("drawer_address"),
             style: TextStyle(
               color: CustomColors.whiteBG,
-              fontSize: 22,
+              fontSize: addressSize.headerTextSize,
               fontWeight: FontWeight.bold,
             ),
             overflow: TextOverflow.visible,
@@ -63,14 +70,15 @@ class _AddressScreenState extends State<AddressScreen> {
                   children: [
                     Column(
                       children: [
-                        _drawTextAddress(),
+                        _drawTextAddress(
+                            addressSize.headerTextSize, addressSize.iconSize),
                         Container(
                           width: MediaQuery.of(context).size.width,
                           height: MediaQuery.of(context).size.height * .7,
                           child: FutureBuilder(
                               future: addressAPI.getUserAddress(),
-                              builder:
-                                  (BuildContext context, AsyncSnapshot snapshot) {
+                              builder: (BuildContext context,
+                                  AsyncSnapshot snapshot) {
                                 switch (snapshot.connectionState) {
                                   case ConnectionState.none:
                                     return emptyPage(context);
@@ -86,23 +94,27 @@ class _AddressScreenState extends State<AddressScreen> {
                                       if (snapshot.data.length > 0) {
                                         return ListView.builder(
                                           shrinkWrap: true,
+                                          physics:
+                                              NeverScrollableScrollPhysics(),
                                           padding: EdgeInsets.symmetric(
                                               horizontal: 10),
-                                          itemBuilder:
-                                              (BuildContext context, int index) {
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
                                             var item = data[index];
                                             if (item["default"] == 1) {
                                               _groupValue.value = index;
                                               _addressId.value = item["id"];
                                             }
                                             return _myRadioButton(
-                                                title: item['full_address'],
-                                                RadioButtonValue: index,
-                                                onChanged: (newValue) {
-                                                  _groupValue.value = newValue;
-                                                  _addressId.value = item["id"];
-                                                },
-                                                posOfProducts: _groupValue);
+                                              title: item['full_address'],
+                                              RadioButtonValue: index,
+                                              onChanged: (newValue) {
+                                                _groupValue.value = newValue;
+                                                _addressId.value = item["id"];
+                                              },
+                                              posOfProducts: _groupValue,
+                                              nameSize: addressSize.nameSize,
+                                            );
                                           },
                                           itemCount: data.length,
                                         );
@@ -116,11 +128,14 @@ class _AddressScreenState extends State<AddressScreen> {
                                             children: [
                                               Text(
                                                 AppLocale.of(context)
-                                                    .getTranslated("Address_dis"),
+                                                    .getTranslated(
+                                                        "Address_dis"),
                                                 style: TextStyle(
-                                                    fontSize: 24,
+                                                    fontSize:
+                                                        addressSize.nameSize,
                                                     fontWeight: FontWeight.w600,
                                                     color: CustomColors.dark),
+                                                textAlign: TextAlign.center,
                                               ),
                                             ],
                                           ),
@@ -133,7 +148,8 @@ class _AddressScreenState extends State<AddressScreen> {
                                 return emptyPage(context);
                               }),
                         ),
-                        _drawAddOrRemoveAddress(),
+                        _drawAddOrRemoveAddress(
+                            addressSize.nameSize, addressSize.iconSize),
                       ],
                     ),
                   ],
@@ -148,7 +164,8 @@ class _AddressScreenState extends State<AddressScreen> {
                     padding: EdgeInsets.symmetric(horizontal: 30),
                     child: Text(
                       AppLocale.of(context).getTranslated("apology"),
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -190,19 +207,19 @@ class _AddressScreenState extends State<AddressScreen> {
     );
   }
 
-  Widget _drawTextAddress() {
+  Widget _drawTextAddress(double nameSize, iconSize) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            height: MediaQuery.of(context).size.height * .04,
+            height: MediaQuery.of(context).size.height * .06,
             child: Center(
               child: Text(
                 AppLocale.of(context).getTranslated("address_added"),
                 style: TextStyle(
-                    fontSize: 24,
+                    fontSize: nameSize,
                     fontWeight: FontWeight.w600,
                     color: CustomColors.primary),
               ),
@@ -210,7 +227,7 @@ class _AddressScreenState extends State<AddressScreen> {
           ),
           Container(
             width: MediaQuery.of(context).size.width * .12,
-            height: MediaQuery.of(context).size.height * .04,
+            height: MediaQuery.of(context).size.height * .045,
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [
                 CustomColors.primary,
@@ -218,21 +235,21 @@ class _AddressScreenState extends State<AddressScreen> {
               ]),
               borderRadius: BorderRadius.circular(7),
             ),
-            child: Center(
-              child: IconButton(
-                icon: FaIcon(
+            child: IconButton(
+              icon: Center(
+                child: FaIcon(
                   FontAwesomeIcons.plus,
-                  size: 16,
+                  size: iconSize,
                   color: CustomColors.whiteBG,
                 ),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AddAddressScreen(
-                              widget.latitude, widget.longitude)));
-                },
               ),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AddAddressScreen(
+                            widget.latitude, widget.longitude)));
+              },
             ),
           ),
         ],
@@ -245,6 +262,7 @@ class _AddressScreenState extends State<AddressScreen> {
     int RadioButtonValue,
     Function onChanged,
     ValueNotifier<int> posOfProducts,
+    double nameSize,
   }) {
     return ValueListenableBuilder(
       valueListenable: posOfProducts,
@@ -257,7 +275,7 @@ class _AddressScreenState extends State<AddressScreen> {
           title: Text(
             title,
             style: TextStyle(
-                fontSize: 16,
+                fontSize: nameSize,
                 fontWeight: FontWeight.w600,
                 color: CustomColors.darkBlue),
           ),
@@ -266,7 +284,7 @@ class _AddressScreenState extends State<AddressScreen> {
     );
   }
 
-  Widget _drawAddOrRemoveAddress() {
+  Widget _drawAddOrRemoveAddress(double nameSize, iconSize) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Row(
@@ -293,10 +311,11 @@ class _AddressScreenState extends State<AddressScreen> {
                 child: Text(
                   AppLocale.of(context).getTranslated("switch_address"),
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: nameSize,
                     fontWeight: FontWeight.w600,
                     color: CustomColors.whiteBG,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
@@ -315,7 +334,7 @@ class _AddressScreenState extends State<AddressScreen> {
               child: IconButton(
                 icon: FaIcon(
                   FontAwesomeIcons.trash,
-                  size: 22,
+                  size: iconSize,
                   color: CustomColors.whiteBG,
                 ),
                 onPressed: () {
@@ -330,6 +349,7 @@ class _AddressScreenState extends State<AddressScreen> {
       ),
     );
   }
+
   Future<bool> _onBackPressed() {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => HomeScreen()));

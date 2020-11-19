@@ -53,11 +53,13 @@ Widget emptyPage(
       children: <Widget>[
         Center(
           child: Text(
-            "Page is Empty",
+            AppLocale.of(context).getTranslated("lang") == 'English'
+                ? "لم نستطع تحميل البيانات تفقد الانترنت"
+                : "we can't load data,check internet",
             style: TextStyle(
-                color: CustomColors.whiteBG,
-                fontSize: 25,
-                fontWeight: FontWeight.bold),
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+            ),
           ),
         ),
       ],

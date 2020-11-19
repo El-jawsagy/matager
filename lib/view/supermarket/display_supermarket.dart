@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/homepage.dart';
 import 'package:matager/view/supermarket/search/product_search_screen.dart';
 import 'package:matager/view/user/cart/cart_offline.dart';
 import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/drawer.dart';
+import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
 
@@ -15,12 +17,13 @@ import 'product/screen_of_proudect.dart';
 class DisplayMarket extends StatefulWidget {
   int categoryID;
   int marketId;
+  String status;
   String marketName;
   String token;
   double latitude, longitude;
 
-  DisplayMarket(this.categoryID, this.marketId, this.marketName, this.token,
-      this.latitude, this.longitude);
+  DisplayMarket(this.categoryID, this.marketId, this.status, this.marketName,
+      this.token, this.latitude, this.longitude);
 
   @override
   _DisplayMarketState createState() => _DisplayMarketState();
@@ -37,6 +40,8 @@ class _DisplayMarketState extends State<DisplayMarket> {
 
   @override
   Widget build(BuildContext context) {
+    DetectedScreen detectedScreen = DetectedScreen(context);
+    MarketSize marketSize = MarketSize(detectedScreen);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -46,8 +51,10 @@ class _DisplayMarketState extends State<DisplayMarket> {
           centerTitle: true,
           title: Text(
             widget.marketName,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            textWidthBasis: TextWidthBasis.parent,
+            style: TextStyle(
+                fontSize: marketSize.headerTextSize,
+                fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
           ),
           elevation: 0,
           actions: <Widget>[
@@ -55,35 +62,57 @@ class _DisplayMarketState extends State<DisplayMarket> {
               onPressed: () {
                 showSearch(
                   context: context,
-                  delegate: ProductSearchScreen(widget.marketId, widget.token,
-                      widget.latitude, widget.longitude),
+                  delegate: ProductSearchScreen(widget.marketId, widget.status,
+                      widget.token, widget.latitude, widget.longitude),
                 );
               },
               icon: Icon(
                 Icons.search,
                 color: CustomColors.whiteBG,
+                size: marketSize.iconHeaderSize,
               ),
             ),
-            IconButton(
-              onPressed: () {
-                if (widget.token == null) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CartOffLineScreen(
-                              widget.latitude, widget.longitude)));
-                } else {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CartOnLineScreen(
-                              widget.latitude, widget.longitude)));
-                }
+            ValueListenableBuilder(
+              valueListenable: countOfProducts,
+              builder: (BuildContext context, int value, Widget child) {
+                return Stack(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                              color: CustomColors.red, shape: BoxShape.circle),
+                          child: Text(countOfProducts.value.toString()),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      iconSize: marketSize.iconHeaderSize,
+                      onPressed: () {
+                        print(widget.token);
+                        if (widget.token == null) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CartOffLineScreen(
+                                      widget.latitude, widget.longitude)));
+                        } else {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CartOnLineScreen(
+                                      widget.latitude, widget.longitude)));
+                        }
+                      },
+                      icon: Icon(
+                        Icons.shopping_cart,
+                      ),
+                    ),
+                  ],
+                );
               },
-              icon: Icon(
-                Icons.shopping_cart,
-                color: CustomColors.whiteBG,
-              ),
             ),
           ],
           bottom: TabBar(
@@ -98,9 +127,10 @@ class _DisplayMarketState extends State<DisplayMarket> {
                     child: Text(
                       AppLocale.of(context).getTranslated("Category"),
                       style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: marketSize.nameSize,
+                      ),
                     ),
                   ),
                 ),
@@ -112,9 +142,10 @@ class _DisplayMarketState extends State<DisplayMarket> {
                     child: Text(
                       AppLocale.of(context).getTranslated("offer"),
                       style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: marketSize.nameSize,
+                      ),
                     ),
                   ),
                 ),
@@ -135,21 +166,28 @@ class _DisplayMarketState extends State<DisplayMarket> {
                   break;
                 case ConnectionState.done:
                   if (snapshot.hasData) {
+                    print(snapshot.data["shipping_time"]);
+                    print(widget.marketId);
                     List<Widget> TabsHomePage = [
                       TabScreenoFCategory(
                           snapshot.data["categories"],
+                          snapshot.data["shipping_time"],
                           widget.marketId,
                           widget.marketName,
                           widget.token,
                           widget.latitude,
-                          widget.longitude),
+                          widget.longitude,
+                          marketSize.nameSize),
                       TabScreenOfOffer(
                         snapshot.data["offers"],
+                        snapshot.data["shipping_time"],
                         widget.marketId,
                         widget.marketName,
                         widget.token,
                         widget.latitude,
                         widget.longitude,
+                        marketSize.nameSize,
+                        marketSize.iconSize,
                       ),
                     ];
 

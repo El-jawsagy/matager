@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:matager/controller/address_api.dart';
 import 'package:matager/controller/cart/cart_items_bloc_and_Api.dart';
-import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/controller/orders_api.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/homepage.dart';
 import 'package:matager/view/user/address/setAddress.dart';
+import 'package:matager/view/user/orders/order.dart';
 import 'package:matager/view/utilities/drawer.dart';
+import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
+
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/controller/orders_api.dart';
 
 class CartCheckOut extends StatefulWidget {
   double latitude, longitude;
@@ -21,29 +25,42 @@ class CartCheckOut extends StatefulWidget {
 }
 
 class _CartCheckOutState extends State<CartCheckOut> {
-  final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> _cartPayScaffoldKey =
+      new GlobalKey<ScaffoldState>();
   AddressAPI addressAPI;
   CardMethodApi cardMethodApi;
   OrdersApi ordersApi;
   ValueNotifier<int> _groupValue;
   ValueNotifier<int> _addressId;
+  ValueNotifier<int> _couponID;
+  ValueNotifier<int> _couponDiscount;
+  ValueNotifier<bool> valueOfCoupon;
+
+  final _couponKey = GlobalKey<FormState>();
+  TextEditingController _couponTextController = TextEditingController();
 
   @override
   void initState() {
     addressAPI = AddressAPI();
     cardMethodApi = CardMethodApi();
     ordersApi = OrdersApi();
+
     _groupValue = ValueNotifier(0);
     _addressId = ValueNotifier(0);
+    _couponDiscount = ValueNotifier(0);
+    _couponID = ValueNotifier(0);
+    valueOfCoupon = ValueNotifier(false);
 
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    DetectedScreen detectedScreen = DetectedScreen(context);
+    CartCheckOutSize cartCheckOutSize = CartCheckOutSize(detectedScreen);
     return Scaffold(
-      key: _scaffoldkey,
-      backgroundColor: CustomColors.grayTow,
+      key: _cartPayScaffoldKey,
+      backgroundColor: CustomColors.whiteBG,
       appBar: AppBar(
         elevation: 0,
         title: Text(
@@ -145,6 +162,14 @@ class _CartCheckOutState extends State<CartCheckOut> {
               },
               itemCount: widget.data.length,
             ),
+            ValueListenableBuilder(
+              valueListenable: _couponDiscount,
+              builder: (BuildContext context, value, Widget child) {
+                return _couponDiscount.value > 0
+                    ? _drawDisplayCoupon(_couponDiscount.value)
+                    : _drawEnterCoupon();
+              },
+            ),
             _drawTextProducts("total"),
             FutureBuilder(
                 future: cardMethodApi.getCartPrice(),
@@ -163,134 +188,177 @@ class _CartCheckOutState extends State<CartCheckOut> {
                         var data = snapshot.data;
                         print("the price ids$data");
 
-                        return Container(
-                          decoration: BoxDecoration(
-                              color: CustomColors.whiteBG,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: CustomColors.gray,
-                                  blurRadius: 0.7,
-                                )
-                              ]),
-                          width: MediaQuery.of(context).size.width,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(2),
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.04,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        AppLocale.of(context)
-                                            .getTranslated("sub_total"),
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            color: CustomColors.grayOne),
-                                        maxLines: 1,
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                        softWrap: true,
+                        return ValueListenableBuilder(
+                          valueListenable: _couponDiscount,
+                          builder: (BuildContext context, value, Widget child) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                  color: CustomColors.whiteBG,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: CustomColors.gray,
+                                      blurRadius: 0.7,
+                                    )
+                                  ]),
+                              width: MediaQuery.of(context).size.width,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(2),
+                                      width: MediaQuery.of(context).size.width,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            AppLocale.of(context)
+                                                .getTranslated("sub_total"),
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: CustomColors.grayOne),
+                                            maxLines: 1,
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.ellipsis,
+                                            softWrap: true,
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                            "${data["sub_total"].toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                            maxLines: 1,
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.ellipsis,
+                                            softWrap: true,
+                                          ),
+                                        ],
                                       ),
-                                      SizedBox(
-                                        width: 10,
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.all(2),
+                                      width: MediaQuery.of(context).size.width,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            AppLocale.of(context)
+                                                .getTranslated("shipping_cost"),
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: CustomColors.grayOne),
+                                            maxLines: 1,
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.ellipsis,
+                                            softWrap: true,
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                            "${data["total_shipping"].toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                            maxLines: 1,
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.ellipsis,
+                                            softWrap: true,
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        data["sub_total"].toString(),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                        maxLines: 1,
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                        softWrap: true,
+                                    ),
+                                    _couponDiscount.value > 0
+                                        ? Container(
+                                            padding: const EdgeInsets.all(2),
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  AppLocale.of(context)
+                                                      .getTranslated(
+                                                          "cart_discount"),
+                                                  style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: CustomColors
+                                                          .greenLightFont),
+                                                  maxLines: 1,
+                                                  textAlign: TextAlign.center,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  softWrap: true,
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Text(
+                                                  "${_couponDiscount.value.toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
+                                                  maxLines: 1,
+                                                  textAlign: TextAlign.center,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  softWrap: true,
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        : Container(),
+                                    Container(
+                                      padding: const EdgeInsets.all(2),
+                                      width: MediaQuery.of(context).size.width,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            AppLocale.of(context)
+                                                .getTranslated("total"),
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: CustomColors.grayOne),
+                                            maxLines: 1,
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.ellipsis,
+                                            softWrap: true,
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                            " ${(data["total"] - _couponDiscount.value).toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                            maxLines: 1,
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.ellipsis,
+                                            softWrap: true,
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    )
+                                  ],
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.all(2),
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.04,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        AppLocale.of(context)
-                                            .getTranslated("shipping_cost"),
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            color: CustomColors.grayOne),
-                                        maxLines: 1,
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                        softWrap: true,
-                                      ),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Text(
-                                        data["total_shipping"].toString(),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                        maxLines: 1,
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                        softWrap: true,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(2),
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.04,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        AppLocale.of(context)
-                                            .getTranslated("total"),
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            color: CustomColors.grayOne),
-                                        maxLines: 1,
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                        softWrap: true,
-                                      ),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Text(
-                                        data["total"].toString(),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                        maxLines: 1,
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                        softWrap: true,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
+                              ),
+                            );
+                          },
                         );
                       } else
                         return emptyPage(context);
@@ -321,8 +389,6 @@ class _CartCheckOutState extends State<CartCheckOut> {
                   color: CustomColors.primary),
             ),
             Container(
-              width: MediaQuery.of(context).size.width * .1,
-              height: MediaQuery.of(context).size.height * .035,
               decoration: BoxDecoration(
                 gradient: LinearGradient(colors: [
                   CustomColors.primary,
@@ -331,19 +397,37 @@ class _CartCheckOutState extends State<CartCheckOut> {
                 borderRadius: BorderRadius.circular(7),
               ),
               child: Center(
-                child: IconButton(
-                  icon: FaIcon(
-                    FontAwesomeIcons.plus,
-                    size: 12,
-                    color: CustomColors.whiteBG,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => AddAddressScreen(
-                                widget.latitude, widget.longitude)));
-                  },
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: FaIcon(
+                        FontAwesomeIcons.plus,
+                        size: 12,
+                        color: CustomColors.whiteBG,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => AddAddressScreen(
+                                    widget.latitude, widget.longitude)));
+                      },
+                    ),
+                    IconButton(
+                      icon: FaIcon(
+                        FontAwesomeIcons.trash,
+                        size: 12,
+                        color: CustomColors.whiteBG,
+                      ),
+                      onPressed: () {
+                        addressAPI
+                            .removeAddress(_addressId.value)
+                            .then((value) {
+                          setState(() {});
+                        });
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -381,7 +465,7 @@ class _CartCheckOutState extends State<CartCheckOut> {
 
   Widget _drawTextProducts(string) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
@@ -408,7 +492,6 @@ class _CartCheckOutState extends State<CartCheckOut> {
     counterController.text = posOfProducts.value.toString();
     return Container(
       margin: EdgeInsets.symmetric(vertical: 2),
-      height: MediaQuery.of(context).size.height * 0.13,
       child: Stack(
         children: <Widget>[
           Card(
@@ -420,8 +503,7 @@ class _CartCheckOutState extends State<CartCheckOut> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 Container(
-                  width: 50,
-                  height: 50,
+                  width: MediaQuery.of(context).size.width * 0.1,
                   child: ClipRRect(
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(7),
@@ -449,24 +531,25 @@ class _CartCheckOutState extends State<CartCheckOut> {
                 ),
                 Column(
                   children: [
-                    Text(
-                      AppLocale.of(context).getTranslated("lang") == 'English'
-                          ? data["name_ar"]
-                          : data["name_en"],
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      child: Text(
+                        AppLocale.of(context).getTranslated("lang") == 'English'
+                            ? data["name_ar"]
+                            : data["name_en"],
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
                       ),
-                      maxLines: 1,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: true,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          height: MediaQuery.of(context).size.height * 0.03,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -499,7 +582,6 @@ class _CartCheckOutState extends State<CartCheckOut> {
                           ),
                         ),
                         Container(
-                          height: MediaQuery.of(context).size.height * 0.03,
                           width: MediaQuery.of(context).size.width * 0.5,
                           child: Center(
                             child: Text.rich(
@@ -508,7 +590,7 @@ class _CartCheckOutState extends State<CartCheckOut> {
                                       children: <TextSpan>[
                                         TextSpan(
                                           text:
-                                              " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                              " ${data["oldprice"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                                           style: new TextStyle(
                                             color: CustomColors.red,
                                             decoration:
@@ -521,10 +603,10 @@ class _CartCheckOutState extends State<CartCheckOut> {
                                             color: CustomColors.red,
                                           ),
                                         ),
-                                        new TextSpan(
+                                        TextSpan(
                                           text:
-                                              " ${(double.tryParse(data["offer_price"])).toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                                          style: new TextStyle(
+                                              " ${(double.tryParse(data["price"])).toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                          style: TextStyle(
                                             color: CustomColors.primary,
                                           ),
                                         ),
@@ -548,7 +630,6 @@ class _CartCheckOutState extends State<CartCheckOut> {
                     ),
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 2),
-                      height: MediaQuery.of(context).size.height * 0.04,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -566,16 +647,18 @@ class _CartCheckOutState extends State<CartCheckOut> {
                           SizedBox(
                             width: 10,
                           ),
-                          Text(
-                            data["store_name"],
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.5,
+                            child: Text(
+                              data["store_name"],
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.visible,
+                              softWrap: true,
                             ),
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            softWrap: true,
                           ),
                         ],
                       ),
@@ -590,29 +673,208 @@ class _CartCheckOutState extends State<CartCheckOut> {
     );
   }
 
+  Widget _drawEnterCoupon() {
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: ValueListenableBuilder(
+        valueListenable: valueOfCoupon,
+        builder: (BuildContext context, value, Widget child) {
+          return valueOfCoupon.value
+              ? Container(
+                  child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Form(
+                      key: _couponKey,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.55,
+                        child: TextFormField(
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          keyboardType: TextInputType.multiline,
+                          controller: _couponTextController,
+                          decoration: InputDecoration(
+                            hintText:
+                                AppLocale.of(context).getTranslated("lang") ==
+                                        'English'
+                                    ? "ادخل كوبون الخصم"
+                                    : "Enter the discount coupon",
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                              ),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                              ),
+                            ),
+                            fillColor: CustomColors.dark,
+                          ),
+                          validator: (onValue) {
+                            if (onValue.isEmpty) {
+                              return AppLocale.of(context)
+                                  .getTranslated("wrong");
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: InkWell(
+                        onTap: () {
+                          if (_couponKey.currentState.validate()) {
+                            cardMethodApi
+                                .checkCoupon(
+                              _couponTextController.text,
+                            )
+                                .then((value) {
+                              if (value['data'] == "false") {
+                                final snackBar = SnackBar(
+                                    backgroundColor: CustomColors.ratingLightBG,
+                                    content: Text(
+                                      AppLocale.of(context)
+                                                  .getTranslated("lang") ==
+                                              'English'
+                                          ? "الكوبون الذي ادخلته غير صالح"
+                                          : "coupon you entered is not valid",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: CustomColors.ratingLightFont),
+                                    ));
+
+                                _cartPayScaffoldKey.currentState
+                                    .showSnackBar(snackBar);
+                              } else if (value['data'] == "wrong limit") {
+                                final snackBar = SnackBar(
+                                    backgroundColor: CustomColors.ratingLightBG,
+                                    content: Text(
+                                      AppLocale.of(context)
+                                                  .getTranslated("lang") ==
+                                              'English'
+                                          ? "الكوبون الذي ادخلته لم يصل بعد لقيمة المشتريات المحددة"
+                                          : "The coupon you entered has not yet reached the value of the specified purchases",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: CustomColors.ratingLightFont),
+                                    ));
+
+                                _cartPayScaffoldKey.currentState
+                                    .showSnackBar(snackBar);
+                              } else if (value['data'].containsKey("id")) {
+                                _couponDiscount.value =
+                                    value['data']["discount"];
+                                _couponID.value = value['data']["id"];
+                              }
+                            });
+                          }
+                        },
+                        child: Text(
+                          AppLocale.of(context).getTranslated("send"),
+                          style: TextStyle(
+                            color: CustomColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ))
+              : FlatButton(
+                  padding: EdgeInsets.all(8),
+                  color: CustomColors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: Text(
+                    AppLocale.of(context).getTranslated("lang") == 'English'
+                        ? "هل لديك قسيمة ؟"
+                        : 'Have coupon ?',
+                    style: TextStyle(
+                      color: CustomColors.whiteBG,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  onPressed: () {
+                    valueOfCoupon.value = !valueOfCoupon.value;
+                  },
+                );
+        },
+      ),
+    );
+  }
+
+  Widget _drawDisplayCoupon(coupon) {
+    return Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.5,
+          child: ListTile(
+            title: Text(
+              _couponTextController.text,
+              style: TextStyle(
+                color: CustomColors.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            trailing: IconButton(
+              icon: FaIcon(FontAwesomeIcons.times),
+              onPressed: () {
+                _couponDiscount.value = 0;
+                _couponTextController.text = '';
+              },
+            ),
+          ),
+        ));
+  }
+
   Widget _drawOrderButton(double textButtonSize) {
     return InkWell(
       onTap: () async {
         ordersApi
-            .makeOrder(widget.data, _addressId.value, null, null)
+            .makeOrder(widget.data, _addressId.value, _couponID.value,
+                _couponDiscount.value)
             .then((value) {
           if (value == "true") {
             final snackBar = SnackBar(
-              content: Text('thanks for your order'),
+              backgroundColor: CustomColors.greenLightBG,
+              content: Text(
+                AppLocale.of(context).getTranslated("lang") == "English"
+                    ? "تم ارسال طلبك بنجاح .."
+                    : "Your order has been sent successfully ..",
+                style: TextStyle(color: CustomColors.greenLightFont),
+              ),
               duration: Duration(seconds: 3),
             );
-            _scaffoldkey.currentState.showSnackBar(snackBar);
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => HomeScreen()));
+            orderScaffoldKey.currentState.showSnackBar(snackBar);
+            countOfProducts.value = 0;
           } else {
             final snackBar = SnackBar(
+              backgroundColor: CustomColors.ratingLightBG,
               content: Text(
-                  'sorry your order is not complete please check internet and try again'),
+                AppLocale.of(context).getTranslated("lang") == "English"
+                    ? "آسف لم يكتمل طلبك ، يرجى التحقق من الإنترنت والمحاولة مرة أخرى"
+                    : 'sorry your order is not complete please check internet and try again',
+                style: TextStyle(color: CustomColors.redLightFont),
+              ),
               duration: Duration(seconds: 3),
             );
-            _scaffoldkey.currentState.showSnackBar(snackBar);
+            orderScaffoldKey.currentState.showSnackBar(snackBar);
           }
         });
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    OrderScreen(widget.latitude, widget.longitude)));
       },
       child: Padding(
         padding: const EdgeInsets.only(top: 8.0),

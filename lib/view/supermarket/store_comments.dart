@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:matager/controller/store/comment_api.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
-import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class StoreCommentsScreen extends StatefulWidget {
   String name;
@@ -18,6 +18,7 @@ class StoreCommentsScreen extends StatefulWidget {
 
 class _StoreCommentsScreenState extends State<StoreCommentsScreen> {
   CommentMethodAPI commentMethodAPI;
+
   @override
   void initState() {
     commentMethodAPI = CommentMethodAPI();
@@ -164,7 +165,6 @@ class _StoreCommentsScreenState extends State<StoreCommentsScreen> {
   Widget _drawCardOfComment(Map data) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 6),
-      height: MediaQuery.of(context).size.height * 0.3,
       child: Stack(
         children: <Widget>[
           Card(
@@ -261,16 +261,23 @@ class _StoreCommentsScreenState extends State<StoreCommentsScreen> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      SmoothStarRating(
-                        starCount: 5,
-                        isReadOnly: true,
-                        size: 22,
-                        borderColor: CustomColors.ratingBG,
-                        color: CustomColors.ratingBG,
-                        rating: data["rate"].floorToDouble(),
-                      )
+                      RatingBar.builder(
+                        ignoreGestures: true,
+                        initialRating: data["rate"].floorToDouble(),
+                        direction: Axis.horizontal,
+                        allowHalfRating: false,
+                        itemCount: 5,
+                        itemSize: 20,
+                        itemBuilder: (context, _) => Icon(
+                          Icons.star,
+                          color: CustomColors.ratingBG,
+                        ),
+                        onRatingUpdate: (rating) {
+                          print(rating);
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -289,7 +296,7 @@ class _StoreCommentsScreenState extends State<StoreCommentsScreen> {
                           children: [
                             Text(
                               data["replies"][0]["username"] == null
-                                  ? "لا يوجد اسم"
+                                  ? widget.name
                                   : data["replies"][0]["username"],
                               style: TextStyle(
                                 fontWeight: FontWeight.w400,

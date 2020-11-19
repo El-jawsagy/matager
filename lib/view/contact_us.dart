@@ -18,7 +18,7 @@ class ContactUsScreen extends StatefulWidget {
 }
 
 class _ContactUsScreenState extends State<ContactUsScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> _contactUsScaffoldKey = new GlobalKey<ScaffoldState>();
 
   AboutAndTermsOfUseAPI contactUsAPI;
   TextEditingController _firstNameEditingText;
@@ -74,7 +74,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
-        key: _scaffoldkey,
+        key: _contactUsScaffoldKey,
         backgroundColor: CustomColors.grayThree,
         appBar: AppBar(
           centerTitle: true,
@@ -375,9 +375,15 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
           )
               .then((value) {
             if (value == "true") {
-              final snackBar = SnackBar(content: Text('your message is sent'));
-
-              _scaffoldkey.currentState.showSnackBar(snackBar);
+              final snackBar = SnackBar(
+                  backgroundColor: CustomColors.greenLightBG,
+                  content: Text(
+                    AppLocale.of(context).getTranslated("lang") == 'English'
+                        ? "مرحباُ : تم ارسال رسالتك ب نجاح.."
+                        : 'Hello: Your message was sent with success..',
+                    style: TextStyle(color: CustomColors.greenLightFont),
+                  ));
+              _contactUsScaffoldKey.currentState.showSnackBar(snackBar);
             }
           });
         }

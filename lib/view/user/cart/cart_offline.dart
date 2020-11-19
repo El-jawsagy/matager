@@ -5,10 +5,10 @@ import 'package:matager/controller/cart/cart_bloc_off.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/Authentication/login.dart';
 import 'package:matager/view/utilities/drawer.dart';
+import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../homepage.dart';
 import 'cart_check_out.dart';
 
 //todo: edit counter of quantity
@@ -24,10 +24,12 @@ class CartOffLineScreen extends StatefulWidget {
 }
 
 class _CartOffLineScreenState extends State<CartOffLineScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> _cartScaffoldKey =
+      new GlobalKey<ScaffoldState>();
   Map allItems = {
     'cart_items': [],
   };
+  ValueNotifier<double> totalPrice = ValueNotifier(0);
 
   @override
   void initState() {
@@ -36,70 +38,83 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onBackPressed,
-      child: Scaffold(
-        key: _scaffoldkey,
-        appBar: AppBar(
-          elevation: 0,
-          title: Text(
-            AppLocale.of(context).getTranslated("drawer_cart"),
-            style: TextStyle(
-              color: CustomColors.whiteBG,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-            overflow: TextOverflow.visible,
-            textAlign: TextAlign.center,
+    DetectedScreen detectedScreen = DetectedScreen(context);
+    CartSize cartSize = CartSize(detectedScreen);
+    return Scaffold(
+      key: _cartScaffoldKey,
+      appBar: AppBar(
+        elevation: 0,
+        title: Text(
+          AppLocale.of(context).getTranslated("drawer_cart"),
+          style: TextStyle(
+            color: CustomColors.whiteBG,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
           ),
-          centerTitle: true,
+          overflow: TextOverflow.visible,
+          textAlign: TextAlign.center,
         ),
-        drawer: NavDrawer(widget.latitude, widget.longitude),
-        body: StreamBuilder(
-          stream: itemBlocOffLine.getStream,
-          initialData: itemBlocOffLine.allItems,
-          builder: (context, snapshot) {
-            allItems = snapshot.data;
+        centerTitle: true,
+      ),
+      drawer: NavDrawer(widget.latitude, widget.longitude),
+      body: StreamBuilder(
+        stream: itemBlocOffLine.getStream,
+        initialData: itemBlocOffLine.allItems,
+        builder: (context, snapshot) {
+          allItems = snapshot.data;
+          totalPrice.value = 0;
 
-            return snapshot.data['cart_items'].length > 0
-                ? Stack(
+          return snapshot.data['cart_items'].length > 0
+              ? SingleChildScrollView(
+                  child: Column(
                     children: [
                       ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
+                          totalPrice.value = totalPrice.value +
+                              snapshot.data['cart_items'][index]["new_price"];
                           return _drawCardOfStore(
-                              snapshot.data['cart_items'][index]);
+                              snapshot.data['cart_items'][index],
+                              cartSize.nameSize,
+                              cartSize.priceSize,
+                              cartSize.iconSize);
                         },
                         itemCount: snapshot.data['cart_items'].length,
                       ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          _drawCompleteOrder(snapshot.data['cart_items']),
+                          _drawCompleteOrder(
+                              snapshot.data['cart_items'], cartSize.nameSize),
                           SizedBox(
-                            height: 50,
+                            height: cartSize.sizeBoxHeight,
                           )
                         ],
                       ),
                     ],
-                  )
-                : Center(
-                    child: Text(
-                    AppLocale.of(context).getTranslated("lang") == 'English'
-                        ? "لم تختار أي عنصر حتى الآن"
-                        : "You haven't taken any item yet",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                    ),
-                  ));
-          },
-        ),
+                  ),
+                )
+              : Center(
+                  child: Text(
+                  AppLocale.of(context).getTranslated("lang") == 'English'
+                      ? "لم تختار أي عنصر حتى الآن"
+                      : "You haven't taken any item yet",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: cartSize.headerTextSize,
+                  ),
+                ));
+        },
       ),
     );
   }
 
   Widget _drawCardOfStore(
     map,
+    nameSize,
+    priceSize,
+    iconSize,
   ) {
     Map data = map["data"];
     double quan = map['quantity'];
@@ -109,7 +124,6 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
     counterController.text = posOfProducts.value.toString();
     return Container(
       margin: EdgeInsets.symmetric(vertical: 6),
-      height: MediaQuery.of(context).size.height * 0.15,
       child: Stack(
         children: <Widget>[
           Card(
@@ -121,8 +135,7 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
-                  width: 50,
-                  height: 50,
+                  width: MediaQuery.of(context).size.width * 0.1,
                   child: ClipRRect(
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(7),
@@ -150,18 +163,20 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
                 ),
                 Column(
                   children: [
-                    Text(
-                      AppLocale.of(context).getTranslated("lang") == 'English'
-                          ? data["name_ar"]
-                          : data["name_en"],
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: Text(
+                        AppLocale.of(context).getTranslated("lang") == 'English'
+                            ? data["name_ar"]
+                            : data["name_en"],
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: nameSize,
+                        ),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        softWrap: true,
                       ),
-                      maxLines: 1,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: true,
                     ),
                     Container(
                       height: MediaQuery.of(context).size.height * 0.03,
@@ -177,9 +192,10 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
                                       children: <TextSpan>[
                                         TextSpan(
                                           text:
-                                              " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                              " ${data["oldprice"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                                           style: new TextStyle(
                                             color: CustomColors.red,
+                                            fontSize: priceSize,
                                             decoration:
                                                 TextDecoration.lineThrough,
                                           ),
@@ -192,8 +208,9 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
                                         ),
                                         new TextSpan(
                                           text:
-                                              " ${(double.tryParse(data["offer_price"]) * posOfProducts.value).toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                              " ${(double.tryParse(data["price"]) * posOfProducts.value).toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                                           style: new TextStyle(
+                                            fontSize: priceSize,
                                             color: CustomColors.primary,
                                           ),
                                         ),
@@ -205,6 +222,7 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
                                           text:
                                               " ${map["new_price"].toString()} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                                           style: new TextStyle(
+                                            fontSize: priceSize,
                                             color: CustomColors.red,
                                           ),
                                         ),
@@ -215,12 +233,11 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
                         },
                       ),
                     ),
-                    _drawCounterRow(data, posOfProducts, counterController),
+                    _drawCounterRow(data, posOfProducts, counterController,
+                        iconSize, nameSize),
                   ],
                 ),
-                _drawRemoveButton(
-                  map,
-                ),
+                _drawRemoveButton(map, iconSize),
               ],
             ),
           ),
@@ -230,7 +247,7 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
   }
 
   Widget _drawCounterRow(Map data, ValueNotifier<double> posOfProducts,
-      TextEditingController counterController) {
+      TextEditingController counterController, iconSize, nameSize) {
     var fixed;
     if (data["unit"] == "0") {
       fixed = 1;
@@ -250,7 +267,7 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
               children: <Widget>[
                 IconButton(
                     highlightColor: Colors.red,
-                    iconSize: 20,
+                    iconSize: iconSize,
                     icon: Icon(Icons.add),
                     onPressed: () {
                       counterController.text = posOfProducts.value.toString();
@@ -259,13 +276,13 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
                     }),
                 Container(
                   padding: EdgeInsets.only(left: 2, right: 2, top: 2),
-                  width: MediaQuery.of(context).size.width * 0.12,
+                  width: MediaQuery.of(context).size.width * 0.13,
                   child: EditableText(
                     controller: counterController,
                     backgroundCursorColor: Colors.black,
                     style: TextStyle(
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: nameSize,
                         fontWeight: FontWeight.bold),
                     cursorColor: Colors.black,
                     textAlign: TextAlign.center,
@@ -282,7 +299,7 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
                 posOfProducts.value > fixed
                     ? IconButton(
                         highlightColor: Colors.red,
-                        iconSize: 20,
+                        iconSize: iconSize,
                         icon: Icon(Icons.remove, color: CustomColors.dark),
                         onPressed: () {
                           if (posOfProducts.value > 0) {
@@ -294,11 +311,11 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
                         })
                     : IconButton(
                         highlightColor: Colors.grey,
-                        iconSize: 20,
+                        iconSize: iconSize,
                         icon: Icon(
                           Icons.remove,
                           color: CustomColors.darkOne,
-                          size: 20,
+                          size: iconSize,
                         ),
                         onPressed: () {})
               ],
@@ -309,17 +326,21 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
     );
   }
 
-  Widget _drawRemoveButton(Map data) {
+  Widget _drawRemoveButton(Map data, iconSize) {
     return InkWell(
       onTap: () async {
         itemBlocOffLine.removeFromCart(
           data,
         );
         final snackBar = SnackBar(
-          content: Text('order remove from your card'),
-          duration: Duration(seconds: 3),
-        );
-        _scaffoldkey.currentState.showSnackBar(snackBar);
+            backgroundColor: CustomColors.greenLightBG,
+            content: Text(
+              AppLocale.of(context).getTranslated("lang") == 'English'
+                  ? "مرحباُ : تم ازالة المنتج من سله المشتريات ب نجاح.."
+                  : "Hello: The product has been removed from the cart with success ..",
+              style: TextStyle(color: CustomColors.greenLightFont),
+            ));
+        _cartScaffoldKey.currentState.showSnackBar(snackBar);
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -345,7 +366,7 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
                 FaIcon(
                   FontAwesomeIcons.trash,
                   color: CustomColors.whiteBG,
-                  size: 18,
+                  size: iconSize,
                 ),
               ],
             ),
@@ -355,7 +376,7 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
     );
   }
 
-  Widget _drawCompleteOrder(List products) {
+  Widget _drawCompleteOrder(List products, nameSize) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -410,11 +431,6 @@ class _CartOffLineScreenState extends State<CartOffLineScreen> {
         ),
       ],
     );
-  }
-
-  Future<bool> _onBackPressed() {
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => HomeScreen()));
   }
 
   @override

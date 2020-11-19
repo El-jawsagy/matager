@@ -4,6 +4,7 @@ import 'package:matager/controller/Favorite/favorite_items_and_api.dart';
 import 'package:matager/controller/cart/cart_bloc_off.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/Authentication/login.dart';
+import 'package:matager/view/homepage.dart';
 import 'package:matager/view/supermarket/search/product_search_screen.dart';
 import 'package:matager/view/user/cart/cart_offline.dart';
 import 'package:matager/view/user/cart/cart_online.dart';
@@ -18,14 +19,24 @@ import 'display_market_product_item_details.dart';
 
 class DisplayMarketProduct extends StatefulWidget {
   int storeId, categoryId;
+  String status;
   String categoryName;
   String marketName;
   String token;
+  int position;
 
   double latitude, longitude;
 
-  DisplayMarketProduct(this.storeId, this.categoryId, this.categoryName,
-      this.marketName, this.token, this.latitude, this.longitude);
+  DisplayMarketProduct(
+      this.storeId,
+      this.categoryId,
+      this.status,
+      this.categoryName,
+      this.marketName,
+      this.token,
+      this.latitude,
+      this.longitude,
+      this.position);
 
   @override
   _DisplayMarketProductState createState() => _DisplayMarketProductState();
@@ -35,9 +46,12 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
     with TickerProviderStateMixin {
   MarketAndCategoryApi homePage;
   TabController tabController;
+
   int currentIndex = 0;
   ProductBloc bloc;
-  final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
+
+  static final GlobalKey<ScaffoldState> _productScaffoldKey =
+      new GlobalKey<ScaffoldState>();
   FavoriteMethodAPI favoriteMethodAPI;
 
   @override
@@ -46,7 +60,8 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
     homePage = MarketAndCategoryApi();
     favoriteMethodAPI = FavoriteMethodAPI();
 
-    tabController = TabController(length: 0, vsync: this, initialIndex: 0);
+    tabController =
+        TabController(length: 0, vsync: this, initialIndex: widget.position);
 
     super.initState();
   }
@@ -69,9 +84,11 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
               case ConnectionState.done:
                 if (snapshot.hasData) {
                   List list = snapshot.data;
-                  bloc.categoryIdSink.add(list[0]["id"]);
+                  bloc.categoryIdSink.add(list[widget.position]["id"]);
                   tabController = TabController(
-                      length: list.length, vsync: this, initialIndex: 0);
+                      length: list.length,
+                      vsync: this,
+                      initialIndex: widget.position);
 
                   return _screen(list);
                 } else
@@ -86,7 +103,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
 
   Widget _screen(List<dynamic> data) {
     return Scaffold(
-      key: _scaffoldkey,
+      key: _productScaffoldKey,
       drawer: NavDrawer(widget.latitude, widget.longitude),
       appBar: AppBar(
         elevation: 0,
@@ -103,34 +120,55 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
             onPressed: () {
               showSearch(
                 context: context,
-                delegate: ProductSearchScreen(widget.storeId, widget.token,
-                    widget.latitude, widget.longitude),
+                delegate: ProductSearchScreen(widget.storeId, widget.status,
+                    widget.token, widget.latitude, widget.longitude),
               );
             },
             icon: Icon(
               Icons.search,
             ),
           ),
-          IconButton(
-            onPressed: () {
-              if (widget.token == null) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CartOffLineScreen(
-                            widget.latitude, widget.longitude)));
-              } else {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CartOnLineScreen(
-                            widget.latitude, widget.longitude)));
-              }
+          ValueListenableBuilder(
+            valueListenable: countOfProducts,
+            builder: (BuildContext context, int value, Widget child) {
+              return Stack(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                            color: CustomColors.red, shape: BoxShape.circle),
+                        child: Text(countOfProducts.value.toString()),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      print(widget.token);
+                      if (widget.token == null) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CartOffLineScreen(
+                                    widget.latitude, widget.longitude)));
+                      } else {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CartOnLineScreen(
+                                    widget.latitude, widget.longitude)));
+                      }
+                    },
+                    icon: Icon(
+                      Icons.shopping_cart,
+                    ),
+                  ),
+                ],
+              );
             },
-            icon: Icon(
-              Icons.shopping_cart,
-            ),
-          )
+          ),
         ],
         bottom: TabBar(
           indicatorSize: TabBarIndicatorSize.tab,
@@ -141,8 +179,9 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
           unselectedLabelStyle: TextStyle(fontSize: 18),
           tabs: subCategoryTabs(data),
           isScrollable: true,
-          onTap: (int val) {
-            currentIndex = data[val]["id"];
+          onTap: (val) {
+            widget.position = val;
+            currentIndex = data[widget.position]["id"];
             bloc.categoryIdSink.add(currentIndex);
           },
         ),
@@ -231,7 +270,11 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => DisplayMarketItemDetails(
-                      data, widget.token, widget.latitude, widget.longitude)));
+                      data,
+                      widget.status,
+                      widget.token,
+                      widget.latitude,
+                      widget.longitude)));
             },
             child: Stack(
               children: <Widget>[
@@ -291,7 +334,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                                     children: <TextSpan>[
                                       TextSpan(
                                         text:
-                                            " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                            " ${data["oldprice"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                                         style: new TextStyle(
                                           color: CustomColors.red,
                                           decoration:
@@ -306,7 +349,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                                       ),
                                       new TextSpan(
                                         text:
-                                            " ${data["offer_price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
+                                            " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
                                         style: new TextStyle(
                                           color: CustomColors.primary,
                                         ),
@@ -327,7 +370,9 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                           ),
                         ],
                       ),
-                      _drawAddToCartButton(data, widget.token),
+                      widget.status == "غير متاح"
+                          ? _drawStoreClose()
+                          : _drawAddToCartButton(data, widget.token),
                     ],
                   ),
                 ),
@@ -385,12 +430,16 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                                   widget.storeId,
                                 )
                                     .then((value) {
+
                                   final snackBar = SnackBar(
-                                    content: Text(
-                                        'Product added to your favorites list'),
-                                    duration: Duration(seconds: 3),
-                                  );
-                                  _scaffoldkey.currentState
+                                      backgroundColor: CustomColors.greenLightBG,
+                                      content: Text(
+                                        AppLocale.of(context).getTranslated("lang") == 'English'
+                                            ? "مرحباُ : تم اضافه المنتج الي المفضلة ب نجاح.."
+                                            : 'Hello: The product has been added to Favorite with success.. ',
+                                        style: TextStyle(color: CustomColors.greenLightFont),
+                                      ));
+                                  _productScaffoldKey.currentState
                                       .showSnackBar(snackBar);
                                 });
                                 favoriteNotifier.value = 1;
@@ -399,11 +448,18 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                                     .removeFavorite(data["id"])
                                     .then((value) {
                                   final snackBar = SnackBar(
-                                    content: Text(
-                                        'Product removed from your favorites list'),
-                                    duration: Duration(seconds: 3),
-                                  );
-                                  _scaffoldkey.currentState
+                                      backgroundColor:
+                                          CustomColors.greenLightBG,
+                                      content: Text(
+                                        AppLocale.of(context)
+                                                    .getTranslated("lang") ==
+                                                'English'
+                                            ? "مرحباُ : تم اضافه المنتج الي المفضلة ب نجاح.."
+                                            : 'Hello: The product has been added to Favorite with success.. ',
+                                        style: TextStyle(
+                                            color: CustomColors.greenLightFont),
+                                      ));
+                                  _productScaffoldKey.currentState
                                       .showSnackBar(snackBar);
                                 });
                                 favoriteNotifier.value == 1;
@@ -442,10 +498,14 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
             double.tryParse(data['price']),
           );
           final snackBar = SnackBar(
-            content: Text('thanks for your order'),
-            duration: Duration(seconds: 3),
-          );
-          _scaffoldkey.currentState.showSnackBar(snackBar);
+              backgroundColor: CustomColors.greenLightBG,
+              content: Text(
+                AppLocale.of(context).getTranslated("lang") == 'English'
+                    ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                    : 'Hello: The product has been added to the cart with success.. ',
+                style: TextStyle(color: CustomColors.greenLightFont),
+              ));
+          _productScaffoldKey.currentState.showSnackBar(snackBar);
         } else {
           var quant;
           if (data['unit'] == "0") {
@@ -461,10 +521,15 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
           );
 
           final snackBar = SnackBar(
-            content: Text('thanks for your order'),
-            duration: Duration(seconds: 3),
-          );
-          _scaffoldkey.currentState.showSnackBar(snackBar);
+              backgroundColor: CustomColors.greenLightBG,
+              content: Text(
+                AppLocale.of(context).getTranslated("lang") == 'English'
+                    ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                    : 'Hello: The product has been added to the cart with success.. ',
+                style: TextStyle(color: CustomColors.greenLightFont),
+              ));
+
+          _productScaffoldKey.currentState.showSnackBar(snackBar);
         }
       },
       child: Container(
@@ -494,6 +559,57 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _drawStoreClose() {
+    return InkWell(
+      //todo:add to cart offline or online
+      onTap: () async {
+        final snackBar = SnackBar(
+            backgroundColor: CustomColors.ratingLightBG,
+            content: Text(
+              AppLocale.of(context).getTranslated("lang") == 'English'
+                  ? "مرحباُ : ناسف هذا المتجر مغلق الان.."
+                  : 'Hello: Sorry, this store is now closed..',
+              style: TextStyle(color: CustomColors.ratingLightFont),
+            ));
+
+        _productScaffoldKey.currentState.showSnackBar(snackBar);
+      },
+      child: Container(
+        height: MediaQuery.of(context).size.height * .06,
+        decoration: BoxDecoration(
+          color: CustomColors.primary,
+          boxShadow: [
+            BoxShadow(
+              color: CustomColors.whiteBG,
+              blurRadius: .75,
+              spreadRadius: .75,
+              offset: Offset(0.0, 0.0),
+            )
+          ],
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Icon(
+                Icons.shopping_cart,
+                color: CustomColors.whiteBG,
+              ),
+              Text(
+                AppLocale.of(context).getTranslated("add_cart"),
+                textAlign: TextAlign.center,
+                style: TextStyle(
                   color: Colors.white,
                 ),
               ),
