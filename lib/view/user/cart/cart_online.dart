@@ -28,7 +28,7 @@ class CartOnLineScreen extends StatefulWidget {
 }
 
 class _CartOnLineScreenState extends State<CartOnLineScreen> {
-  static final GlobalKey<ScaffoldState> _cartOsScaffoldKey = new GlobalKey<ScaffoldState>();
+   final GlobalKey<ScaffoldState> _cartOsScaffoldKey = new GlobalKey<ScaffoldState>();
   Map allItems = {
     'cart_items': [],
   };

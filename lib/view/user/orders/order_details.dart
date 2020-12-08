@@ -19,7 +19,7 @@ class OrderDetailsScreen extends StatefulWidget {
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   OrdersApi ordersApi;
-  static final GlobalKey<ScaffoldState> orderScaffoldKey =
+  final GlobalKey<ScaffoldState> orderScaffoldKey =
       new GlobalKey<ScaffoldState>();
 
   @override
@@ -165,74 +165,101 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   SizedBox(
                     width: 6,
                   ),
-                  Text(
-                    AppLocale.of(context).getTranslated("lang") == 'English'
-                        ? " عنوان التوصيل :"
-                        : "Delivery Address :",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: CustomColors.dark,
-                      fontSize: orderDetailsSize.nameSize,
-                    ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.55,
-                    child: Text(
-                      widget.data["address"] == null
-                          ? ""
-                          : widget.data["address_details"],
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: CustomColors.dark,
-                        fontSize: orderDetailsSize.nameSize,
-                      ),
-                      maxLines: 3,
-                    ),
-                  ),
+                  widget.data["address"] == null
+                      ? Container()
+                      : Text(
+                          AppLocale.of(context).getTranslated("lang") ==
+                                  'English'
+                              ? " عنوان التوصيل :"
+                              : "Delivery Address :",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: CustomColors.dark,
+                            fontSize: orderDetailsSize.nameSize,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                  widget.data["address"] == null
+                      ? Container()
+                      : SizedBox(
+                          width: 5,
+                        ),
+                  widget.data["address"] == null
+                      ? Container()
+                      : Container(
+                          width: MediaQuery.of(context).size.width * 0.55,
+                          child: Text(
+                            widget.data["address"] == null
+                                ? ""
+                                : widget.data["address_details"],
+                            style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              color: CustomColors.dark,
+                              fontSize: orderDetailsSize.nameSize,
+                            ),
+                            maxLines: 3,
+                          ),
+                        ),
                 ],
               ),
             ),
-            _drawBodyItemLine(
-              AppLocale.of(context).getTranslated("lang") == 'English'
-                  ? " رقم الموبيل :"
-                  : "mobile number :",
-              widget.data["address"] == null
-                  ? ""
-                  : widget.data["address"]['phone'].toString(),
-              1,
-              FontAwesomeIcons.mobileAlt,
-              orderDetailsSize.nameSize,
-              orderDetailsSize.iconSize,
-            ),
-            _drawBodyItemLine(
-              AppLocale.of(context).getTranslated("lang") == 'English'
-                  ? "رقم الهاتف الارضى :"
-                  : "telephone phone number :",
-              widget.data["address"] == null
-                  ? ""
-                  : widget.data["address"]['telephone'].toString(),
-              1,
-              FontAwesomeIcons.phone,
-              orderDetailsSize.nameSize,
-              orderDetailsSize.iconSize,
-            ),
-            _drawBodyItemLine(
-              AppLocale.of(context).getTranslated("lang") == 'English'
-                  ? "المدينة :"
-                  : "city :",
-              widget.data["address"] == null
-                  ? ""
-                  : widget.data["address"]['city'].toString(),
-              1,
-              FontAwesomeIcons.home,
-              orderDetailsSize.nameSize,
-              orderDetailsSize.iconSize,
-            ),
+            widget.data["address"] == null
+                ? Container()
+                : _drawBodyItemLine(
+                    AppLocale.of(context).getTranslated("lang") == 'English'
+                        ? " رقم الموبيل :"
+                        : "mobile number :",
+                    widget.data["address"] == null
+                        ? ""
+                        : widget.data["address"]['phone'].toString(),
+                    1,
+                    FontAwesomeIcons.mobileAlt,
+                    orderDetailsSize.nameSize,
+                    orderDetailsSize.iconSize,
+                  ),
+            widget.data["address"] == null
+                ? Container()
+                : _drawBodyItemLine(
+                    AppLocale.of(context).getTranslated("lang") == 'English'
+                        ? "رقم الهاتف الارضى :"
+                        : "telephone phone number :",
+                    widget.data["address"] == null
+                        ? ""
+                        : widget.data["address"]['telephone'].toString(),
+                    1,
+                    FontAwesomeIcons.phone,
+                    orderDetailsSize.nameSize,
+                    orderDetailsSize.iconSize,
+                  ),
+            widget.data["address"] == null
+                ? Container()
+                : _drawBodyItemLine(
+                    AppLocale.of(context).getTranslated("lang") == 'English'
+                        ? "المدينة :"
+                        : "city :",
+                    widget.data["address"] == null
+                        ? ""
+                        : widget.data["address"]['city'].toString(),
+                    1,
+                    FontAwesomeIcons.home,
+                    orderDetailsSize.nameSize,
+                    orderDetailsSize.iconSize,
+                  ),
+            widget.data["address"] == null
+                ? Container()
+                : _drawBodyItemLine(
+                    AppLocale.of(context).getTranslated("lang") == 'English'
+                        ? "المنطقة :"
+                        : "region :",
+                    widget.data["address"] == null
+                        ? ""
+                        : widget.data["address"]['region'].toString(),
+                    1,
+                    FontAwesomeIcons.home,
+                    orderDetailsSize.nameSize,
+                    orderDetailsSize.iconSize,
+                  ),
             _drawHeadrLine(
               AppLocale.of(context).getTranslated("lang") == 'English'
                   ? "بيانات المتجر :"
@@ -352,6 +379,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               itemBuilder: (BuildContext context, int index) {
                 return _drawCardOfStore(
                     widget.data["products_id"][index],
+                    widget.data["store_id"],
+                    widget.data["shipping_time"],
                     widget.data["products_images"][index],
                     widget.data["products_names"][index],
                     widget.data["quantities"][index],
@@ -461,8 +490,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     );
   }
 
-  Widget _drawCardOfStore(
-      id, image, name, quantity, price, storeName, nameSize) {
+  Widget _drawCardOfStore(id, storeId, shippingTime, image, name, quantity,
+      price, storeName, nameSize) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 2),
       child: InkWell(
@@ -470,8 +499,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => DisplayOrderItemDetails(
-                    id, storeName, widget.latitude, widget.longitude),
+                builder: (context) => DisplayOrderItemDetails(id, storeId,
+                    shippingTime, storeName, widget.latitude, widget.longitude),
               ));
         },
         child: Stack(
@@ -789,6 +818,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   showMaterialDialog() {
     TextEditingController massageController = TextEditingController();
     ValueNotifier<double> count = ValueNotifier(0);
+    ValueNotifier<bool> state = ValueNotifier(false);
+
     showDialog(
       context: context,
       builder: (_) => new AlertDialog(
@@ -869,46 +900,94 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   Navigator.of(context).pop();
                 },
               ),
-              FlatButton(
-                child: Text(AppLocale.of(context).getTranslated("send")),
-                onPressed: () {
-                  ordersApi
-                      .rattingOrder(widget.data["store_id"],
-                          massageController.text, count.value)
-                      .then((value) {
-                    if (value['data'] == "true") {
-                      Navigator.pop(context);
-                      final snackBar = SnackBar(
-                          backgroundColor: CustomColors.greenLightBG,
-                          content: Text(
-                            AppLocale.of(context).getTranslated("lang") ==
-                                    'English'
-                                ? "تم اضافه التعليق ."
-                                : "Comment added.",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: CustomColors.greenLightFont),
-                          ));
+              ValueListenableBuilder(
+                valueListenable: state,
+                builder: (BuildContext context, value, Widget child) {
+                  return Container(
+                    child: state.value
+                        ? Center(
+                            child: SizedBox(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    CustomColors.primary),
+                              ),
+                            ),
+                          )
+                        : FlatButton(
+                            child: Text(
+                                AppLocale.of(context).getTranslated("send")),
+                            onPressed: () {
+                              state.value = true;
+                              if (massageController.text.isNotEmpty ||
+                                  count.value > 0) {
+                                ordersApi
+                                    .rattingOrder(widget.data["store_id"],
+                                        massageController.text, count.value)
+                                    .then((value) {
+                                  state.value = false;
 
-                      orderScaffoldKey.currentState.showSnackBar(snackBar);
-                    } else {
-                      Navigator.pop(context);
+                                  if (value['data'] == "true") {
+                                    Navigator.pop(context);
+                                    final snackBar = SnackBar(
+                                        backgroundColor:
+                                            CustomColors.greenLightBG,
+                                        content: Text(
+                                          AppLocale.of(context)
+                                                      .getTranslated("lang") ==
+                                                  'English'
+                                              ? "تم اضافه التعليق ."
+                                              : "Comment added.",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color:
+                                                  CustomColors.greenLightFont),
+                                        ));
 
-                      final snackBar = SnackBar(
-                          backgroundColor: CustomColors.ratingLightBG,
-                          content: Text(
-                            AppLocale.of(context).getTranslated("lang") ==
-                                    'English'
-                                ? "حدث خطأ من فضلك تاكد من الاتصال بالانترنت وحاول مرة اخري"
-                                : "An error occurred. Please check your internet connection and try again",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: CustomColors.ratingLightFont),
-                          ));
+                                    orderScaffoldKey.currentState
+                                        .showSnackBar(snackBar);
+                                  } else {
+                                    Navigator.pop(context);
 
-                      orderScaffoldKey.currentState.showSnackBar(snackBar);
-                    }
-                  });
+                                    final snackBar = SnackBar(
+                                        backgroundColor:
+                                            CustomColors.ratingLightBG,
+                                        content: Text(
+                                          AppLocale.of(context)
+                                                      .getTranslated("lang") ==
+                                                  'English'
+                                              ? "حدث خطأ من فضلك تاكد من الاتصال بالانترنت وحاول مرة اخري"
+                                              : "An error occurred. Please check your internet connection and try again",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color:
+                                                  CustomColors.ratingLightFont),
+                                        ));
+
+                                    orderScaffoldKey.currentState
+                                        .showSnackBar(snackBar);
+                                  }
+                                });
+                              } else {
+                                Navigator.pop(context);
+                                final snackBar = SnackBar(
+                                    backgroundColor: CustomColors.ratingLightBG,
+                                    content: Text(
+                                      AppLocale.of(context)
+                                                  .getTranslated("lang") ==
+                                              'English'
+                                          ? "لا يمكنك ارسال تقييم لا يحتوي علي بيانات"
+                                          : "You cannot submit an evaluation that does not contain data",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: CustomColors.ratingLightFont),
+                                    ));
+
+                                orderScaffoldKey.currentState
+                                    .showSnackBar(snackBar);
+                              }
+                            },
+                          ),
+                  );
                 },
               ),
             ],

@@ -13,7 +13,7 @@ class TabScreenOfOffer extends StatefulWidget {
   List map;
   String status;
   String marketName;
-  int subMarketId;
+  int marketId;
   String token;
   double latitude, longitude;
   double nameSize;
@@ -22,7 +22,7 @@ class TabScreenOfOffer extends StatefulWidget {
   TabScreenOfOffer(
     this.map,
     this.status,
-    this.subMarketId,
+    this.marketId,
     this.marketName,
     this.token,
     this.latitude,
@@ -102,6 +102,7 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => DisplayMarketItemDetails(
                       data,
+                      widget.marketId,
                       widget.status,
                       widget.token,
                       widget.latitude,
@@ -246,7 +247,7 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
                                 favoriteMethodAPI
                                     .addToFavorite(
                                   data['id'],
-                                  widget.subMarketId,
+                                  widget.marketId,
                                 )
                                     .then((value) {
                                   final snackBar = SnackBar(
@@ -313,7 +314,7 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
             quant = .25;
           }
           itemBlocOffLine.addToCart(
-              data, quant, widget.subMarketId, double.tryParse(data['price']));
+              data, quant, widget.marketId, double.tryParse(data['price']));
           final snackBar = SnackBar(
               backgroundColor: CustomColors.greenLightBG,
               content: Text(
@@ -331,7 +332,7 @@ class _TabScreenOfOfferState extends State<TabScreenOfOffer> {
             quant = .25;
           }
           itemBlocOnLineN.addToCart(
-              data, quant, widget.subMarketId, double.tryParse(data['price']));
+              data, quant, widget.marketId, double.tryParse(data['price']));
 
           final snackBar = SnackBar(
               backgroundColor: CustomColors.greenLightBG,

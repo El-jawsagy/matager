@@ -482,19 +482,28 @@ class _NavDrawerState extends State<NavDrawer> {
                                 Icons.feedback,
                                 AppLocale.of(context)
                                     .getTranslated("drawer_feed"), () async {
-                              MarketAndCategoryApi homePage =
-                                  MarketAndCategoryApi();
-                              await homePage.getAllCategory().then((value) {
+                              if (snapshot.hasData) {
+                                MarketAndCategoryApi homePage =
+                                    MarketAndCategoryApi();
+                                await homePage.getAllCategory().then((value) {
+                                  Navigator.pop(context);
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ContactUsScreen(
+                                                value,
+                                                AppLocale.of(context)
+                                                    .getTranslated("lang"),
+                                              )));
+                                });
+                              } else {
                                 Navigator.pop(context);
-                                Navigator.pushReplacement(
+                                Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => ContactUsScreen(
-                                              value,
-                                              AppLocale.of(context)
-                                                  .getTranslated("lang"),
-                                            )));
-                              });
+                                        builder: (context) => LoginScreen(
+                                            widget.lat, widget.lng)));
+                              }
                             }),
                           ],
                         ),

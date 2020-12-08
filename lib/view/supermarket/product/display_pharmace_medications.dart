@@ -12,10 +12,12 @@ import 'package:matager/view/utilities/theme.dart';
 class PharmacyPrescriptionScreen extends StatefulWidget {
   String token;
   String status;
+  String storeName;
 
   int storeId;
 
-  PharmacyPrescriptionScreen(this.token, this.status, this.storeId);
+  PharmacyPrescriptionScreen(
+      this.token, this.status, this.storeId, this.storeName);
 
   @override
   _PharmacyPrescriptionScreenState createState() =>
@@ -24,7 +26,7 @@ class PharmacyPrescriptionScreen extends StatefulWidget {
 
 class _PharmacyPrescriptionScreenState
     extends State<PharmacyPrescriptionScreen> {
-  static final GlobalKey<ScaffoldState> _pharmacyScaffoldKey =
+  final GlobalKey<ScaffoldState> _pharmacyScaffoldKey =
       new GlobalKey<ScaffoldState>();
   OrdersApi ordersApi;
 
@@ -44,160 +46,157 @@ class _PharmacyPrescriptionScreenState
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onBackPressed,
-      child: Scaffold(
-        key: _pharmacyScaffoldKey,
-        backgroundColor: CustomColors.grayThree,
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text(
-            AppLocale.of(context).getTranslated("app_name"),
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            textWidthBasis: TextWidthBasis.parent,
-          ),
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => HomeScreen()));
-            },
-          ),
+    return Scaffold(
+      key: _pharmacyScaffoldKey,
+      backgroundColor: CustomColors.grayThree,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          widget.storeName,
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          textWidthBasis: TextWidthBasis.parent,
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: Text(
-                  AppLocale.of(context).getTranslated("lang") == "English"
-                      ? " ادخل الادوية المطلوبة"
-                      : "  Enter the required medications",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                    color: CustomColors.primary,
-                  ),
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: true,
-                ),
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width * 0.2,
-                child: Stack(
-                  children: [
-                    Divider(
-                      color: CustomColors.red,
-                      thickness: 1,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.1,
-                          child: Divider(
-                            color: CustomColors.primary,
-                            thickness: 2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              _drawForm(),
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: Text(
-                  AppLocale.of(context).getTranslated("lang") == "English"
-                      ? "ارفق روشتة الدكتور"
-                      : "Attach the doctor's prescription",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                    color: CustomColors.primary,
-                  ),
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: true,
-                ),
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width * 0.2,
-                child: Stack(
-                  children: [
-                    Divider(
-                      color: CustomColors.red,
-                      thickness: 1,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.1,
-                          child: Divider(
-                            color: CustomColors.primary,
-                            thickness: 2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              _image == null
-                  ? InkWell(
-                      onTap: getImage,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: MediaQuery.of(context).size.height * 0.5,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            border: Border.all(
-                                width: 0.5, color: CustomColors.whiteBG),
-                          ),
-                          child: ClipRect(
-                              child: Image.asset(
-                            'assets/images/Prescription.jpg',
-                          )),
-                        ),
-                      ),
-                    )
-                  : InkWell(
-                      onTap: getImage,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: MediaQuery.of(context).size.height * 0.5,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            border: Border.all(
-                                width: 0.5, color: CustomColors.whiteBG),
-                          ),
-                          child: ClipRect(
-                              child: Image.file(
-                            _image,
-                            fit: BoxFit.cover,
-                          )),
-                        ),
-                      ),
-                    ),
-              widget.status == "غير متاح"
-                  ? _drawStoreClose()
-                  : _drawContactUsButton(),
-            ],
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.white,
           ),
+          onPressed: () {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (context) => HomeScreen()));
+          },
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Text(
+                AppLocale.of(context).getTranslated("lang") == "English"
+                    ? " ادخل الادوية المطلوبة"
+                    : "  Enter the required medications",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                  color: CustomColors.primary,
+                ),
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+              ),
+            ),
+            Container(
+              width: MediaQuery.of(context).size.width * 0.2,
+              child: Stack(
+                children: [
+                  Divider(
+                    color: CustomColors.red,
+                    thickness: 1,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.1,
+                        child: Divider(
+                          color: CustomColors.primary,
+                          thickness: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            _drawForm(),
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Text(
+                AppLocale.of(context).getTranslated("lang") == "English"
+                    ? "ارفق روشتة الدكتور"
+                    : "Attach the doctor's prescription",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                  color: CustomColors.primary,
+                ),
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+              ),
+            ),
+            Container(
+              width: MediaQuery.of(context).size.width * 0.2,
+              child: Stack(
+                children: [
+                  Divider(
+                    color: CustomColors.red,
+                    thickness: 1,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.1,
+                        child: Divider(
+                          color: CustomColors.primary,
+                          thickness: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            _image == null
+                ? InkWell(
+                    onTap: getImage,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        height: MediaQuery.of(context).size.height * 0.5,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          border: Border.all(
+                              width: 0.5, color: CustomColors.whiteBG),
+                        ),
+                        child: ClipRect(
+                            child: Image.asset(
+                          'assets/images/Prescription.jpg',
+                        )),
+                      ),
+                    ),
+                  )
+                : InkWell(
+                    onTap: getImage,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        height: MediaQuery.of(context).size.height * 0.5,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          border: Border.all(
+                              width: 0.5, color: CustomColors.whiteBG),
+                        ),
+                        child: ClipRect(
+                            child: Image.file(
+                          _image,
+                          fit: BoxFit.cover,
+                        )),
+                      ),
+                    ),
+                  ),
+            widget.status == "غير متاح"
+                ? _drawStoreClose()
+                : _drawContactUsButton(),
+          ],
         ),
       ),
     );
@@ -390,10 +389,5 @@ class _PharmacyPrescriptionScreenState
         ),
       ),
     );
-  }
-
-  Future<bool> _onBackPressed() {
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => HomeScreen()));
   }
 }

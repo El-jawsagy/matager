@@ -25,7 +25,7 @@ class CartCheckOut extends StatefulWidget {
 }
 
 class _CartCheckOutState extends State<CartCheckOut> {
-  static final GlobalKey<ScaffoldState> _cartPayScaffoldKey =
+   final GlobalKey<ScaffoldState> _cartPayScaffoldKey =
       new GlobalKey<ScaffoldState>();
   AddressAPI addressAPI;
   CardMethodApi cardMethodApi;
@@ -105,10 +105,8 @@ class _CartCheckOutState extends State<CartCheckOut> {
                               itemBuilder: (BuildContext context, int index) {
                                 var item = data[index];
                                 print(data[index]);
-                                if (item["default"] == 1) {
-                                  _groupValue.value = index;
-                                  _addressId.value = item["id"];
-                                }
+                                _groupValue.value = 0;
+                                _addressId.value = data[0]["id"];
 
                                 return Padding(
                                   padding: const EdgeInsets.all(10.0),

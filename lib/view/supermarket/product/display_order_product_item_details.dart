@@ -16,12 +16,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class DisplayOrderItemDetails extends StatefulWidget {
   String productId;
+  int storeId;
   String storeName;
+  String status;
 
   double latitude, longitude;
 
   DisplayOrderItemDetails(
     this.productId,
+    this.storeId,
+    this.status,
     this.storeName,
     this.latitude,
     this.longitude,
@@ -115,7 +119,8 @@ class _DisplayOrderItemDetailsState extends State<DisplayOrderItemDetails> {
                 break;
               case ConnectionState.done:
                 if (snapshot.hasData) {
-                  return BuildScaffold(snapshot.data, widget.productId);
+                  return BuildScaffold(snapshot.data, widget.productId,
+                      widget.storeId, widget.status);
                 } else
                   return emptyPage(context);
                 break;
@@ -129,11 +134,18 @@ class _DisplayOrderItemDetailsState extends State<DisplayOrderItemDetails> {
 class BuildScaffold extends StatefulWidget {
   Map map;
   String productId;
+  int storeId;
+  String status;
 
   @override
   _BuildScaffoldState createState() => _BuildScaffoldState();
 
-  BuildScaffold(this.map, this.productId);
+  BuildScaffold(
+    this.map,
+    this.productId,
+    this.storeId,
+    this.status,
+  );
 }
 
 class _BuildScaffoldState extends State<BuildScaffold> {
@@ -207,15 +219,24 @@ class _BuildScaffoldState extends State<BuildScaffold> {
           productSize.nameSize,
           productSize.iconSize,
         ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: _drawAddToCartButton(
-            data,
-            posOfProducts,
-            productSize.nameSize,
-            productSize.iconSize,
-          ),
-        )
+        widget.status == "غير متاح"
+            ? Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _drawStoreClose(
+                  productSize.nameSize,
+                  productSize.iconSize,
+                ),
+              )
+            : Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _drawAddToCartButton(
+                  data,
+                  widget.storeId,
+                  posOfProducts,
+                  productSize.nameSize,
+                  productSize.iconSize,
+                ),
+              ),
       ],
     );
   }
@@ -361,9 +382,9 @@ class _BuildScaffoldState extends State<BuildScaffold> {
                   iconSize: iconSize,
                   icon: Icon(Icons.add),
                   onPressed: () {
-                    posOfProducts.value = data["unit"] == "0"
-                        ? posOfProducts.value + 1
-                        : (posOfProducts.value + .25);
+                    posOfProducts.value = (data["unit"] == "0"
+                        ? (posOfProducts.value + 1)
+                        : (posOfProducts.value + .25));
 
                     _counterController.text = posOfProducts.value.toString();
                   }),
@@ -393,9 +414,9 @@ class _BuildScaffoldState extends State<BuildScaffold> {
                       icon: Icon(Icons.remove, color: CustomColors.dark),
                       onPressed: () {
                         if (posOfProducts.value > 0) {
-                          posOfProducts.value = data["unit"] == "0"
-                              ? posOfProducts.value - 1
-                              : (posOfProducts.value - .25);
+                          posOfProducts.value = (data["unit"] == "0"
+                              ? (posOfProducts.value - 1)
+                              : (posOfProducts.value - .25));
 
                           _counterController.text =
                               posOfProducts.value.toString();
@@ -415,6 +436,7 @@ class _BuildScaffoldState extends State<BuildScaffold> {
 
   Widget _drawAddToCartButton(
     data,
+    storeId,
     ValueNotifier<double> quantity,
     nameSize,
     iconSize,
@@ -438,48 +460,95 @@ class _BuildScaffoldState extends State<BuildScaffold> {
       child: InkWell(
         //todo:add to cart offline or online
         onTap: () async {
-          if (quantity.value == 0) {
+          SharedPreferences pref = await SharedPreferences.getInstance();
+
+          if (pref.get("token") == null) {
+            itemBlocOffLine.addToCart(data, quantity.value, widget.storeId,
+                double.tryParse(data["price"]));
             final snackBar = SnackBar(
-                backgroundColor: CustomColors.ratingLightBG,
+                backgroundColor: CustomColors.greenLightBG,
                 content: Text(
                   AppLocale.of(context).getTranslated("lang") == 'English'
-                      ? "مرحباُ :آسف ولكن لا يمكنك إضافة 0 كمية من المنتج.."
-                      : "Hello: Sorry but you can't add 0 quantity of product..",
-                  style: TextStyle(color: CustomColors.ratingLightFont),
+                      ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                      : 'Hello: The product has been added to the cart with success.. ',
+                  style: TextStyle(color: CustomColors.greenLightFont),
                 ));
+
             _orderProductScaffoldKey.currentState.showSnackBar(snackBar);
           } else {
-            SharedPreferences pref = await SharedPreferences.getInstance();
+            print(quantity.value);
+            itemBlocOnLineN.addToCart(data, quantity.value, widget.storeId,
+                double.tryParse(data["price"]));
 
-            if (pref.get("token") == null) {
-              itemBlocOffLine.addToCart(data, quantity.value, widget.productId,
-                  double.tryParse(data["price"]));
-              final snackBar = SnackBar(
-                  backgroundColor: CustomColors.greenLightBG,
-                  content: Text(
-                    AppLocale.of(context).getTranslated("lang") == 'English'
-                        ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
-                        : 'Hello: The product has been added to the cart with success.. ',
-                    style: TextStyle(color: CustomColors.greenLightFont),
-                  ));
-
-              _orderProductScaffoldKey.currentState.showSnackBar(snackBar);
-            } else {
-              print(quantity.value);
-              itemBlocOnLineN.addToCart(data, quantity.value, data["store_id"],
-                  double.tryParse(data["price"]));
-
-              final snackBar = SnackBar(
-                  backgroundColor: CustomColors.greenLightBG,
-                  content: Text(
-                    AppLocale.of(context).getTranslated("lang") == 'English'
-                        ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
-                        : 'Hello: The product has been added to the cart with success.. ',
-                    style: TextStyle(color: CustomColors.greenLightFont),
-                  ));
-              _orderProductScaffoldKey.currentState.showSnackBar(snackBar);
-            }
+            final snackBar = SnackBar(
+                backgroundColor: CustomColors.greenLightBG,
+                content: Text(
+                  AppLocale.of(context).getTranslated("lang") == 'English'
+                      ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                      : 'Hello: The product has been added to the cart with success.. ',
+                  style: TextStyle(color: CustomColors.greenLightFont),
+                ));
+            _orderProductScaffoldKey.currentState.showSnackBar(snackBar);
           }
+        },
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Icon(
+                Icons.shopping_cart,
+                color: CustomColors.whiteBG,
+                size: iconSize,
+              ),
+              Text(
+                AppLocale.of(context).getTranslated("add_cart"),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: nameSize,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _drawStoreClose(
+    nameSize,
+    iconSize,
+  ) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      width: MediaQuery.of(context).size.width * .8,
+      height: MediaQuery.of(context).size.height * .1,
+      decoration: BoxDecoration(
+        color: CustomColors.primary,
+        boxShadow: [
+          BoxShadow(
+            color: CustomColors.whiteBG,
+            blurRadius: .75,
+            spreadRadius: .75,
+            offset: Offset(0.0, 0.0),
+          )
+        ],
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: InkWell(
+        //todo:add to cart offline or online
+        onTap: () async {
+          final snackBar = SnackBar(
+              backgroundColor: CustomColors.ratingLightBG,
+              content: Text(
+                AppLocale.of(context).getTranslated("lang") == 'English'
+                    ? "مرحباُ : ناسف هذا المتجر مغلق الان.."
+                    : 'Hello: Sorry, this store is now closed ..',
+                style: TextStyle(color: CustomColors.ratingLightFont),
+              ));
+
+          _orderProductScaffoldKey.currentState.showSnackBar(snackBar);
         },
         child: Center(
           child: Row(

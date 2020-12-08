@@ -1,5 +1,6 @@
 {
   "app_name": "متاجرنا",
+  "our_store": "متاجرنا",
   "start": "أبداء الان",
   "your_loc": "من فضلك ادخل عنوانك على خريطة جوجل :",
   "log": "تسجيل الدخول",
@@ -82,7 +83,7 @@
   "order": "تأكيد تفاصيل التوصيل",
   "order_details": "الفاتورة",
   "def_Cat_Contact": "اختر نوع المتجر",
-  "send": "إرسال",
+    "send": "إرسال",
   "image": "assets/images/boxImage.png",
   "lang": "English",
   "end": ""

@@ -22,6 +22,7 @@ class DisplayMarketItemDetails extends StatefulWidget {
 
   DisplayMarketItemDetails(
     this.map,
+    this.marketId,
     this.status,
     this.token,
     this.latitude,
@@ -38,15 +39,18 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
   TextEditingController _counterController;
   double pos;
   ValueNotifier<double> posOfProducts;
-  static final GlobalKey<ScaffoldState> _marketProductScaffoldKey =
+   final GlobalKey<ScaffoldState> _marketProductScaffoldKey =
       new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     pos = 0;
-    widget.map["unit"] == "0"
-        ? posOfProducts = ValueNotifier(1)
-        : posOfProducts = ValueNotifier(0.25);
+    if (widget.map["unit"] == "0") {
+      posOfProducts = ValueNotifier(1);
+    } else {
+      posOfProducts = ValueNotifier(0.25);
+    }
+
     _counterController = TextEditingController();
     _counterController.text = posOfProducts.value.toString();
     _controller = PageController(
@@ -58,6 +62,7 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
 
   @override
   Widget build(BuildContext context) {
+    print("this is unit ${posOfProducts.value}");
     DetectedScreen detectedScreen = DetectedScreen(context);
     ProductSize productSize = ProductSize(detectedScreen);
     return Scaffold(
@@ -336,9 +341,9 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
                   iconSize: iconSize,
                   icon: Icon(Icons.add),
                   onPressed: () {
-                    posOfProducts.value = widget.map["unit"] == "0"
-                        ? posOfProducts.value + 1
-                        : (posOfProducts.value + .25);
+                    posOfProducts.value = (widget.map["unit"] == "0"
+                        ? (posOfProducts.value + 1)
+                        : (posOfProducts.value + .25));
 
                     _counterController.text = posOfProducts.value.toString();
                   }),
@@ -413,47 +418,41 @@ class _DisplayMarketItemDetailsState extends State<DisplayMarketItemDetails> {
       child: InkWell(
         //todo:add to cart offline or online
         onTap: () async {
-          if (quantity.value == 0) {
+          if (token == null) {
+            var quant = quantity.value;
+
+            itemBlocOffLine.addToCart(widget.map, quant, widget.marketId,
+                double.tryParse(widget.map["price"]));
             final snackBar = SnackBar(
-                backgroundColor: CustomColors.ratingLightBG,
+                backgroundColor: CustomColors.greenLightBG,
                 content: Text(
                   AppLocale.of(context).getTranslated("lang") == 'English'
-                      ? "مرحباُ :آسف ولكن لا يمكنك إضافة 0 كمية من المنتج.."
-                      : "Hello: Sorry but you can't add 0 quantity of product..",
-                  style: TextStyle(color: CustomColors.ratingLightFont),
+                      ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                      : 'Hello: The product has been added to the cart with success.. ',
+                  style: TextStyle(color: CustomColors.greenLightFont),
                 ));
 
             _marketProductScaffoldKey.currentState.showSnackBar(snackBar);
           } else {
-            if (token == null) {
-              itemBlocOffLine.addToCart(widget.map, quantity.value,
-                  widget.marketId, double.tryParse(widget.map["price"]));
-              final snackBar = SnackBar(
-                  backgroundColor: CustomColors.greenLightBG,
-                  content: Text(
-                    AppLocale.of(context).getTranslated("lang") == 'English'
-                        ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
-                        : 'Hello: The product has been added to the cart with success.. ',
-                    style: TextStyle(color: CustomColors.greenLightFont),
-                  ));
+            var quant = quantity.value;
+            print(quant);
+            itemBlocOnLineN.addToCart(
+              widget.map,
+              quant,
+              widget.marketId,
+              double.tryParse(widget.map["price"]),
+            );
 
-              _marketProductScaffoldKey.currentState.showSnackBar(snackBar);
-            } else {
-              print(quantity.value);
-              itemBlocOnLineN.addToCart(widget.map, quantity.value,
-                  widget.marketId, double.tryParse(widget.map["price"]));
+            final snackBar = SnackBar(
+                backgroundColor: CustomColors.greenLightBG,
+                content: Text(
+                  AppLocale.of(context).getTranslated("lang") == 'English'
+                      ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
+                      : 'Hello: The product has been added to the cart with success.. ',
+                  style: TextStyle(color: CustomColors.greenLightFont),
+                ));
 
-              final snackBar = SnackBar(
-                  backgroundColor: CustomColors.greenLightBG,
-                  content: Text(
-                    AppLocale.of(context).getTranslated("lang") == 'English'
-                        ? "مرحباُ : تم اضافه المنتج الي سله المشتريات ب نجاح.."
-                        : 'Hello: The product has been added to the cart with success.. ',
-                    style: TextStyle(color: CustomColors.greenLightFont),
-                  ));
-
-              _marketProductScaffoldKey.currentState.showSnackBar(snackBar);
-            }
+            _marketProductScaffoldKey.currentState.showSnackBar(snackBar);
           }
         },
         child: Center(

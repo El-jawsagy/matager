@@ -23,7 +23,7 @@ class ProductSearchScreen extends SearchDelegate {
     return theme.copyWith(
       primaryColor: CustomColors.primary,
       primaryIconTheme:
-          theme.primaryIconTheme.copyWith(color: Colors.grey[200]),
+      theme.primaryIconTheme.copyWith(color: Colors.grey[200]),
       primaryColorBrightness: Brightness.light,
       primaryTextTheme: TextTheme(
         headline1: TextStyle(color: CustomColors.whiteBG),
@@ -60,7 +60,7 @@ class ProductSearchScreen extends SearchDelegate {
   @override
   Widget buildResults(BuildContext context) {
     SearchProductsAndStoresApi searchProductsAndStoresApi =
-        SearchProductsAndStoresApi();
+    SearchProductsAndStoresApi();
     return FutureBuilder(
         future: searchProductsAndStoresApi.getProducts(
           query,
@@ -80,40 +80,52 @@ class ProductSearchScreen extends SearchDelegate {
               if (snapshot.hasData) {
                 return snapshot.data.length >= 1
                     ? GridView.count(
-                        // Create a grid with 2 columns. If you change the scrollDirection to
-                        // horizontal, this produces 2 rows.
-                        crossAxisCount: 2,
+                  // Create a grid with 2 columns. If you change the scrollDirection to
+                  // horizontal, this produces 2 rows.
+                  crossAxisCount: 2,
 
-                        // Generate 100 widgets that display their index in the List.
-                        children: List.generate(snapshot.data.length, (index) {
-                          return _drawCardOfStore(
-                              context, snapshot.data[index]);
-                        }),
-                        childAspectRatio: .55,
-                      )
+                  // Generate 100 widgets that display their index in the List.
+                  children: List.generate(snapshot.data.length, (index) {
+                    return _drawCardOfStore(
+                        context, snapshot.data[index]);
+                  }),
+                  childAspectRatio: .55,
+                )
                     : Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                child: Image.asset(
-                                  "assets/images/box.jpg",
-                                  width: MediaQuery.of(context).size.width,
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.25,
-                                ),
-                              ),
-                              Text(
-                                AppLocale.of(context).getTranslated("prod_dis"),
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 20),
-                              ),
-                            ],
+                    width: MediaQuery
+                        .of(context)
+                        .size
+                        .width,
+                    height: MediaQuery
+                        .of(context)
+                        .size
+                        .height,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            child: Image.asset(
+                              "assets/images/box.jpg",
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width,
+                              height:
+                              MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.25,
+                            ),
                           ),
-                        ));
+                          Text(
+                            AppLocale.of(context).getTranslated("prod_dis"),
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                        ],
+                      ),
+                    ));
               } else
                 return emptyPage(context);
               break;
@@ -127,13 +139,21 @@ class ProductSearchScreen extends SearchDelegate {
 
     return Container(
       margin: EdgeInsets.symmetric(vertical: 6),
-      width: MediaQuery.of(context).size.width * 0.4,
-      height: MediaQuery.of(context).size.height * 0.6,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width * 0.4,
+      height: MediaQuery
+          .of(context)
+          .size
+          .height * 0.6,
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => DisplayMarketItemDetails(
-                  data, this.status, this.token, this.lat, this.lng)));
+              builder: (context) =>
+                  DisplayMarketItemDetails(
+                      data, this.id, this.status, this.token, this.lat,
+                      this.lng)));
         },
         child: Stack(
           children: <Widget>[
@@ -153,23 +173,29 @@ class ProductSearchScreen extends SearchDelegate {
                             topRight: Radius.circular(7)),
                         child: (data["image"] == null)
                             ? Image.asset(
-                                "assets/images/boxImage.png",
-                              )
+                          "assets/images/boxImage.png",
+                        )
                             : Image(
-                                width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height * .2,
-                                loadingBuilder: (context, image,
-                                    ImageChunkEvent loadingProgress) {
-                                  if (loadingProgress == null) {
-                                    return image;
-                                  }
-                                  return Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                },
-                                image: NetworkImage(data["image"], scale: 1.0),
-                                fit: BoxFit.contain,
-                              ),
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .width,
+                          height: MediaQuery
+                              .of(context)
+                              .size
+                              .height * .2,
+                          loadingBuilder: (context, image,
+                              ImageChunkEvent loadingProgress) {
+                            if (loadingProgress == null) {
+                              return image;
+                            }
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          image: NetworkImage(data["image"], scale: 1.0),
+                          fit: BoxFit.contain,
+                        ),
                       ),
                       Text(
                         AppLocale.of(context).getTranslated("lang") == 'English'
@@ -187,41 +213,44 @@ class ProductSearchScreen extends SearchDelegate {
                       Text.rich(
                         data['offer']
                             ? TextSpan(
-                                children: <TextSpan>[
-                                  TextSpan(
-                                    text:
-                                        " ${data["oldprice"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                                    style: new TextStyle(
-                                      color: CustomColors.red,
-                                      decoration: TextDecoration.lineThrough,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: " ",
-                                    style: TextStyle(
-                                      color: CustomColors.red,
-                                    ),
-                                  ),
-                                  new TextSpan(
-                                    text:
-                                        " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                                    style: new TextStyle(
-                                      color: CustomColors.primary,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : TextSpan(
-                                children: <TextSpan>[
-                                  TextSpan(
-                                    text:
-                                        " ${data["price"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")}",
-                                    style: new TextStyle(
-                                      color: CustomColors.red,
-                                    ),
-                                  ),
-                                ],
+                          children: <TextSpan>[
+                            TextSpan(
+                              text:
+                              " ${data["oldprice"]} ${AppLocale.of(context)
+                                  .getTranslated("delivery_cost_unit")}",
+                              style: new TextStyle(
+                                color: CustomColors.red,
+                                decoration: TextDecoration.lineThrough,
                               ),
+                            ),
+                            TextSpan(
+                              text: " ",
+                              style: TextStyle(
+                                color: CustomColors.red,
+                              ),
+                            ),
+                            new TextSpan(
+                              text:
+                              " ${data["price"]} ${AppLocale.of(context)
+                                  .getTranslated("delivery_cost_unit")}",
+                              style: new TextStyle(
+                                color: CustomColors.primary,
+                              ),
+                            ),
+                          ],
+                        )
+                            : TextSpan(
+                          children: <TextSpan>[
+                            TextSpan(
+                              text:
+                              " ${data["price"]} ${AppLocale.of(context)
+                                  .getTranslated("delivery_cost_unit")}",
+                              style: new TextStyle(
+                                color: CustomColors.red,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -233,24 +262,24 @@ class ProductSearchScreen extends SearchDelegate {
             ),
             data['offer'] == 1
                 ? Opacity(
-                    opacity: 0.75,
-                    child: Container(
-                      width: 50,
-                      height: 25,
-                      margin: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                          color: CustomColors.primary,
-                          borderRadius: BorderRadius.circular(7)),
-                      child: Center(
-                          child: Text(
-                        " ${data["discount"]} %",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: Colors.white),
-                      )),
-                    ),
-                  )
+              opacity: 0.75,
+              child: Container(
+                width: 50,
+                height: 25,
+                margin: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                    color: CustomColors.primary,
+                    borderRadius: BorderRadius.circular(7)),
+                child: Center(
+                    child: Text(
+                      " ${data["discount"]} %",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.white),
+                    )),
+              ),
+            )
                 : Container(),
           ],
         ),
@@ -312,7 +341,10 @@ class ProductSearchScreen extends SearchDelegate {
         }
       },
       child: Container(
-        height: MediaQuery.of(context).size.height * .06,
+        height: MediaQuery
+            .of(context)
+            .size
+            .height * .06,
         decoration: BoxDecoration(
           color: CustomColors.primary,
           boxShadow: [
@@ -348,9 +380,7 @@ class ProductSearchScreen extends SearchDelegate {
     );
   }
 
-  Widget _drawStoreClose(
-    BuildContext context,
-  ) {
+  Widget _drawStoreClose(BuildContext context,) {
     return InkWell(
       //todo:add to cart offline or online
       onTap: () async {
@@ -366,7 +396,10 @@ class ProductSearchScreen extends SearchDelegate {
         Scaffold.of(context).showSnackBar(snackBar);
       },
       child: Container(
-        height: MediaQuery.of(context).size.height * .06,
+        height: MediaQuery
+            .of(context)
+            .size
+            .height * .06,
         decoration: BoxDecoration(
           color: CustomColors.primary,
           boxShadow: [

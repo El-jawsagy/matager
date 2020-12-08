@@ -8,7 +8,6 @@ import 'display_pharmace_medications.dart';
 class TabScreenoFCategory extends StatefulWidget {
   List map;
   String status;
-
   int marketId;
   String marketName;
   String token;
@@ -105,11 +104,8 @@ class _TabScreenoFCategoryState extends State<TabScreenoFCategory> {
             if (data['name'] == "ادويه" || data["name_en"] == "Medicines") {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => PharmacyPrescriptionScreen(
-                    widget.token,
-                    widget.status,
-                    widget.marketId,
-                  ),
+                  builder: (context) => PharmacyPrescriptionScreen(widget.token,
+                      widget.status, widget.marketId, widget.marketName),
                 ),
               );
             } else {

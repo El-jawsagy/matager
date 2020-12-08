@@ -18,7 +18,8 @@ class ContactUsScreen extends StatefulWidget {
 }
 
 class _ContactUsScreenState extends State<ContactUsScreen> {
-  static final GlobalKey<ScaffoldState> _contactUsScaffoldKey = new GlobalKey<ScaffoldState>();
+   final GlobalKey<ScaffoldState> _contactUsScaffoldKey = new GlobalKey<
+      ScaffoldState>();
 
   AboutAndTermsOfUseAPI contactUsAPI;
   TextEditingController _firstNameEditingText;
@@ -78,11 +79,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
         backgroundColor: CustomColors.grayThree,
         appBar: AppBar(
           centerTitle: true,
-          title: Text(
-            AppLocale.of(context).getTranslated("app_name"),
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            textWidthBasis: TextWidthBasis.parent,
-          ),
+          title: Image.asset(AppLocale.of(context).getTranslated("image")),
           elevation: 0,
           leading: IconButton(
             icon: Icon(
@@ -105,9 +102,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
     );
   }
 
-  Widget _drawForm(
-    List<String> map,
-  ) {
+  Widget _drawForm(List<String> map,) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 6),
       child: Form(
@@ -132,7 +127,10 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                   softWrap: true,
                 ),
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.2,
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width * 0.2,
                   child: Stack(
                     children: [
                       Divider(
@@ -143,7 +141,10 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            width: MediaQuery.of(context).size.width * 0.1,
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width * 0.1,
                             child: Divider(
                               color: CustomColors.primary,
                               thickness: 2,
@@ -154,19 +155,37 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * .015),
+                SizedBox(height: MediaQuery
+                    .of(context)
+                    .size
+                    .height * .015),
                 _drawFirstName(18),
-                SizedBox(height: MediaQuery.of(context).size.height * .015),
+                SizedBox(height: MediaQuery
+                    .of(context)
+                    .size
+                    .height * .015),
                 _drawEmail(18),
-                SizedBox(height: MediaQuery.of(context).size.height * .015),
+                SizedBox(height: MediaQuery
+                    .of(context)
+                    .size
+                    .height * .015),
                 _drawPhone(18),
-                SizedBox(height: MediaQuery.of(context).size.height * .015),
+                SizedBox(height: MediaQuery
+                    .of(context)
+                    .size
+                    .height * .015),
                 _drawChooseCountry(
                   map,
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * .015),
+                SizedBox(height: MediaQuery
+                    .of(context)
+                    .size
+                    .height * .015),
                 _drawMassage(18),
-                SizedBox(height: MediaQuery.of(context).size.height * .015),
+                SizedBox(height: MediaQuery
+                    .of(context)
+                    .size
+                    .height * .015),
                 _drawContactUsButton(),
               ],
             ),
@@ -178,7 +197,10 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
 
   Widget _drawFirstName(double textSize) {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.9,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width * 0.9,
       child: TextFormField(
         controller: _firstNameEditingText,
         keyboardType: TextInputType.name,
@@ -215,7 +237,10 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
     RegExp regex = new RegExp(pattern);
 
     return Container(
-      width: MediaQuery.of(context).size.width * 0.9,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width * 0.9,
       child: TextFormField(
         controller: _emailEditingText,
         keyboardType: TextInputType.emailAddress,
@@ -255,7 +280,10 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
 
   Widget _drawPhone(double textSize) {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.9,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width * 0.9,
       child: TextFormField(
         controller: _phoneEditingText,
         keyboardType: TextInputType.number,
@@ -296,8 +324,14 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                 color: CustomColors.grayBorder,
               ),
               borderRadius: BorderRadius.circular(3)),
-          width: MediaQuery.of(context).size.width * 0.9,
-          height: MediaQuery.of(context).size.height * .08,
+          width: MediaQuery
+              .of(context)
+              .size
+              .width * 0.9,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height * .08,
           child: Center(
             child: DropdownButton<String>(
               value: category.value,
@@ -329,7 +363,10 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
 
   Widget _drawMassage(double textSize) {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.9,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width * 0.9,
       child: TextFormField(
         controller: _massageEditingText,
         maxLines: 10,
@@ -389,8 +426,14 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
         }
       },
       child: Container(
-        width: MediaQuery.of(context).size.width * .65,
-        height: MediaQuery.of(context).size.height * .07,
+        width: MediaQuery
+            .of(context)
+            .size
+            .width * .65,
+        height: MediaQuery
+            .of(context)
+            .size
+            .height * .07,
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: [
             CustomColors.primary,

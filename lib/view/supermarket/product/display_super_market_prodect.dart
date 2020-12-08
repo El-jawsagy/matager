@@ -18,7 +18,7 @@ import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/control
 import 'display_market_product_item_details.dart';
 
 class DisplayMarketProduct extends StatefulWidget {
-  int storeId, categoryId;
+  int marketId, categoryId;
   String status;
   String categoryName;
   String marketName;
@@ -28,7 +28,7 @@ class DisplayMarketProduct extends StatefulWidget {
   double latitude, longitude;
 
   DisplayMarketProduct(
-      this.storeId,
+      this.marketId,
       this.categoryId,
       this.status,
       this.categoryName,
@@ -50,13 +50,13 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
   int currentIndex = 0;
   ProductBloc bloc;
 
-  static final GlobalKey<ScaffoldState> _productScaffoldKey =
+   final GlobalKey<ScaffoldState> _productScaffoldKey =
       new GlobalKey<ScaffoldState>();
   FavoriteMethodAPI favoriteMethodAPI;
 
   @override
   void initState() {
-    bloc = ProductBloc(widget.storeId);
+    bloc = ProductBloc(widget.marketId);
     homePage = MarketAndCategoryApi();
     favoriteMethodAPI = FavoriteMethodAPI();
 
@@ -71,7 +71,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
     return Scaffold(
       body: FutureBuilder(
           future: homePage.getSingleMarketSubcategory(
-              widget.storeId, widget.categoryId),
+              widget.marketId, widget.categoryId),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.none:
@@ -120,7 +120,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
             onPressed: () {
               showSearch(
                 context: context,
-                delegate: ProductSearchScreen(widget.storeId, widget.status,
+                delegate: ProductSearchScreen(widget.marketId, widget.status,
                     widget.token, widget.latitude, widget.longitude),
               );
             },
@@ -250,7 +250,10 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
   List<Tab> subCategoryTabs(List ListTabs) {
     List<Tab> tabs = [];
     for (var i in ListTabs) {
-      tabs.add(Tab(text: i['name']));
+      tabs.add(Tab(
+          text: AppLocale.of(context).getTranslated("lang") == "English"
+              ? i['name']
+              : i["name_en"]));
     }
     return tabs;
   }
@@ -271,6 +274,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => DisplayMarketItemDetails(
                       data,
+                      widget.marketId,
                       widget.status,
                       widget.token,
                       widget.latitude,
@@ -427,17 +431,20 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
                                 favoriteMethodAPI
                                     .addToFavorite(
                                   data['id'],
-                                  widget.storeId,
+                                  widget.marketId,
                                 )
                                     .then((value) {
-
                                   final snackBar = SnackBar(
-                                      backgroundColor: CustomColors.greenLightBG,
+                                      backgroundColor:
+                                          CustomColors.greenLightBG,
                                       content: Text(
-                                        AppLocale.of(context).getTranslated("lang") == 'English'
+                                        AppLocale.of(context)
+                                                    .getTranslated("lang") ==
+                                                'English'
                                             ? "مرحباُ : تم اضافه المنتج الي المفضلة ب نجاح.."
                                             : 'Hello: The product has been added to Favorite with success.. ',
-                                        style: TextStyle(color: CustomColors.greenLightFont),
+                                        style: TextStyle(
+                                            color: CustomColors.greenLightFont),
                                       ));
                                   _productScaffoldKey.currentState
                                       .showSnackBar(snackBar);
@@ -494,7 +501,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
           itemBlocOffLine.addToCart(
             data,
             quant,
-            widget.storeId,
+            widget.marketId,
             double.tryParse(data['price']),
           );
           final snackBar = SnackBar(
@@ -516,7 +523,7 @@ class _DisplayMarketProductState extends State<DisplayMarketProduct>
           itemBlocOnLineN.addToCart(
             data,
             quant,
-            widget.storeId,
+            widget.marketId,
             double.tryParse(data['price']),
           );
 

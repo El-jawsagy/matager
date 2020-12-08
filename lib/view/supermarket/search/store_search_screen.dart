@@ -3,6 +3,8 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:matager/controller/store/search_api.dart';
 import 'package:matager/lang/applocate.dart';
+import 'package:matager/view/utilities/multi_screen.dart';
+import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
 
 import '../display_supermarket.dart';
@@ -60,9 +62,82 @@ class StoreSearchScreen extends SearchDelegate {
   Widget buildResults(BuildContext context) {
     SearchProductsAndStoresApi searchProductsAndStoresApi =
         SearchProductsAndStoresApi();
+    DetectedScreen detectedScreen = DetectedScreen(context);
+    CategorySize categorySize = CategorySize(detectedScreen);
+    return FutureBuilder(
+        future: searchProductsAndStoresApi.getStores(
+          query,
+          this.id,
+          this.lat,
+          this.lng,
+        ),
+        builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+              return emptyPage(context);
+              break;
+            case ConnectionState.waiting:
+              return loading(context, 1);
+              break;
+            case ConnectionState.active:
+
+            case ConnectionState.done:
+              if (snapshot.hasData) {
+                return snapshot.data.length >= 1
+                    ? ListView.builder(
+                        itemBuilder: (BuildContext context, int index) {
+                          return _drawCardOfStore(
+                              context,
+                              snapshot.data[index],
+                              categorySize.nameSize,
+                              categorySize.iconSize,
+                              categorySize.smallNameSize,
+                              categorySize.smallIconSize);
+                        },
+                        itemCount: snapshot.data.length,
+                      )
+                    : Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                child: Image.asset(
+                                  "assets/images/box.jpg",
+                                  width: MediaQuery.of(context).size.width,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.25,
+                                ),
+                              ),
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.05,
+                              ),
+                              Text(
+                                AppLocale.of(context).getTranslated("lang") ==
+                                        "English"
+                                    ? " لا يوجد متجر بهذا الاسم ' ${this.query} '  في الوقت الحالي "
+                                    : "There is no store with this name ' ${this.query} ' at this time  ",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: categorySize.headerTextSize),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ));
+              } else
+                return emptyPage(context);
+              break;
+          }
+          return emptyPage(context);
+        });
   }
 
-  Widget _drawCardOfStore(Map data) {
+  Widget _drawCardOfStore(BuildContext context, Map data, nameSize, iconSize,
+      smallNameSize, smallIconSize) {
     ValueNotifier<bool> posOfProducts = ValueNotifier(false);
 
     return ValueListenableBuilder(
@@ -86,13 +161,14 @@ class StoreSearchScreen extends SearchDelegate {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => DisplayMarket(
-                                this.id,
-                                data["id"],
-                                data["shipping_time"],
-                                data["name"],
-                                this.token,
-                                this.lat,
-                                this.lng),
+                              this.id,
+                              data["id"],
+                              data["shipping_time"],
+                              data["name"],
+                              this.token,
+                              this.lat,
+                              this.lng,
+                            ),
                           ),
                         );
                       },
@@ -139,38 +215,37 @@ class StoreSearchScreen extends SearchDelegate {
                                   child: Center(
                                     child: Row(
                                       children: [
-                                        Text(
-                                          data["name"],
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                            color: CustomColors.primary,
+                                        Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.7,
+                                          child: Text(
+                                            data["name"],
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: nameSize,
+                                              color: CustomColors.primary,
+                                            ),
+                                            textAlign: TextAlign.center,
                                           ),
-                                          textAlign: TextAlign.center,
                                         ),
                                         SizedBox(
                                           width: 4,
                                         ),
-                                        Icon(
-                                          FontAwesomeIcons.infoCircle,
+                                        IconButton(
+                                          icon: FaIcon(
+                                              FontAwesomeIcons.infoCircle),
+                                          onPressed: () {
+                                            posOfProducts.value =
+                                                !posOfProducts.value;
+                                          },
+                                          iconSize: iconSize,
                                         ),
                                       ],
                                     ),
                                   ),
                                 ),
-                                FlatButton(
-                                    color: CustomColors.primary,
-                                    child: Text(
-                                      AppLocale.of(context)
-                                          .getTranslated("more_det"),
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: CustomColors.whiteBG),
-                                    ),
-                                    onPressed: () {
-                                      posOfProducts.value =
-                                          !posOfProducts.value;
-                                    })
                               ],
                             ),
                           ),
@@ -183,6 +258,41 @@ class StoreSearchScreen extends SearchDelegate {
               posOfProducts.value
                   ? Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                              padding: EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                  color: Colors.white70,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Center(
+                                  child: Text(
+                                "${AppLocale.of(context).getTranslated("delivery_cost")}  ${data["shipping_cost"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")} ",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: smallNameSize),
+                              )),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                  color: Colors.white70,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Center(
+                                  child: Text(
+                                "${AppLocale.of(context).getTranslated("delivery_time")}  ${data["shipping_time"]}  ",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 12),
+                              )),
+                            ),
+                          ]),
+                    )
+                  : Container(),
+              posOfProducts.value
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 4),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -202,7 +312,7 @@ class StoreSearchScreen extends SearchDelegate {
                                   Icon(
                                     FontAwesomeIcons.solidComments,
                                     color: CustomColors.primary,
-                                    size: 20,
+                                    size: smallIconSize,
                                   ),
                                   SizedBox(
                                     width: 10,
@@ -211,7 +321,7 @@ class StoreSearchScreen extends SearchDelegate {
                                     "(${AppLocale.of(context).getTranslated("comments")} ${data["comments"]})",
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                      fontSize: smallNameSize,
                                       color: CustomColors.gray,
                                     ),
                                     textAlign: TextAlign.center,
@@ -222,11 +332,11 @@ class StoreSearchScreen extends SearchDelegate {
                           ),
                           RatingBar.builder(
                             ignoreGestures: true,
-                            initialRating: data["rate"],
+                            initialRating: data["rate"].floorToDouble(),
                             direction: Axis.horizontal,
                             allowHalfRating: false,
                             itemCount: 5,
-                            itemSize: 20.0,
+                            itemSize: smallIconSize,
                             itemBuilder: (context, _) => Icon(
                               Icons.star,
                               color: CustomColors.ratingBG,
@@ -243,35 +353,72 @@ class StoreSearchScreen extends SearchDelegate {
                   ? Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Container(
-                              padding: EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                  color: Colors.white70,
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Center(
-                                  child: Text(
-                                "${AppLocale.of(context).getTranslated("delivery_time")}  ${data["shipping_time"]}  ",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 12),
-                              )),
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  FontAwesomeIcons.creditCard,
+                                  color: CustomColors.primary,
+                                  size: smallIconSize,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  "${AppLocale.of(context).getTranslated("delivery_method")} ",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: smallNameSize,
+                                    color: CustomColors.primary,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
-                            Container(
-                              padding: EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                  color: Colors.white70,
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Center(
-                                  child: Text(
-                                "${AppLocale.of(context).getTranslated("delivery_cost")}  ${data["shipping_cost"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")} ",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 12),
-                              )),
-                            ),
-                          ]),
+                          ),
+                          Container(),
+                        ],
+                      ),
                     )
                   : Container(),
+              data['coupon'] != null &&
+                      data['coupon']['user_show'] != 0 &&
+                      data['coupon']['status'] != 0
+                  ? (posOfProducts.value
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 2),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              FaIcon(
+                                FontAwesomeIcons.gift,
+                                color: CustomColors.primary,
+                                size: smallIconSize,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.8,
+                                child: Text(
+                                  "(${data['coupon']['coupon']}) ${AppLocale.of(context).getTranslated("discount")} ${data["coupondiscount"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")} ${AppLocale.of(context).getTranslated("discount_comp")} ${data['couponlimit']} ${AppLocale.of(context).getTranslated("discount_complete")} ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: smallNameSize,
+                                      color: CustomColors.primary),
+                                  overflow: TextOverflow.visible,
+                                  maxLines: 4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Container())
+                  : Container()
             ],
           ),
         );

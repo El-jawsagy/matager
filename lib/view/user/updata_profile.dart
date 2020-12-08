@@ -20,7 +20,7 @@ class UpdateProfileScreen extends StatefulWidget {
 }
 
 class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
-  static final GlobalKey<ScaffoldState> _profileScaffoldKey =
+  final GlobalKey<ScaffoldState> _profileScaffoldKey =
       new GlobalKey<ScaffoldState>();
 
   Authentication authentication;
@@ -62,11 +62,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         backgroundColor: CustomColors.grayThree,
         appBar: AppBar(
           centerTitle: true,
-          title: Text(
-            AppLocale.of(context).getTranslated("app_name"),
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            textWidthBasis: TextWidthBasis.parent,
-          ),
+          title: Image.asset(AppLocale.of(context).getTranslated("image")),
           elevation: 0,
           leading: IconButton(
             icon: Icon(

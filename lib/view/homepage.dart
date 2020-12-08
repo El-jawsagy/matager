@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:matager/controller/cart/cart_items_bloc_and_Api.dart';
+import 'package:matager/controller/store/home_api.dart';
 import 'package:matager/lang/applocate.dart';
 import 'package:matager/view/get_location.dart';
 import 'package:matager/view/supermarket/market.dart';
@@ -16,8 +17,6 @@ import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
 import 'package:matager/view/utilities/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/controller/store/home_api.dart';
 
 //todo: make cart choice between before login and after that
 ValueNotifier<int> countOfProducts = ValueNotifier(0);
@@ -43,6 +42,7 @@ void getCounterProduct() {
         countOfProducts.value = count;
       }
     } else {
+      countOfProducts.value = count;
       getCount().then((value) {
         countOfProducts.value = value;
       });
@@ -55,7 +55,7 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
- final GlobalKey<ScaffoldState> homePageScaffoldKey =
+final GlobalKey<ScaffoldState> homePageScaffoldKey =
     new GlobalKey<ScaffoldState>();
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -220,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return emptyPage(context);
                     }),
               ),
-              _drawTextMataget(homePageSize.headerTextSize),
+              _drawTextMatagger(homePageSize.headerTextSize),
               Container(
                 child: FutureBuilder(
                     future: homePage.getAllCategory(),
@@ -304,10 +304,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                   options: CarouselOptions(
-                    autoPlayCurve: Curves.easeInOut,
+                    autoPlayCurve: Curves.easeInOutSine,
                     autoPlay: true,
                     enlargeCenterPage: true,
-                    autoPlayAnimationDuration: Duration(seconds: 3),
+                    autoPlayAnimationDuration: Duration(milliseconds: 200),
                     viewportFraction: 1,
                     initialPage: 0,
                   ),
@@ -394,9 +394,9 @@ class _HomeScreenState extends State<HomeScreen> {
         });
   }
 
-  Widget _drawTextMataget(fontSize) {
+  Widget _drawTextMatagger(fontSize) {
     return Text(
-      AppLocale.of(context).getTranslated("app_name"),
+      AppLocale.of(context).getTranslated("our_store"),
       style: TextStyle(
           fontSize: fontSize,
           fontWeight: FontWeight.w600,
@@ -497,18 +497,30 @@ class _HomeScreenState extends State<HomeScreen> {
           context: context,
           builder: (context) => new AlertDialog(
             actionsPadding: EdgeInsets.all(16),
-            title: new Text('Are you sure?'),
-            content: new Text('Do you want to exit an App'),
+            title: new Text(
+                AppLocale.of(context).getTranslated("lang") == "English"
+                    ? 'هل أنت متأكد؟'
+                    : 'Are you sure?'),
+            content: new Text(
+                AppLocale.of(context).getTranslated("lang") == "English"
+                    ? 'هل تريد الخروج من التطبيق؟'
+                    : 'Do you want to exit the App'),
             actions: <Widget>[
               new GestureDetector(
                 onTap: () => Navigator.of(context).pop(false),
-                child: Text("NO"),
+                child: Text(
+                    AppLocale.of(context).getTranslated("lang") == "English"
+                        ? 'لا'
+                        : "NO"),
               ),
               SizedBox(height: 16),
               new GestureDetector(
                 onTap: () async => await SystemChannels.platform
                     .invokeMethod<void>('SystemNavigator.pop'),
-                child: Text("YES"),
+                child: Text(
+                    AppLocale.of(context).getTranslated("lang") == "English"
+                        ? 'نعم'
+                        : "YES"),
               ),
             ],
           ),

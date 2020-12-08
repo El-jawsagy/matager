@@ -1,5 +1,7 @@
 {
   "app_name": "MATAGER",
+  "our_store": "Our Story",
+
   "start": "Start Now",
   "your_loc": "Please enter your address on Google Map:",
   "log": "Sign In",

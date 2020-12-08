@@ -31,11 +31,7 @@ class _TermsOfUseScreenState extends State<TermsOfUseScreen> {
         backgroundColor: CustomColors.grayThree,
         appBar: AppBar(
           centerTitle: true,
-          title: Text(
-            AppLocale.of(context).getTranslated("app_name"),
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            textWidthBasis: TextWidthBasis.parent,
-          ),
+          title: Image.asset(AppLocale.of(context).getTranslated("image")),
           elevation: 0,
           leading: IconButton(
             icon: Icon(

@@ -116,17 +116,13 @@ class CartItemsBlocOn {
       }
     }
     if (!at) {
-      if (item["unit"] == "0") {
-        newQuantity = quantity;
-      } else {
-        newQuantity = quantity;
-      }
+      print("now is now in cart and i add it");
 
       allItems['cart_items'].add({
         "data": item,
-        "quantity": newQuantity,
+        "quantity": quantity,
         "sub_store_id": storeID,
-        "new_price": price * newQuantity
+        "new_price": price * quantity
       });
       cardMethodApi
           .addToCart(item['id'], storeID, quantity, price)
@@ -135,14 +131,15 @@ class CartItemsBlocOn {
           getCounterProduct();
         }
       });
+      SharedPreferences.getInstance().then((value) {
+        SharedPreferences pref = value;
+        var data = json.encode(allItems);
+
+        pref.setString("cart", data);
+      });
       cartOnlineStreamController.sink.add(allItems);
     }
-    SharedPreferences.getInstance().then((value) {
-      SharedPreferences pref = value;
-      var data = json.encode(allItems);
 
-      pref.setString("cart", data);
-    });
     cartOnlineStreamController.sink.add(allItems);
   }
 

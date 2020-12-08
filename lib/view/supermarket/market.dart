@@ -218,14 +218,20 @@ class _MarketsState extends State<Markets> {
                                   child: Center(
                                     child: Row(
                                       children: [
-                                        Text(
-                                          data["name"],
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: nameSize,
-                                            color: CustomColors.primary,
+                                        Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.7,
+                                          child: Text(
+                                            data["name"],
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: nameSize,
+                                              color: CustomColors.primary,
+                                            ),
+                                            textAlign: TextAlign.center,
                                           ),
-                                          textAlign: TextAlign.center,
                                         ),
                                         SizedBox(
                                           width: 4,
@@ -329,7 +335,7 @@ class _MarketsState extends State<Markets> {
                           ),
                           RatingBar.builder(
                             ignoreGestures: true,
-                            initialRating: data["rate"].floorToDouble() ,
+                            initialRating: data["rate"].floorToDouble(),
                             direction: Axis.horizontal,
                             allowHalfRating: false,
                             itemCount: 5,
@@ -381,7 +387,9 @@ class _MarketsState extends State<Markets> {
                       ),
                     )
                   : Container(),
-              data['coupon'] != null
+              data['coupon'] != null &&
+                      data['coupon']['user_show'] != 0 &&
+                      data['coupon']['status'] != 0
                   ? (posOfProducts.value
                       ? Padding(
                           padding: const EdgeInsets.symmetric(
@@ -400,7 +408,7 @@ class _MarketsState extends State<Markets> {
                               Container(
                                 width: MediaQuery.of(context).size.width * 0.8,
                                 child: Text(
-                                  "(${data['coupon']}) ${AppLocale.of(context).getTranslated("discount")} ${data["coupondiscount"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")} ${AppLocale.of(context).getTranslated("discount_comp")} ${data['couponlimit']} ${AppLocale.of(context).getTranslated("discount_complete")} ",
+                                  "(${data['coupon']['coupon']}) ${AppLocale.of(context).getTranslated("discount")} ${data["coupondiscount"]} ${AppLocale.of(context).getTranslated("delivery_cost_unit")} ${AppLocale.of(context).getTranslated("discount_comp")} ${data['couponlimit']} ${AppLocale.of(context).getTranslated("discount_complete")} ",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: smallNameSize,

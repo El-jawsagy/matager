@@ -215,47 +215,64 @@ class _StoreCommentsScreenState extends State<StoreCommentsScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            data["username"] == null ? "" : data["username"],
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: CustomColors.primary,
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.6,
+                            child: Text(
+                              data["username"] == null ? "" : data["username"],
+                              style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: CustomColors.primary,
+                              ),
+                              maxLines: 1,
+                              textAlign:
+                                  AppLocale.of(context).getTranslated("lang") ==
+                                          "English"
+                                      ? TextAlign.right
+                                      : TextAlign.left,
+                              overflow: TextOverflow.visible,
+                              softWrap: true,
                             ),
-                            maxLines: 1,
-                            textAlign: TextAlign.right,
-                            overflow: TextOverflow.ellipsis,
-                            softWrap: true,
                           ),
-                          Text(
-                            data["created_at"] == null
-                                ? ""
-                                : data["created_at"],
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: CustomColors.gray,
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.6,
+                            child: Text(
+                              data["created_at"] == null
+                                  ? ""
+                                  : data["created_at"],
+                              style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: CustomColors.gray,
+                              ),
+                              maxLines: 1,
+                              textAlign:
+                                  AppLocale.of(context).getTranslated("lang") ==
+                                          "English"
+                                      ? TextAlign.right
+                                      : TextAlign.left,
+                              overflow: TextOverflow.visible,
+                              softWrap: true,
                             ),
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            softWrap: true,
                           ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                Text(
-                  data["comment"] == null ? "" : data["comment"],
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: Text(
+                    data["comment"] == null ? "" : data["comment"],
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.visible,
+                    softWrap: true,
                   ),
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: true,
                 ),
                 Padding(
                   padding:
@@ -292,21 +309,26 @@ class _StoreCommentsScreenState extends State<StoreCommentsScreen> {
                     ? Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(
-                              data["replies"][0]["username"] == null
-                                  ? widget.name
-                                  : data["replies"][0]["username"],
-                              style: TextStyle(
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16,
-                                color: CustomColors.primary,
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.8,
+                              child: Text(
+                                widget.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 16,
+                                  color: CustomColors.primary,
+                                ),
+                                maxLines: 1,
+                                textAlign: AppLocale.of(context)
+                                            .getTranslated("lang") ==
+                                        "English"
+                                    ? TextAlign.left
+                                    : TextAlign.right,
+                                overflow: TextOverflow.visible,
+                                softWrap: true,
                               ),
-                              maxLines: 1,
-                              textAlign: TextAlign.right,
-                              overflow: TextOverflow.ellipsis,
-                              softWrap: true,
                             ),
                           ],
                         ),
@@ -318,19 +340,26 @@ class _StoreCommentsScreenState extends State<StoreCommentsScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Text(
-                              data["replies"][0]["created_at"] == null
-                                  ? ""
-                                  : data["replies"][0]["created_at"],
-                              style: TextStyle(
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16,
-                                color: CustomColors.gray,
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.8,
+                              child: Text(
+                                data["replies"][0]["created_at"] == null
+                                    ? ""
+                                    : data["replies"][0]["created_at"],
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 16,
+                                  color: CustomColors.gray,
+                                ),
+                                maxLines: 1,
+                                textAlign: AppLocale.of(context)
+                                            .getTranslated("lang") ==
+                                        "English"
+                                    ? TextAlign.left
+                                    : TextAlign.right,
+                                overflow: TextOverflow.visible,
+                                softWrap: true,
                               ),
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              softWrap: true,
                             ),
                           ],
                         ),
@@ -339,18 +368,21 @@ class _StoreCommentsScreenState extends State<StoreCommentsScreen> {
                 data["replies"].length > 0
                     ? Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          data["replies"][0]["comment"] == null
-                              ? ""
-                              : data["replies"][0]["comment"],
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          child: Text(
+                            data["replies"][0]["comment"] == null
+                                ? ""
+                                : data["replies"][0]["comment"],
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.visible,
+                            softWrap: true,
                           ),
-                          maxLines: 1,
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: true,
                         ),
                       )
                     : Container(),

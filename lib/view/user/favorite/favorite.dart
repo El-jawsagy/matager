@@ -22,7 +22,7 @@ class FavoriteOnLineScreen extends StatefulWidget {
 }
 
 class _FavoriteOnLineScreenState extends State<FavoriteOnLineScreen> {
-  static final GlobalKey<ScaffoldState> _favoriteScaffoldKey =
+   final GlobalKey<ScaffoldState> _favoriteScaffoldKey =
       new GlobalKey<ScaffoldState>();
   List allItems = [];
   FavoriteMethodAPI favoriteMethodAPI;
@@ -210,6 +210,8 @@ class _FavoriteOnLineScreenState extends State<FavoriteOnLineScreen> {
                         MaterialPageRoute(
                           builder: (context) => DisplayOrderItemDetails(
                               data['id'].toString(),
+                              map['store_id'],
+                              data["shipping_time"],
                               data['store_name'].toString(),
                               widget.latitude,
                               widget.longitude),
@@ -250,6 +252,8 @@ class _FavoriteOnLineScreenState extends State<FavoriteOnLineScreen> {
                         MaterialPageRoute(
                           builder: (context) => DisplayOrderItemDetails(
                               data['id'].toString(),
+                              map['store_id'],
+                              data["shipping_time"],
                               data['store_name'].toString(),
                               widget.latitude,
                               widget.longitude),
@@ -258,18 +262,22 @@ class _FavoriteOnLineScreenState extends State<FavoriteOnLineScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        AppLocale.of(context).getTranslated("lang") == 'English'
-                            ? data["name_ar"]
-                            : data["name_en"],
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: Text(
+                          AppLocale.of(context).getTranslated("lang") ==
+                                  'English'
+                              ? data["name_ar"]
+                              : data["name_en"],
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
                         ),
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
                       ),
                       Container(
                         height: MediaQuery.of(context).size.height * 0.03,
