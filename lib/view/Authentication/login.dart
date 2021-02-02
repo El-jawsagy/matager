@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:matager/controller/Authentication_api.dart';
-import 'package:matager/lang/applocate.dart';
+import 'package:matager/utilities/lang/applocate.dart';
 import 'package:matager/view/Authentication/signup_screen.dart';
 import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/controller/cart/cart_items_bloc_and_Api.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:matager/lang/applocate.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'package:matager/utilities/lang/applocate.dart';
+
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 
 import 'get_location.dart';
 

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:matager/controller/address_api.dart';
-import 'package:matager/lang/applocate.dart';
+import 'package:matager/utilities/lang/applocate.dart';
 import 'package:matager/view/Authentication/login.dart';
 import 'package:matager/view/user/address/setAddress.dart';
 import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
-import 'package:matager/view/utilities/prefrences.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/data/prefrences.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 
 import '../../homepage.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:matager/lang/applocate.dart';
+import 'package:matager/utilities/lang/applocate.dart';
 import 'package:matager/view/supermarket/product/display_super_market_prodect.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 
 import 'display_pharmace_medications.dart';
 

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
-import 'package:matager/lang/applocate.dart';
+import 'package:matager/utilities/lang/applocate.dart';
 import 'package:matager/view/homepage.dart';
 import 'package:matager/view/user/address/setAddress.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CheckLocation extends StatefulWidget {

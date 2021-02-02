@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:matager/controller/cart/cart_items_bloc_and_Api.dart';
 import 'package:matager/controller/store/home_api.dart';
-import 'package:matager/lang/applocate.dart';
+import 'package:matager/utilities/lang/applocate.dart';
 import 'package:matager/view/get_location.dart';
 import 'package:matager/view/supermarket/market.dart';
 import 'package:matager/view/user/cart/cart_offline.dart';
@@ -15,7 +15,7 @@ import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/multi_screen.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 //todo: make cart choice between before login and after that

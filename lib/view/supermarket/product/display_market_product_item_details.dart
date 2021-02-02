@@ -5,13 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
 import 'package:matager/controller/cart/cart_bloc_off.dart';
-import 'package:matager/lang/applocate.dart';
+import 'package:matager/utilities/lang/applocate.dart';
 import 'package:matager/view/homepage.dart';
 import 'package:matager/view/user/cart/cart_offline.dart';
 import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/multi_screen.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 
 class DisplayMarketItemDetails extends StatefulWidget {
   Map map;

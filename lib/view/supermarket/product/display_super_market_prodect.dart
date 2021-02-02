@@ -2,7 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matager/controller/Favorite/favorite_items_and_api.dart';
 import 'package:matager/controller/cart/cart_bloc_off.dart';
-import 'package:matager/lang/applocate.dart';
+import 'package:matager/utilities/lang/applocate.dart';
+
 import 'package:matager/view/Authentication/login.dart';
 import 'package:matager/view/homepage.dart';
 import 'package:matager/view/supermarket/search/product_search_screen.dart';
@@ -10,7 +11,7 @@ import 'package:matager/view/user/cart/cart_offline.dart';
 import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/drawer.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/controller/store/home_api.dart';

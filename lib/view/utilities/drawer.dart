@@ -4,13 +4,13 @@ import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:matager/controller/Authentication_api.dart';
 import 'package:matager/controller/store/home_api.dart';
-import 'package:matager/lang/applocate.dart';
+import 'package:matager/utilities/lang/applocate.dart';
 import 'package:matager/view/Authentication/login.dart';
 import 'package:matager/view/user/cart/cart_offline.dart';
 import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/user/updata_profile.dart';
-import 'package:matager/view/utilities/prefrences.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/data/prefrences.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/view/user/address/address.dart';

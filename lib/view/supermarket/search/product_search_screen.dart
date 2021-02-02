@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:matager/controller/cart/cart_bloc_off.dart';
 import 'package:matager/controller/store/search_api.dart';
-import 'package:matager/lang/applocate.dart';
+import 'package:matager/utilities/lang/applocate.dart';
 import 'package:matager/view/supermarket/product/display_market_product_item_details.dart';
 import 'package:matager/view/user/cart/cart_online.dart';
 import 'package:matager/view/utilities/popular_widget.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 
 class ProductSearchScreen extends SearchDelegate {
   int id;

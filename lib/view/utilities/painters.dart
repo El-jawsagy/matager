@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 
 class BackGround extends CustomPainter {
   @override

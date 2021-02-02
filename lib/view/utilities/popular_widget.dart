@@ -1,8 +1,8 @@
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:matager/lang/applocate.dart';
-import 'package:matager/view/utilities/theme.dart';
+import 'package:matager/utilities/lang/applocate.dart';
+import 'file:///C:/Users/mahmoud.ragab/projects/flutter_apps/matager/lib/utilities/theme/theme.dart';
 
 showDialogWidget(String str, BuildContext context) {
   // flutter defined function
